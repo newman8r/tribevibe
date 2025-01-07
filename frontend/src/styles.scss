@@ -44,6 +44,13 @@ h1, h2, h3, h4, h5, h6 {
   color: transparent;
 }
 
+.gradient-text-blue {
+  background: linear-gradient(45deg, var(--accent-2), var(--accent-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .neon-border {
   border: 2px solid var(--accent-2);
   box-shadow: 0 0 10px var(--accent-2);

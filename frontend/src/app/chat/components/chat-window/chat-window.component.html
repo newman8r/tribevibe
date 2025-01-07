@@ -1,0 +1,58 @@
+<div class="chat-window">
+  <!-- Header Section -->
+  <div class="chat-header">
+    <div class="breadcrumbs">
+      <span class="channel-prefix">#</span>
+      <span class="channel-name">general</span>
+    </div>
+    <div class="header-actions">
+      <button class="action-btn" title="Search">
+        <i class="fas fa-search"></i>
+      </button>
+      <button class="action-btn" title="More options">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Section -->
+  <div class="messages-container">
+    <div class="empty-state" *ngIf="messages.length === 0">
+      <i class="fas fa-comments"></i>
+      <h3 class="gradient-text-blue">No messages yet ✨</h3>
+      <p>Be the first one to send a message!</p>
+    </div>
+    
+    <div class="messages-list" *ngIf="messages.length > 0">
+      <!-- Messages will be rendered here -->
+    </div>
+  </div>
+
+  <!-- Editor Section -->
+  <div class="message-editor">
+    <div class="editor-toolbar">
+      <button class="toolbar-btn" (click)="openEmojiPicker()" title="Add emoji">
+        <i class="far fa-smile"></i>
+      </button>
+      <button class="toolbar-btn" title="Upload file">
+        <i class="fas fa-paperclip"></i>
+      </button>
+    </div>
+    
+    <div class="editor-input-wrapper">
+      <textarea 
+        class="message-input" 
+        placeholder="Type a message..."
+        [(ngModel)]="messageText"
+        (keydown.enter)="onEnterPress($event)">
+      </textarea>
+      
+      <button 
+        class="send-button" 
+        [disabled]="!messageText.trim()"
+        (click)="sendMessage()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div> 
