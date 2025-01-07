@@ -8,6 +8,8 @@ import {
 import { Socket, Server } from 'socket.io';
 import { UserService } from '../user/user.service';
 import { ChannelService } from '../channel/channel.service';
+import { MessageService } from '../message/message.service';
+import { NameGenerator } from '../utils/name-generator';
 
 @WebSocketGateway({
   cors: {
@@ -27,6 +29,8 @@ export class ChatGateway {
   constructor(
     private userService: UserService,
     private channelService: ChannelService,
+    private messageService: MessageService,
+    private nameGenerator: NameGenerator,
   ) {}
 
   @SubscribeMessage('joinChannel')
@@ -34,21 +38,13 @@ export class ChatGateway {
     @MessageBody() data: { userId: string; channelId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    // Skip user lookup for anonymous users
-    if (data.userId.startsWith('anonymous-')) {
-      client.join(data.channelId);
-      client.emit('joinedChannel', { channelId: data.channelId });
-      return;
-    }
-
-    const user = await this.userService.findOne(data.userId);
-    const channel = await this.channelService.findOne(data.channelId);
-
-    if (user && channel) {
-      await this.channelService.addUserToChannel(channel, user);
-      client.join(data.channelId);
-      client.emit('joinedChannel', { channelId: data.channelId });
-    }
+    client.join(data.channelId);
+    
+    // Send last 100 messages to the user
+    const messages = await this.messageService.getChannelMessages(data.channelId);
+    client.emit('channelHistory', messages.reverse());
+    
+    client.emit('joinedChannel', { channelId: data.channelId });
   }
 
   @SubscribeMessage('sendMessage')
@@ -56,30 +52,28 @@ export class ChatGateway {
     @MessageBody() data: { userId: string; channelId: string; content: string },
     @ConnectedSocket() client: Socket,
   ) {
-    // Handle anonymous users
-    if (data.userId.startsWith('anonymous-')) {
-      const message = {
-        user: { id: data.userId, username: 'Anonymous User' },
-        content: data.content,
-        createdAt: new Date(),
-      };
-      // Emit to everyone in the channel INCLUDING the sender
-      this.server.to(data.channelId).emit('newMessage', message);
-      return;
-    }
-
-    const user = await this.userService.findOne(data.userId);
     const channel = await this.channelService.findOne(data.channelId);
+    if (!channel) return;
 
-    if (user && channel) {
-      const message = {
-        user: { id: user.id, username: user.username },
-        content: data.content,
-        createdAt: new Date(),
-      };
-      // Emit to everyone in the channel INCLUDING the sender
-      this.server.to(data.channelId).emit('newMessage', message);
+    let messageData: any = {
+      content: data.content,
+      channel,
+    };
+
+    if (data.userId.startsWith('anonymous-')) {
+      messageData.anonymousId = data.userId;
+      messageData.username = `anon ${this.nameGenerator.generateNickname(data.userId)}`;
+      messageData.avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${data.userId}`;
+    } else {
+      const user = await this.userService.findOne(data.userId);
+      if (user) {
+        messageData.user = user;
+        messageData.username = user.username;
+      }
     }
+
+    const savedMessage = await this.messageService.create(messageData);
+    this.server.to(data.channelId).emit('newMessage', savedMessage);
   }
 }
 

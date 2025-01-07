@@ -33,4 +33,10 @@ export class WebsocketService {
       this.socket.on('newMessage', message => observer.next(message));
     });
   }
+
+  onChannelHistory(): Observable<Message[]> {
+    return new Observable(observer => {
+      this.socket.on('channelHistory', messages => observer.next(messages));
+    });
+  }
 } 

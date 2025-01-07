@@ -29,7 +29,19 @@ __decorate([
     __metadata("design:type", Date)
 ], Message.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Message.prototype, "anonymousId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Message.prototype, "username", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Message.prototype, "avatarUrl", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { nullable: true }),
     __metadata("design:type", user_entity_1.User)
 ], Message.prototype, "user", void 0);
 __decorate([

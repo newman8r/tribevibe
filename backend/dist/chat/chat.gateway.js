@@ -17,45 +17,43 @@ const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const user_service_1 = require("../user/user.service");
 const channel_service_1 = require("../channel/channel.service");
+const message_service_1 = require("../message/message.service");
+const name_generator_1 = require("../utils/name-generator");
 let ChatGateway = class ChatGateway {
-    constructor(userService, channelService) {
+    constructor(userService, channelService, messageService, nameGenerator) {
         this.userService = userService;
         this.channelService = channelService;
+        this.messageService = messageService;
+        this.nameGenerator = nameGenerator;
     }
     async handleJoinChannel(data, client) {
-        if (data.userId.startsWith('anonymous-')) {
-            client.join(data.channelId);
-            client.emit('joinedChannel', { channelId: data.channelId });
-            return;
-        }
-        const user = await this.userService.findOne(data.userId);
-        const channel = await this.channelService.findOne(data.channelId);
-        if (user && channel) {
-            await this.channelService.addUserToChannel(channel, user);
-            client.join(data.channelId);
-            client.emit('joinedChannel', { channelId: data.channelId });
-        }
+        client.join(data.channelId);
+        const messages = await this.messageService.getChannelMessages(data.channelId);
+        client.emit('channelHistory', messages.reverse());
+        client.emit('joinedChannel', { channelId: data.channelId });
     }
     async handleMessage(data, client) {
-        if (data.userId.startsWith('anonymous-')) {
-            const message = {
-                user: { id: data.userId, username: 'Anonymous User' },
-                content: data.content,
-                createdAt: new Date(),
-            };
-            this.server.to(data.channelId).emit('newMessage', message);
-            return;
-        }
-        const user = await this.userService.findOne(data.userId);
         const channel = await this.channelService.findOne(data.channelId);
-        if (user && channel) {
-            const message = {
-                user: { id: user.id, username: user.username },
-                content: data.content,
-                createdAt: new Date(),
-            };
-            this.server.to(data.channelId).emit('newMessage', message);
+        if (!channel)
+            return;
+        let messageData = {
+            content: data.content,
+            channel,
+        };
+        if (data.userId.startsWith('anonymous-')) {
+            messageData.anonymousId = data.userId;
+            messageData.username = `anon ${this.nameGenerator.generateNickname(data.userId)}`;
+            messageData.avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${data.userId}`;
         }
+        else {
+            const user = await this.userService.findOne(data.userId);
+            if (user) {
+                messageData.user = user;
+                messageData.username = user.username;
+            }
+        }
+        const savedMessage = await this.messageService.create(messageData);
+        this.server.to(data.channelId).emit('newMessage', savedMessage);
     }
 };
 exports.ChatGateway = ChatGateway;
@@ -92,6 +90,8 @@ exports.ChatGateway = ChatGateway = __decorate([
         transports: ['websocket', 'polling']
     }),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        channel_service_1.ChannelService])
+        channel_service_1.ChannelService,
+        message_service_1.MessageService,
+        name_generator_1.NameGenerator])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map

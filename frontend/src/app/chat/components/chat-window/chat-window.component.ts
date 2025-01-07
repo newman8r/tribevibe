@@ -20,12 +20,18 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   messageText = '';
   currentChannel: Channel | null = null;
   private subscriptions: Subscription[] = [];
+  private anonymousId: string;
 
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
     private authService: AuthService
-  ) {}
+  ) {
+    // Get or create anonymous ID
+    this.anonymousId = localStorage.getItem('anonymousId') || 
+      'anonymous-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('anonymousId', this.anonymousId);
+  }
 
   ngOnInit() {
     // Get initial channel state
@@ -46,6 +52,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Subscribe to channel history
+    this.subscriptions.push(
+      this.websocketService.onChannelHistory().subscribe(messages => {
+        this.messages = messages;
+      })
+    );
+
     // Subscribe to new messages
     this.subscriptions.push(
       this.websocketService.onNewMessage().subscribe(message => {
@@ -60,7 +73,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   private joinChannel(channelId: string) {
     const currentUser = this.authService.getCurrentUser();
-    const userId = currentUser?.id || 'anonymous-' + Math.random().toString(36).substr(2, 9);
+    const userId = currentUser?.id || this.anonymousId;
     this.websocketService.joinChannel(userId, channelId);
   }
 
@@ -79,7 +92,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   sendMessage() {
     if (this.messageText.trim() && this.currentChannel) {
       const currentUser = this.authService.getCurrentUser();
-      const userId = currentUser?.id || 'anonymous-' + Math.random().toString(36).substr(2, 9);
+      const userId = currentUser?.id || this.anonymousId;
       
       this.websocketService.sendMessage(
         userId,
@@ -89,5 +102,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       
       this.messageText = '';
     }
+  }
+
+  // Helper method to get consistent avatar URL
+  getAvatarUrl(message: Message): string {
+    if (message.user?.avatarUrl) {
+      return message.user.avatarUrl;
+    }
+    return message.avatarUrl || `https://api.dicebear.com/7.x/identicon/svg?seed=${message.anonymousId}`;
   }
 } 

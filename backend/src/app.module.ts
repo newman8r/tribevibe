@@ -4,10 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ChannelModule } from './channel/channel.module';
+import { MessageModule } from './message/message.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { User } from './entities/user.entity';
 import { Channel } from './entities/channel.entity';
 import { Message } from './entities/message.entity';
+import { UtilsModule } from './utils/utils.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { Message } from './entities/message.entity';
     AuthModule,
     UserModule,
     ChannelModule,
+    MessageModule,
+    UtilsModule,
   ],
   providers: [ChatGateway],
 })

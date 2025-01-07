@@ -13,7 +13,16 @@ export class Message {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User)
+  @Column({ nullable: true })
+  anonymousId: string;
+
+  @Column()
+  username: string;
+
+  @Column({ nullable: true })
+  avatarUrl: string;
+
+  @ManyToOne(() => User, { nullable: true })
   user: User;
 
   @ManyToOne(() => Channel, channel => channel.messages)

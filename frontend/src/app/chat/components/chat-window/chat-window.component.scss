@@ -204,4 +204,33 @@
       }
     }
   }
+}
+
+.anon-badge {
+  background: rgba(var(--surface-light-rgb), 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  position: relative;
+  margin-right: 4px;
+  border: 1px solid rgba(var(--accent-2-rgb), 0.2);
+}
+
+.anon-text {
+  background: linear-gradient(45deg, var(--accent-2), var(--accent-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-style: italic;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+.username {
+  color: var(--primary-light);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 } 

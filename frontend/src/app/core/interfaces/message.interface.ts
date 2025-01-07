@@ -5,6 +5,9 @@ export interface Message {
   id: string;
   content: string;
   createdAt: Date;
-  user: User;
+  user?: User;
+  anonymousId?: string;
+  username: string;
+  avatarUrl?: string;
   channel: Channel;
 } 
