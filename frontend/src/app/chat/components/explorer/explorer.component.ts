@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 interface ExplorerItem {
   icon: string;
   label: string;
-  type: 'map' | 'setlist' | 'stream' | 'photos' | 'merch' | 'tickets';
+  type: 'map' | 'setlist' | 'stream' | 'photos' | 'merch' | 'tickets' | 'gear';
   isNew?: boolean;
 }
 
@@ -17,11 +17,11 @@ interface ExplorerItem {
 })
 export class ExplorerComponent {
   explorerItems: ExplorerItem[] = [
-    { icon: '🗺️', label: 'Tour Map', type: 'map', isNew: true },
-    { icon: '🎵', label: 'Setlists', type: 'setlist' },
+    { icon: '🗺️', label: 'Event Map', type: 'map', isNew: true },
+    { icon: '🎵', label: 'Lineup', type: 'setlist' },
     { icon: '📺', label: 'Live Streams', type: 'stream' },
-    { icon: '📸', label: 'Photo Albums', type: 'photos' },
-    { icon: '👕', label: 'Merch', type: 'merch' },
+    { icon: '📸', label: 'Photo & Video', type: 'photos' },
+    { icon: '👕', label: 'Gear', type: 'gear' },
     { icon: '🎟️', label: 'Tickets', type: 'tickets', isNew: true }
   ];
 } 
