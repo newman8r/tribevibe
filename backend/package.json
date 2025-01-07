@@ -19,6 +19,7 @@
     "@nestjs/config": "latest",
     "@nestjs/core": "latest",
     "@nestjs/platform-express": "latest",
+    "@nestjs/platform-socket.io": "^10.4.15",
     "@nestjs/typeorm": "latest",
     "@nestjs/websockets": "latest",
     "@supabase/supabase-js": "latest",

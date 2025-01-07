@@ -14,10 +14,12 @@ const common_1 = require("@nestjs/common");
 const supabase_js_1 = require("@supabase/supabase-js");
 const config_1 = require("@nestjs/config");
 const user_service_1 = require("../user/user.service");
+const channel_service_1 = require("../channel/channel.service");
 let AuthService = class AuthService {
-    constructor(configService, userService) {
+    constructor(configService, userService, channelService) {
         this.configService = configService;
         this.userService = userService;
+        this.channelService = channelService;
         this.supabase = (0, supabase_js_1.createClient)(this.configService.getOrThrow('SUPABASE_URL'), this.configService.getOrThrow('SUPABASE_KEY'));
     }
     async signUp(email, password, ticketId) {
@@ -35,6 +37,10 @@ let AuthService = class AuthService {
             ticketId: ticketId,
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${authData.user.id}`,
         });
+        const welcomeChannel = await this.channelService.findOne('cae31388-5a90-4506-98fb-288f34ca0f40');
+        if (welcomeChannel) {
+            await this.channelService.addUserToChannel(welcomeChannel, newUser);
+        }
         return {
             user: newUser,
             session: authData.session,
@@ -62,6 +68,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
-        user_service_1.UserService])
+        user_service_1.UserService,
+        channel_service_1.ChannelService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

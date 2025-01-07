@@ -12,12 +12,13 @@ const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const config_1 = require("@nestjs/config");
 const user_module_1 = require("../user/user.module");
+const channel_module_1 = require("../channel/channel.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule, user_module_1.UserModule],
+        imports: [config_1.ConfigModule, user_module_1.UserModule, channel_module_1.ChannelModule],
         providers: [auth_service_1.AuthService],
         controllers: [auth_controller_1.AuthController],
     })
