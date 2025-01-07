@@ -27,6 +27,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   showNewMessageBar = false;
   unreadCount = 0;
   private viewInitialized = false;
+  userStatuses: Map<string, string> = new Map();
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -60,8 +61,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     // Subscribe to channel history
     this.subscriptions.push(
-      this.websocketService.onChannelHistory().subscribe(messages => {
+      this.websocketService.onChannelHistory().subscribe(({messages, userStatuses}) => {
         this.messages = messages;
+        // Update user statuses
+        Object.entries(userStatuses).forEach(([userId, status]) => {
+          this.userStatuses.set(userId, status);
+        });
         this.scrollToBottom(true);
       })
     );
@@ -73,6 +78,24 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         this.scrollToBottom();
       })
     );
+
+    // Subscribe to user status updates
+    this.subscriptions.push(
+      this.websocketService.onUserStatusUpdate().subscribe(({userId, status}) => {
+        this.userStatuses.set(userId, status);
+      })
+    );
+
+    // Set up presence interval (every 15 seconds instead of every minute)
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      // Initial presence update
+      this.websocketService.updatePresence(currentUser.id);
+      
+      setInterval(() => {
+        this.websocketService.updatePresence(currentUser.id);
+      }, 15000); // Update presence every 15 seconds
+    }
   }
 
   ngOnDestroy() {
@@ -167,5 +190,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.showNewMessageBar = false;
     this.unreadCount = 0;
     this.scrollToBottom(true);
+  }
+
+  getUserStatus(message: Message): string {
+    if (message.anonymousId) return 'none';
+    return this.userStatuses.get(message.user?.id || '') || 'offline';
   }
 } 

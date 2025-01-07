@@ -31,6 +31,7 @@
         <div class="message-content">
           <div class="message-header">
             <span class="username">
+              <span class="status-dot" [class]="getUserStatus(message)"></span>
               <span class="anon-badge" *ngIf="message.anonymousId">
                 <span class="anon-text">anon</span>
               </span>

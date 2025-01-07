@@ -280,4 +280,30 @@
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+
+  &.online {
+    background-color: var(--success);
+    box-shadow: 0 0 4px var(--success);
+  }
+
+  &.idle {
+    background-color: var(--warning);
+    box-shadow: 0 0 4px var(--warning);
+  }
+
+  &.offline {
+    background-color: var(--text-muted);
+  }
+
+  &.none {
+    display: none;
+  }
 } 

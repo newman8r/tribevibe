@@ -19,17 +19,32 @@ const user_service_1 = require("../user/user.service");
 const channel_service_1 = require("../channel/channel.service");
 const message_service_1 = require("../message/message.service");
 const name_generator_1 = require("../utils/name-generator");
+const presence_service_1 = require("../presence/presence.service");
 let ChatGateway = class ChatGateway {
-    constructor(userService, channelService, messageService, nameGenerator) {
+    constructor(userService, channelService, messageService, nameGenerator, presenceService) {
         this.userService = userService;
         this.channelService = channelService;
         this.messageService = messageService;
         this.nameGenerator = nameGenerator;
+        this.presenceService = presenceService;
     }
     async handleJoinChannel(data, client) {
         client.join(data.channelId);
         const messages = await this.messageService.getChannelMessages(data.channelId);
-        client.emit('channelHistory', messages.reverse());
+        const userStatuses = {};
+        const userIds = [...new Set(messages
+                .filter(msg => msg.user?.id)
+                .map(msg => msg.user.id))];
+        for (const userId of userIds) {
+            if (userId) {
+                const status = await this.presenceService.getUserStatus(userId);
+                userStatuses[userId] = status;
+            }
+        }
+        client.emit('channelHistory', {
+            messages: messages.reverse(),
+            userStatuses
+        });
         client.emit('joinedChannel', { channelId: data.channelId });
     }
     async handleMessage(data, client) {
@@ -55,6 +70,16 @@ let ChatGateway = class ChatGateway {
         const savedMessage = await this.messageService.create(messageData);
         this.server.to(data.channelId).emit('newMessage', savedMessage);
     }
+    async handlePresenceUpdate(data) {
+        if (!data.userId.startsWith('anonymous-')) {
+            await this.presenceService.updatePresence(data.userId);
+            this.broadcastUserStatus(data.userId);
+        }
+    }
+    async broadcastUserStatus(userId) {
+        const status = await this.presenceService.getUserStatus(userId);
+        this.server.emit('userStatusUpdate', { userId, status });
+    }
 };
 exports.ChatGateway = ChatGateway;
 __decorate([
@@ -77,6 +102,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
     __metadata("design:returntype", Promise)
 ], ChatGateway.prototype, "handleMessage", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('updatePresence'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handlePresenceUpdate", null);
 exports.ChatGateway = ChatGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {
@@ -92,6 +124,7 @@ exports.ChatGateway = ChatGateway = __decorate([
     __metadata("design:paramtypes", [user_service_1.UserService,
         channel_service_1.ChannelService,
         message_service_1.MessageService,
-        name_generator_1.NameGenerator])
+        name_generator_1.NameGenerator,
+        presence_service_1.PresenceService])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map

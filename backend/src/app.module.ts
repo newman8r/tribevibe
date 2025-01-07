@@ -10,6 +10,8 @@ import { User } from './entities/user.entity';
 import { Channel } from './entities/channel.entity';
 import { Message } from './entities/message.entity';
 import { UtilsModule } from './utils/utils.module';
+import { UserPresence } from './entities/user-presence.entity';
+import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { UtilsModule } from './utils/utils.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, Channel, Message],
+        entities: [User, Channel, Message, UserPresence],
         synchronize: false, // Disable auto-sync
         migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
         migrationsRun: true, // Automatically run migrations on startup
@@ -37,6 +39,7 @@ import { UtilsModule } from './utils/utils.module';
     ChannelModule,
     MessageModule,
     UtilsModule,
+    PresenceModule,
   ],
   providers: [ChatGateway],
 })

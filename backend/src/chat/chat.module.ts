@@ -4,6 +4,7 @@ import { UserModule } from '../user/user.module';
 import { ChannelModule } from '../channel/channel.module';
 import { MessageModule } from '../message/message.module';
 import { AuthModule } from '../auth/auth.module';
+import { PresenceModule } from '../presence/presence.module';
 import { WsGuard } from './ws.guard';
 import { NameGenerator } from '../utils/name-generator';
 
@@ -12,7 +13,8 @@ import { NameGenerator } from '../utils/name-generator';
     UserModule,
     ChannelModule,
     MessageModule,
-    AuthModule // Import AuthModule to use AuthService
+    AuthModule,
+    PresenceModule
   ],
   providers: [
     ChatGateway,

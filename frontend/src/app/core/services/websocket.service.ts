@@ -46,9 +46,19 @@ export class WebsocketService {
     });
   }
 
-  onChannelHistory(): Observable<Message[]> {
+  onChannelHistory(): Observable<{messages: Message[], userStatuses: {[key: string]: string}}> {
     return new Observable(observer => {
-      this.socket.on('channelHistory', messages => observer.next(messages));
+      this.socket.on('channelHistory', data => observer.next(data));
     });
+  }
+
+  onUserStatusUpdate(): Observable<{userId: string, status: string}> {
+    return new Observable(observer => {
+      this.socket.on('userStatusUpdate', status => observer.next(status));
+    });
+  }
+
+  updatePresence(userId: string): void {
+    this.socket.emit('updatePresence', { userId });
   }
 } 

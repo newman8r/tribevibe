@@ -19,6 +19,8 @@ const user_entity_1 = require("./entities/user.entity");
 const channel_entity_1 = require("./entities/channel.entity");
 const message_entity_1 = require("./entities/message.entity");
 const utils_module_1 = require("./utils/utils.module");
+const user_presence_entity_1 = require("./entities/user-presence.entity");
+const presence_module_1 = require("./presence/presence.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -37,7 +39,7 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_NAME'),
-                    entities: [user_entity_1.User, channel_entity_1.Channel, message_entity_1.Message],
+                    entities: [user_entity_1.User, channel_entity_1.Channel, message_entity_1.Message, user_presence_entity_1.UserPresence],
                     synchronize: false,
                     migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
                     migrationsRun: true,
@@ -49,6 +51,7 @@ exports.AppModule = AppModule = __decorate([
             channel_module_1.ChannelModule,
             message_module_1.MessageModule,
             utils_module_1.UtilsModule,
+            presence_module_1.PresenceModule,
         ],
         providers: [chat_gateway_1.ChatGateway],
     })

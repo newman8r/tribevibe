@@ -10,6 +10,7 @@ import { UserService } from '../user/user.service';
 import { ChannelService } from '../channel/channel.service';
 import { MessageService } from '../message/message.service';
 import { NameGenerator } from '../utils/name-generator';
+import { PresenceService } from '../presence/presence.service';
 
 @WebSocketGateway({
   cors: {
@@ -31,6 +32,7 @@ export class ChatGateway {
     private channelService: ChannelService,
     private messageService: MessageService,
     private nameGenerator: NameGenerator,
+    private presenceService: PresenceService,
   ) {}
 
   @SubscribeMessage('joinChannel')
@@ -40,9 +42,30 @@ export class ChatGateway {
   ) {
     client.join(data.channelId);
     
-    // Send last 100 messages to the user
+    // Get messages
     const messages = await this.messageService.getChannelMessages(data.channelId);
-    client.emit('channelHistory', messages.reverse());
+    const userStatuses: { [key: string]: string } = {};
+    
+    // Get unique user IDs from messages (excluding anonymous users)
+    const userIds = [...new Set(
+      messages
+        .filter(msg => msg.user?.id)
+        .map(msg => msg.user.id)
+    )];
+    
+    // Get status for each user
+    for (const userId of userIds) {
+      if (userId) { // Extra check to ensure userId exists
+        const status = await this.presenceService.getUserStatus(userId);
+        userStatuses[userId] = status;
+      }
+    }
+    
+    // Send both messages and statuses
+    client.emit('channelHistory', {
+      messages: messages.reverse(),
+      userStatuses
+    });
     
     client.emit('joinedChannel', { channelId: data.channelId });
   }
@@ -74,6 +97,21 @@ export class ChatGateway {
 
     const savedMessage = await this.messageService.create(messageData);
     this.server.to(data.channelId).emit('newMessage', savedMessage);
+  }
+
+  @SubscribeMessage('updatePresence')
+  async handlePresenceUpdate(
+    @MessageBody() data: { userId: string }
+  ) {
+    if (!data.userId.startsWith('anonymous-')) {
+      await this.presenceService.updatePresence(data.userId);
+      this.broadcastUserStatus(data.userId);
+    }
+  }
+
+  private async broadcastUserStatus(userId: string) {
+    const status = await this.presenceService.getUserStatus(userId);
+    this.server.emit('userStatusUpdate', { userId, status });
   }
 }
 
