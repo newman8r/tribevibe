@@ -24,7 +24,9 @@
                [class.error]="authForm.get('confirmPassword')?.invalid && authForm.get('confirmPassword')?.touched">
       </div>
 
-      <button type="submit" [disabled]="!authForm.valid" class="submit-btn">
+      <button type="submit" 
+              [disabled]="authForm.invalid || (authForm.get('confirmPassword')?.errors?.['passwordMismatch'] && !isLoginMode)" 
+              class="submit-btn">
         {{ isLoginMode ? 'Login' : 'Register' }}
       </button>
     </form>
