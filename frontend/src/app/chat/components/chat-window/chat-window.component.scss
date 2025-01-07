@@ -58,6 +58,14 @@
   padding-bottom: calc(80px + 2rem);
   position: relative;
   height: 0;
+  mask-image: linear-gradient(to bottom, 
+    black calc(100% - 100px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(to bottom, 
+    black calc(100% - 100px),
+    transparent 100%
+  );
   
   .empty-state {
     display: flex;
@@ -86,6 +94,7 @@
   padding: 1rem;
   border-top: 1px solid var(--border-color);
   background: var(--surface-dark);
+  z-index: 10;
   
   .editor-toolbar {
     margin-bottom: 0.5rem;
@@ -233,4 +242,42 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.new-messages-bar {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+  color: var(--primary-light);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+  z-index: 100;
+
+  i {
+    font-size: 0.9em;
+  }
+
+  &:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
 } 

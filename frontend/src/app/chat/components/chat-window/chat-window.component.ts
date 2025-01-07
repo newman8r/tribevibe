@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChannelStateService } from '../../../core/services/channel-state.service';
@@ -21,6 +21,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   currentChannel: Channel | null = null;
   private subscriptions: Subscription[] = [];
   private anonymousId: string;
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  private isUserScrolled = false;
+  private lastScrollHeight = 0;
+  showNewMessageBar = false;
+  unreadCount = 0;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -63,6 +68,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.websocketService.onNewMessage().subscribe(message => {
         this.messages.push(message);
+        this.scrollToBottom();
       })
     );
   }
@@ -110,5 +116,48 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       return message.user.avatarUrl;
     }
     return message.avatarUrl || `https://api.dicebear.com/7.x/identicon/svg?seed=${message.anonymousId}`;
+  }
+
+  ngAfterViewInit() {
+    this.scrollToBottom();
+    this.setupScrollListener();
+  }
+
+  private setupScrollListener() {
+    const container = this.messagesContainer.nativeElement;
+    container.addEventListener('scroll', () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 50;
+      this.isUserScrolled = !isAtBottom;
+      
+      if (!this.isUserScrolled) {
+        this.showNewMessageBar = false;
+        this.unreadCount = 0;
+      }
+    });
+  }
+
+  private scrollToBottom(force = false) {
+    if (!this.messagesContainer) return;
+    
+    const container = this.messagesContainer.nativeElement;
+    if (!this.isUserScrolled || force) {
+      setTimeout(() => {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth'
+        });
+        this.lastScrollHeight = container.scrollHeight;
+      });
+    } else {
+      this.showNewMessageBar = true;
+      this.unreadCount++;
+    }
+  }
+
+  jumpToNewMessages() {
+    this.showNewMessageBar = false;
+    this.unreadCount = 0;
+    this.scrollToBottom(true);
   }
 } 
