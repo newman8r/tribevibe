@@ -14,6 +14,24 @@
   max-width: 400px;
   position: relative;
   overflow: hidden;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+  animation-delay: 0.1s;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &:not(:defined) {
+    visibility: hidden;
+  }
 
   &::before {
     content: '';
@@ -96,7 +114,9 @@ h2 {
 }
 
 .loading-state {
-  min-height: 300px; // Adjust this value to match your form's approximate height
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+  min-height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
