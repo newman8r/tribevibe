@@ -34,7 +34,7 @@
               <span class="anon-badge" *ngIf="message.anonymousId">
                 <span class="anon-text">anon</span>
               </span>
-              {{ message.username.replace('anon ', '') }}
+              {{ message.user?.username || message.username }}
             </span>
             <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
           </div>

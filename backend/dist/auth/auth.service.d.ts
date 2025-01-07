@@ -7,7 +7,7 @@ export declare class AuthService {
     private channelService;
     private supabase;
     constructor(configService: ConfigService, userService: UserService, channelService: ChannelService);
-    signUp(email: string, password: string, ticketId: string): Promise<any>;
+    signUp(email: string, password: string, username: string, ticketId: string): Promise<any>;
     signIn(email: string, password: string): Promise<any>;
     validateToken(token: string): Promise<any>;
 }

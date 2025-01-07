@@ -10,6 +10,13 @@
                [class.error]="authForm.get('email')?.invalid && authForm.get('email')?.touched">
       </div>
 
+      <div class="form-group" *ngIf="!isLoginMode">
+        <input type="text" 
+               formControlName="username" 
+               placeholder="Username"
+               [class.error]="authForm.get('username')?.invalid && authForm.get('username')?.touched">
+      </div>
+
       <div class="form-group">
         <input type="password" 
                formControlName="password" 
@@ -24,7 +31,7 @@
       </div>
 
       <button type="submit" 
-              [disabled]="authForm.invalid" 
+              [disabled]="!isFormValid()" 
               class="submit-btn">
         {{ isLoginMode ? 'Login' : 'Register' }}
       </button>

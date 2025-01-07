@@ -28,7 +28,7 @@ export class AuthService {
     }
   }
 
-  async signUp(email: string, password: string, ticketId: string): Promise<any> {
+  async signUp(email: string, password: string, username: string, ticketId: string): Promise<any> {
     const { data: authData, error } = await this.supabase.auth.signUp({
       email,
       password,
@@ -41,7 +41,9 @@ export class AuthService {
     if (!authData.user) throw new Error('Failed to create user');
 
     const newUser = await this.userService.create({
-      username: email.split('@')[0],
+      email,
+      username,
+      password,
       ticketId: ticketId,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${authData.user.id}`,
     });

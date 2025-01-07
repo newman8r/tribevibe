@@ -33,7 +33,7 @@ let UserService = class UserService {
     }
     async findByEmail(email) {
         return await this.userRepository.findOne({
-            where: { username: email.split('@')[0] },
+            where: { email },
             relations: ['channels']
         });
     }

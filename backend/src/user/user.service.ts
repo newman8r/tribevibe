@@ -24,7 +24,7 @@ export class UserService {
 
   async findByEmail(email: string): Promise<User | null> {
     return await this.userRepository.findOne({
-      where: { username: email.split('@')[0] }, // Since we use email prefix as username
+      where: { email },
       relations: ['channels']
     });
   }

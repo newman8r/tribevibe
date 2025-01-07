@@ -26,7 +26,9 @@ import { UtilsModule } from './utils/utils.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [User, Channel, Message],
-        synchronize: true, // Be careful with this in production
+        synchronize: false, // Disable auto-sync
+        migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+        migrationsRun: true, // Automatically run migrations on startup
       }),
       inject: [ConfigService],
     }),

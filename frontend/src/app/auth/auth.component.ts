@@ -17,7 +17,7 @@ import { SignUpDto, SignInDto } from '../core/interfaces/auth.interface';
 })
 export class AuthComponent implements OnInit {
   isLoginMode = true;
-  authForm: FormGroup;
+  authForm!: FormGroup;
   isLoading = false;
   error: string | null = null;
 
@@ -26,8 +26,13 @@ export class AuthComponent implements OnInit {
     private authService: AuthService,
     private router: Router
   ) {
+    this.initializeForm();
+  }
+
+  private initializeForm() {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       ticketId: ['']
     });
@@ -44,22 +49,36 @@ export class AuthComponent implements OnInit {
     this.isLoginMode = !this.isLoginMode;
     if (this.isLoginMode) {
       this.authForm.get('ticketId')?.clearValidators();
+      this.authForm.get('username')?.clearValidators();
+    } else {
+      this.authForm.get('ticketId')?.setValidators([]);  // Optional field
+      this.authForm.get('username')?.setValidators([Validators.required, Validators.minLength(3)]);
     }
     this.authForm.get('ticketId')?.updateValueAndValidity();
+    this.authForm.get('username')?.updateValueAndValidity();
+  }
+
+  isFormValid(): boolean {
+    const emailControl = this.authForm.get('email');
+    const passwordControl = this.authForm.get('password');
+    
+    if (!emailControl || !passwordControl) return false;
+    
+    return emailControl.valid && passwordControl.valid;
   }
 
   onSubmit() {
-    if (this.authForm.valid) {
+    if (this.isFormValid()) {
       this.isLoading = true;
       this.error = null;
       
-      const { email, password, ticketId } = this.authForm.value;
+      const { email, password, ticketId, username } = this.authForm.value;
       let authObs: Observable<any>;
 
       if (this.isLoginMode) {
         authObs = this.authService.signIn({ email, password });
       } else {
-        authObs = this.authService.signUp({ email, password, ticketId: ticketId || '' });
+        authObs = this.authService.signUp({ email, password, username, ticketId: ticketId || '' });
       }
 
       authObs.pipe(

@@ -2,6 +2,7 @@ import { User } from './user.interface';
 
 export interface SignUpDto {
   email: string;
+  username: string;
   password: string;
   ticketId?: string;
 }
