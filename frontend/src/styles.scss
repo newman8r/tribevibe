@@ -1,1 +1,79 @@
 /* You can add global styles to this file, and also import other style files */
+
+// Color Palette
+:root {
+  // Primary Colors
+  --primary-dark: #121212;    // Deep black background
+  --primary-light: #ffffff;   // White text
+  --accent-1: #FF0266;       // Hot pink
+  --accent-2: #00F9FF;       // Neon cyan
+  --accent-3: #7B61FF;       // Electric purple
+  
+  // UI Colors
+  --surface-dark: #1E1E1E;   // Slightly lighter black for cards/surfaces
+  --surface-medium: #2D2D2D; // Medium surface color
+  --surface-light: #333333;  // Lighter surface color
+  
+  // Status Colors
+  --success: #00FF94;        // Neon green
+  --error: #FF3D00;         // Bright red
+  --warning: #FFD600;       // Bright yellow
+}
+
+// Typography
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--primary-dark);
+  color: var(--primary-light);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+// Common utility classes
+.gradient-text {
+  background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.neon-border {
+  border: 2px solid var(--accent-2);
+  box-shadow: 0 0 10px var(--accent-2);
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-3);
+  border-radius: 4px;
+  
+  &:hover {
+    background: var(--accent-1);
+  }
+}
+
+// Basic animations
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
