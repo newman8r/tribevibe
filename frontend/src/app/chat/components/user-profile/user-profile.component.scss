@@ -40,13 +40,19 @@
         box-shadow: 0 0 4px var(--success);
       }
 
-      &.idle {
+      &.away {
         background-color: var(--warning);
         box-shadow: 0 0 4px var(--warning);
       }
 
+      &.busy {
+        background-color: var(--error);
+        box-shadow: 0 0 4px var(--error);
+      }
+
       &.offline {
         background-color: var(--text-muted);
+        box-shadow: none;
       }
     }
   }

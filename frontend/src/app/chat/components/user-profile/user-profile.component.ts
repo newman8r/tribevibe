@@ -23,6 +23,7 @@ export class UserProfileComponent implements OnInit {
   private statusCycle = [
     UserStatus.ONLINE,
     UserStatus.AWAY,
+    UserStatus.BUSY,
     UserStatus.OFFLINE
   ];
 

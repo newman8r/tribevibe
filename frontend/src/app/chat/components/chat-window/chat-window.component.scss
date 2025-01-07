@@ -288,19 +288,27 @@
   border-radius: 50%;
   display: inline-block;
   margin-right: 6px;
+  border: 2px solid var(--surface-dark);
+  transition: all 0.3s ease;
 
   &.online {
     background-color: var(--success);
     box-shadow: 0 0 4px var(--success);
   }
 
-  &.idle {
+  &.away {
     background-color: var(--warning);
     box-shadow: 0 0 4px var(--warning);
   }
 
+  &.busy {
+    background-color: var(--error);
+    box-shadow: 0 0 4px var(--error);
+  }
+
   &.offline {
     background-color: var(--text-muted);
+    box-shadow: none;
   }
 
   &.none {
