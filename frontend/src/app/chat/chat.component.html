@@ -1,14 +1,7 @@
 <div class="chat-container">
   <!-- Left Section -->
   <div class="left-panel">
-    <div class="user-profile">
-      <div class="avatar-wrapper">
-        <img [src]="currentUser?.avatarUrl" alt="Profile" class="avatar">
-        <div class="status-indicator"></div>
-      </div>
-      <h3 class="username gradient-text">{{currentUser?.username}}</h3>
-    </div>
-    
+    <app-user-profile></app-user-profile>
     <app-channel-list></app-channel-list>
   </div>
 

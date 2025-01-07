@@ -1,0 +1,27 @@
+<div class="user-profile">
+  <div class="avatar-wrapper">
+    <img [src]="currentUser?.avatarUrl || anonymousAvatar" 
+         [alt]="currentUser?.username || anonymousUsername || 'Anonymous'" 
+         class="avatar">
+    <div class="status-indicator"></div>
+  </div>
+  
+  <div class="username-container">
+    <h3 class="username gradient-text">
+      <ng-container *ngIf="currentUser; else anonymousUser">
+        {{currentUser.username}}
+      </ng-container>
+      <ng-template #anonymousUser>
+        <span class="anon-badge">anon</span>
+        {{anonymousUsername ? anonymousUsername.replace('anon ', '') : '...'}}
+      </ng-template>
+    </h3>
+    <p *ngIf="!currentUser" class="hint-text">Create an account to change your username</p>
+  </div>
+
+  <button *ngIf="!currentUser" 
+          class="register-btn" 
+          (click)="navigateToRegister()">
+    Register Account
+  </button>
+</div> 

@@ -1,0 +1,74 @@
+.user-profile {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  
+  .avatar-wrapper {
+    position: relative;
+    
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-2);
+      box-shadow: 0 0 15px var(--accent-2);
+    }
+    
+    .status-indicator {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--success);
+      border: 2px solid var(--surface-dark);
+    }
+  }
+  
+  .username-container {
+    text-align: center;
+    
+    .username {
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .hint-text {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+  }
+
+  .anon-badge {
+    background: rgba(var(--surface-light-rgb), 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    border: 1px solid rgba(var(--accent-2-rgb), 0.2);
+    font-style: italic;
+  }
+
+  .register-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+    color: var(--primary-light);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+  }
+} 

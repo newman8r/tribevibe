@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebsocketService } from '../core/services/websocket.service';
-import { AuthService } from '../core/services/auth.service';
-import { User } from '../core/interfaces/user.interface';
 import { ExplorerComponent } from './components/explorer/explorer.component';
 import { ChannelListComponent } from './components/channel-list/channel-list.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { SocialHubComponent } from './components/social-hub/social-hub.component';
 import { PromoSpaceComponent } from './components/promo-space/promo-space.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
 
 @Component({
   selector: 'app-chat',
@@ -19,21 +18,11 @@ import { PromoSpaceComponent } from './components/promo-space/promo-space.compon
     ChannelListComponent,
     ChatWindowComponent,
     SocialHubComponent,
-    PromoSpaceComponent
+    PromoSpaceComponent,
+    UserProfileComponent
   ],
   standalone: true
 })
-export class ChatComponent implements OnInit {
-  currentUser: User | null = null;
-
-  constructor(
-    private websocketService: WebsocketService,
-    private authService: AuthService
-  ) {}
-
-  ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
-  }
+export class ChatComponent {
+  constructor(private websocketService: WebsocketService) {}
 } 
