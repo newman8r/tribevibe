@@ -1,0 +1,60 @@
+.explorer {
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .explorer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .explorer-item {
+    position: relative;
+    background-color: var(--surface-medium);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    
+    &.new::after {
+      content: 'NEW';
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 0.6rem;
+      background: var(--accent-1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--primary-light);
+    }
+    
+    .icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .label {
+      font-size: 0.9rem;
+      color: var(--primary-light);
+    }
+    
+    .hover-effect {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+      
+      .hover-effect {
+        opacity: 0.1;
+      }
+    }
+  }
+} 

@@ -1,0 +1,13 @@
+<div class="explorer">
+  <h3 class="gradient-text">Explorer</h3>
+  
+  <div class="explorer-grid">
+    <div *ngFor="let item of explorerItems" 
+         class="explorer-item" 
+         [class.new]="item.isNew">
+      <div class="icon">{{item.icon}}</div>
+      <span class="label">{{item.label}}</span>
+      <div class="hover-effect"></div>
+    </div>
+  </div>
+</div> 

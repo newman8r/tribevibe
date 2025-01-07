@@ -14,9 +14,21 @@ export class AuthService {
 
   constructor(private apiService: ApiService) {
     // Initialize user from localStorage if available
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && typeof parsedUser === 'object') {
+          this.currentUserSubject.next(parsedUser);
+        } else {
+          // Invalid user object, clear it
+          localStorage.removeItem('currentUser');
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+      // Clear corrupted data
+      localStorage.removeItem('currentUser');
     }
   }
 

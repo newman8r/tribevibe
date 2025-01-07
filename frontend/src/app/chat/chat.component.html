@@ -1,0 +1,34 @@
+<div class="chat-container">
+  <!-- Left Section -->
+  <div class="left-panel">
+    <div class="user-profile">
+      <div class="avatar-wrapper">
+        <img [src]="currentUser?.avatarUrl" alt="Profile" class="avatar">
+        <div class="status-indicator"></div>
+      </div>
+      <h3 class="username gradient-text">{{currentUser?.username}}</h3>
+    </div>
+    
+    <app-channel-list></app-channel-list>
+  </div>
+
+  <!-- Center Section -->
+  <div class="center-panel">
+    <app-chat-window></app-chat-window>
+  </div>
+
+  <!-- Right Section -->
+  <div class="right-panel">
+    <div class="explorer-section">
+      <app-explorer></app-explorer>
+    </div>
+    
+    <div class="social-section">
+      <app-social-hub></app-social-hub>
+    </div>
+    
+    <div class="promo-section">
+      <app-promo-space></app-promo-space>
+    </div>
+  </div>
+</div> 

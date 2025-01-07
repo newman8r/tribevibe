@@ -1,0 +1,99 @@
+.chat-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  height: 100vh;
+  background-color: var(--primary-dark);
+  gap: 1px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+    opacity: 0.05;
+    pointer-events: none;
+  }
+}
+
+.left-panel, .center-panel, .right-panel {
+  background-color: var(--surface-dark);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-panel {
+  border-right: 1px solid var(--surface-light);
+  
+  .user-profile {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    
+    .avatar-wrapper {
+      position: relative;
+      
+      .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid var(--accent-2);
+        box-shadow: 0 0 15px var(--accent-2);
+      }
+      
+      .status-indicator {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--success);
+        border: 2px solid var(--surface-dark);
+      }
+    }
+    
+    .username {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.right-panel {
+  border-left: 1px solid var(--surface-light);
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 1px;
+  
+  > div {
+    background-color: var(--surface-dark);
+    padding: 1rem;
+    
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--surface-light);
+    }
+  }
+}
+
+.center-panel {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+    opacity: 0.5;
+  }
+} 
