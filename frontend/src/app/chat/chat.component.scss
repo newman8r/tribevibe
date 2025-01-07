@@ -29,6 +29,8 @@
 
 .left-panel {
   border-right: 1px solid var(--surface-light);
+  height: 100%;
+overflow: scroll;
   
   .user-profile {
     padding: 1.5rem;
