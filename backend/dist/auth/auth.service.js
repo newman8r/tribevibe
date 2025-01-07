@@ -20,7 +20,18 @@ let AuthService = class AuthService {
         this.configService = configService;
         this.userService = userService;
         this.channelService = channelService;
-        this.supabase = (0, supabase_js_1.createClient)(this.configService.getOrThrow('SUPABASE_URL'), this.configService.getOrThrow('SUPABASE_KEY'));
+        const supabaseUrl = this.configService.getOrThrow('SUPABASE_URL');
+        const supabaseKey = this.configService.getOrThrow('SUPABASE_KEY');
+        if (!supabaseUrl || !supabaseKey) {
+            throw new Error('Supabase configuration is missing');
+        }
+        try {
+            this.supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseKey);
+        }
+        catch (error) {
+            console.error('Failed to initialize Supabase client:', error);
+            throw new Error('Failed to initialize Supabase client');
+        }
     }
     async signUp(email, password, ticketId) {
         const { data: authData, error } = await this.supabase.auth.signUp({

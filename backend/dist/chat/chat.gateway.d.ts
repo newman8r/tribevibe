@@ -1,9 +1,10 @@
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { UserService } from '../user/user.service';
 import { ChannelService } from '../channel/channel.service';
 export declare class ChatGateway {
     private userService;
     private channelService;
+    server: Server;
     constructor(userService: UserService, channelService: ChannelService);
     handleJoinChannel(data: {
         userId: string;

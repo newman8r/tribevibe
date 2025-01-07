@@ -16,4 +16,8 @@ export class ChannelStateService {
   getSelectedChannel() {
     return this.selectedChannelSubject.value;
   }
+
+  getCurrentChannel(): Channel | null {
+    return this.selectedChannelSubject.value;
+  }
 } 

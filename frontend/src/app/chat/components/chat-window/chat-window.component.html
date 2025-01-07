@@ -24,7 +24,19 @@
     </div>
     
     <div class="messages-list" *ngIf="messages.length > 0">
-      <!-- Messages will be rendered here -->
+      <div class="message" *ngFor="let message of messages">
+        <div class="message-avatar">
+          <img [src]="message.user.avatarUrl || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + message.user.id" 
+               [alt]="message.user.username || 'Anonymous'">
+        </div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="username">{{ message.user.username || 'Anonymous' }}</span>
+            <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
+          </div>
+          <div class="message-text">{{ message.content }}</div>
+        </div>
+      </div>
     </div>
   </div>
 

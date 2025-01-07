@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChannelStateService } from '../../../core/services/channel-state.service';
+import { WebsocketService } from '../../../core/services/websocket.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Channel } from '../../../core/interfaces/channel.interface';
+import { Message } from '../../../core/interfaces/message.interface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chat-window',
@@ -11,17 +15,53 @@ import { Channel } from '../../../core/interfaces/channel.interface';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-export class ChatWindowComponent implements OnInit {
-  messages: any[] = [];
+export class ChatWindowComponent implements OnInit, OnDestroy {
+  messages: Message[] = [];
   messageText = '';
   currentChannel: Channel | null = null;
+  private subscriptions: Subscription[] = [];
 
-  constructor(private channelStateService: ChannelStateService) {}
+  constructor(
+    private channelStateService: ChannelStateService,
+    private websocketService: WebsocketService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    this.channelStateService.selectedChannel$.subscribe(channel => {
-      this.currentChannel = channel;
-    });
+    // Get initial channel state
+    const initialChannel = this.channelStateService.getCurrentChannel();
+    if (initialChannel) {
+      this.currentChannel = initialChannel;
+      this.joinChannel(initialChannel.id);
+    }
+
+    // Subscribe to channel changes
+    this.subscriptions.push(
+      this.channelStateService.selectedChannel$.subscribe(channel => {
+        if (channel && channel.id !== this.currentChannel?.id) {
+          this.currentChannel = channel;
+          this.messages = [];
+          this.joinChannel(channel.id);
+        }
+      })
+    );
+
+    // Subscribe to new messages
+    this.subscriptions.push(
+      this.websocketService.onNewMessage().subscribe(message => {
+        this.messages.push(message);
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  private joinChannel(channelId: string) {
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || 'anonymous-' + Math.random().toString(36).substr(2, 9);
+    this.websocketService.joinChannel(userId, channelId);
   }
 
   openEmojiPicker() {
@@ -37,8 +77,16 @@ export class ChatWindowComponent implements OnInit {
   }
 
   sendMessage() {
-    if (this.messageText.trim()) {
-      // Implement message sending logic
+    if (this.messageText.trim() && this.currentChannel) {
+      const currentUser = this.authService.getCurrentUser();
+      const userId = currentUser?.id || 'anonymous-' + Math.random().toString(36).substr(2, 9);
+      
+      this.websocketService.sendMessage(
+        userId,
+        this.currentChannel.id,
+        this.messageText.trim()
+      );
+      
       this.messageText = '';
     }
   }

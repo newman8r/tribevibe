@@ -3,13 +3,27 @@ import {
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { UserService } from '../user/user.service';
 import { ChannelService } from '../channel/channel.service';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: true,  // Allow all origins in development
+    methods: ['GET', 'POST'],
+    credentials: true,
+    allowedHeaders: ['my-custom-header'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  },
+  transports: ['websocket', 'polling']
+})
 export class ChatGateway {
+  @WebSocketServer()
+  server: Server;
+
   constructor(
     private userService: UserService,
     private channelService: ChannelService,
@@ -20,6 +34,13 @@ export class ChatGateway {
     @MessageBody() data: { userId: string; channelId: string },
     @ConnectedSocket() client: Socket,
   ) {
+    // Skip user lookup for anonymous users
+    if (data.userId.startsWith('anonymous-')) {
+      client.join(data.channelId);
+      client.emit('joinedChannel', { channelId: data.channelId });
+      return;
+    }
+
     const user = await this.userService.findOne(data.userId);
     const channel = await this.channelService.findOne(data.channelId);
 
@@ -35,18 +56,29 @@ export class ChatGateway {
     @MessageBody() data: { userId: string; channelId: string; content: string },
     @ConnectedSocket() client: Socket,
   ) {
+    // Handle anonymous users
+    if (data.userId.startsWith('anonymous-')) {
+      const message = {
+        user: { id: data.userId, username: 'Anonymous User' },
+        content: data.content,
+        createdAt: new Date(),
+      };
+      // Emit to everyone in the channel INCLUDING the sender
+      this.server.to(data.channelId).emit('newMessage', message);
+      return;
+    }
+
     const user = await this.userService.findOne(data.userId);
     const channel = await this.channelService.findOne(data.channelId);
 
     if (user && channel) {
-      // Here you would typically save the message to the database
       const message = {
         user: { id: user.id, username: user.username },
         content: data.content,
         createdAt: new Date(),
       };
-
-      client.to(data.channelId).emit('newMessage', message);
+      // Emit to everyone in the channel INCLUDING the sender
+      this.server.to(data.channelId).emit('newMessage', message);
     }
   }
 }
