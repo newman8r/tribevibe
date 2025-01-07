@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../core/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { SignUpDto, SignInDto } from '../core/interfaces/auth.interface';
@@ -24,7 +24,8 @@ export class AuthComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.initializeForm();
   }
@@ -39,23 +40,39 @@ export class AuthComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Handle route parameter
+    this.route.params.subscribe(params => {
+      if (params['mode']) {
+        this.isLoginMode = params['mode'].toLowerCase() !== 'register';
+        this.updateFormValidation();
+      }
+    });
+
     document.body.classList.add('loading');
     setTimeout(() => {
       document.body.classList.remove('loading');
     }, 100);
   }
 
-  toggleMode() {
-    this.isLoginMode = !this.isLoginMode;
+  private updateFormValidation() {
     if (this.isLoginMode) {
       this.authForm.get('ticketId')?.clearValidators();
       this.authForm.get('username')?.clearValidators();
     } else {
-      this.authForm.get('ticketId')?.setValidators([]);  // Optional field
+      this.authForm.get('ticketId')?.setValidators([]);
       this.authForm.get('username')?.setValidators([Validators.required, Validators.minLength(3)]);
     }
     this.authForm.get('ticketId')?.updateValueAndValidity();
     this.authForm.get('username')?.updateValueAndValidity();
+  }
+
+  toggleMode() {
+    this.isLoginMode = !this.isLoginMode;
+    this.updateFormValidation();
+    
+    // Update URL when toggling modes
+    const mode = this.isLoginMode ? 'login' : 'register';
+    this.router.navigate(['/auth', mode], { replaceUrl: true });
   }
 
   isFormValid(): boolean {

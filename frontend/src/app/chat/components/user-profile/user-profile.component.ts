@@ -52,7 +52,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   navigateToRegister() {
-    this.router.navigate(['/auth']);
+    this.router.navigate(['/auth/register']);
   }
 
   logout() {
