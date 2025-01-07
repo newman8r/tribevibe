@@ -1,5 +1,13 @@
 <div class="channel-list">
-  <h3 class="channel-header gradient-text">Channels</h3>
+  <div class="channel-header-container">
+    <h3 class="channel-header gradient-text">Channels</h3>
+    <button 
+      *ngIf="isLoggedIn" 
+      class="create-channel-btn" 
+      (click)="openCreateChannelModal()">
+      +
+    </button>
+  </div>
   
   <div class="channels-grid">
     <div *ngFor="let channel of channels" 
@@ -10,6 +18,27 @@
         <span class="channel-initial">#</span>
       </div>
       <span class="channel-name">{{channel.name}}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Create Channel Modal -->
+<div class="modal" *ngIf="showCreateModal">
+  <div class="modal-content">
+    <h3>Create New Channel</h3>
+    <input 
+      type="text" 
+      [(ngModel)]="newChannelName" 
+      placeholder="Enter channel name"
+      (keyup.enter)="createChannel()">
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeCreateChannelModal()">Cancel</button>
+      <button 
+        class="create-btn" 
+        [disabled]="!newChannelName.trim()" 
+        (click)="createChannel()">
+        Create
+      </button>
     </div>
   </div>
 </div> 
