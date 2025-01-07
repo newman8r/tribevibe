@@ -2,16 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserPresence } from '../entities/user-presence.entity';
-
-export enum UserStatus {
-  ONLINE = 'online',
-  IDLE = 'idle',
-  OFFLINE = 'offline'
-}
+import { UserStatus } from '../core/interfaces/user-status.enum';
 
 @Injectable()
 export class PresenceService {
   private anonymousPresence: Map<string, Date> = new Map();
+  private manualStatuses: Map<string, UserStatus> = new Map();
 
   constructor(
     @InjectRepository(UserPresence)
@@ -34,6 +30,10 @@ export class PresenceService {
   }
 
   async getUserStatus(userId: string): Promise<UserStatus> {
+    // Check for manual status override first
+    const manualStatus = this.manualStatuses.get(userId);
+    if (manualStatus) return manualStatus;
+
     if (userId.startsWith('anonymous-')) {
       const lastActivity = this.anonymousPresence.get(userId);
       if (!lastActivity) return UserStatus.OFFLINE;
@@ -43,7 +43,7 @@ export class PresenceService {
       const minutesDiff = diff / (1000 * 60);
 
       if (minutesDiff <= 15) return UserStatus.ONLINE;
-      if (minutesDiff <= 30) return UserStatus.IDLE;
+      if (minutesDiff <= 30) return UserStatus.AWAY;
       return UserStatus.OFFLINE;
     }
 
@@ -58,11 +58,10 @@ export class PresenceService {
     const minutesDiff = diff / (1000 * 60);
 
     if (minutesDiff <= 15) return UserStatus.ONLINE;
-    if (minutesDiff <= 30) return UserStatus.IDLE;
+    if (minutesDiff <= 30) return UserStatus.AWAY;
     return UserStatus.OFFLINE;
   }
 
-  // Clean up old anonymous presence data periodically
   cleanupAnonymousPresence(): void {
     const now = new Date();
     for (const [userId, lastActivity] of this.anonymousPresence.entries()) {
@@ -72,5 +71,13 @@ export class PresenceService {
         this.anonymousPresence.delete(userId);
       }
     }
+  }
+
+  async setManualStatus(userId: string, status: UserStatus): Promise<void> {
+    this.manualStatuses.set(userId, status);
+  }
+
+  clearManualStatus(userId: string): void {
+    this.manualStatuses.delete(userId);
   }
 } 

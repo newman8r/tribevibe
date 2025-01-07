@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { User } from '../../../core/interfaces/user.interface';
+import { UserStatus } from '../../../core/interfaces/user-status.enum';
 
 @Component({
   selector: 'app-user-profile',
@@ -18,6 +19,12 @@ export class UserProfileComponent implements OnInit {
   anonymousAvatar: string;
   anonymousUsername: string | null = null;
   currentUserStatus: string = 'offline';
+
+  private statusCycle = [
+    UserStatus.ONLINE,
+    UserStatus.AWAY,
+    UserStatus.OFFLINE
+  ];
 
   constructor(
     private authService: AuthService,
@@ -66,5 +73,16 @@ export class UserProfileComponent implements OnInit {
   logout() {
     this.authService.signOut();
     this.router.navigate(['/auth']);
+  }
+
+  cycleStatus(event: Event) {
+    event.stopPropagation();
+    const currentIndex = this.statusCycle.indexOf(this.currentUserStatus as UserStatus);
+    const nextIndex = (currentIndex + 1) % this.statusCycle.length;
+    const newStatus = this.statusCycle[nextIndex];
+    
+    const userId = this.currentUser?.id || this.anonymousId;
+    console.log('Updating status to:', newStatus); // Debug log
+    this.websocketService.updateManualStatus(userId, newStatus);
   }
 } 

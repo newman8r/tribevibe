@@ -11,6 +11,7 @@ import { ChannelService } from '../channel/channel.service';
 import { MessageService } from '../message/message.service';
 import { NameGenerator } from '../utils/name-generator';
 import { PresenceService } from '../presence/presence.service';
+import { UserStatus } from '../core/interfaces/user-status.enum';
 
 @WebSocketGateway({
   cors: {
@@ -100,6 +101,14 @@ export class ChatGateway {
     @MessageBody() data: { userId: string }
   ) {
     await this.presenceService.updatePresence(data.userId);
+    await this.broadcastUserStatus(data.userId);
+  }
+
+  @SubscribeMessage('updateManualStatus')
+  async handleManualStatus(
+    @MessageBody() data: { userId: string; status: string }
+  ) {
+    await this.presenceService.setManualStatus(data.userId, data.status as UserStatus);
     await this.broadcastUserStatus(data.userId);
   }
 

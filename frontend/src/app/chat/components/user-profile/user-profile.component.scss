@@ -17,6 +17,7 @@
     }
     
     .status-indicator {
+      cursor: pointer;
       position: absolute;
       bottom: 5px;
       right: 5px;
@@ -25,6 +26,14 @@
       border-radius: 50%;
       border: 2px solid var(--surface-dark);
       transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
 
       &.online {
         background-color: var(--success);

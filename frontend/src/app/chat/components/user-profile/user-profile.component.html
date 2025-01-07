@@ -3,7 +3,10 @@
     <img [src]="currentUser?.avatarUrl || anonymousAvatar" 
          [alt]="currentUser?.username || anonymousUsername || 'Anonymous'" 
          class="avatar">
-    <div class="status-indicator" [class]="currentUserStatus"></div>
+    <div class="status-indicator" 
+         [class]="currentUserStatus"
+         (click)="cycleStatus($event)">
+    </div>
   </div>
   
   <div class="username-container">

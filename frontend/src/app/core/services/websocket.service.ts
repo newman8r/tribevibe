@@ -61,4 +61,8 @@ export class WebsocketService {
   updatePresence(userId: string): void {
     this.socket.emit('updatePresence', { userId });
   }
+
+  updateManualStatus(userId: string, status: string): void {
+    this.socket.emit('updateManualStatus', { userId, status });
+  }
 } 

@@ -70,6 +70,10 @@ let ChatGateway = class ChatGateway {
         await this.presenceService.updatePresence(data.userId);
         await this.broadcastUserStatus(data.userId);
     }
+    async handleManualStatus(data) {
+        await this.presenceService.setManualStatus(data.userId, data.status);
+        await this.broadcastUserStatus(data.userId);
+    }
     async broadcastUserStatus(userId) {
         const status = await this.presenceService.getUserStatus(userId);
         this.server.emit('userStatusUpdate', { userId, status });
@@ -103,6 +107,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], ChatGateway.prototype, "handlePresenceUpdate", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('updateManualStatus'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleManualStatus", null);
 exports.ChatGateway = ChatGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

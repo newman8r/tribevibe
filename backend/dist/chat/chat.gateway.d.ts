@@ -24,5 +24,9 @@ export declare class ChatGateway {
     handlePresenceUpdate(data: {
         userId: string;
     }): Promise<void>;
+    handleManualStatus(data: {
+        userId: string;
+        status: string;
+    }): Promise<void>;
     private broadcastUserStatus;
 }
