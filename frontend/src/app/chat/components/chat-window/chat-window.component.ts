@@ -26,6 +26,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   private lastScrollHeight = 0;
   showNewMessageBar = false;
   unreadCount = 0;
+  private viewInitialized = false;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -61,6 +62,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.websocketService.onChannelHistory().subscribe(messages => {
         this.messages = messages;
+        this.scrollToBottom(true);
       })
     );
 
@@ -119,7 +121,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.scrollToBottom();
+    this.viewInitialized = true;
+    this.scrollToBottom(true);
     this.setupScrollListener();
   }
 
@@ -138,6 +141,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   private scrollToBottom(force = false) {
+    if (!this.viewInitialized) {
+      setTimeout(() => this.scrollToBottom(force), 0);
+      return;
+    }
+    
     if (!this.messagesContainer) return;
     
     const container = this.messagesContainer.nativeElement;
@@ -145,7 +153,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         container.scrollTo({
           top: container.scrollHeight,
-          behavior: 'smooth'
+          behavior: force ? 'auto' : 'smooth'
         });
         this.lastScrollHeight = container.scrollHeight;
       });
