@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChannelStateService } from '../../../core/services/channel-state.service';
+import { Channel } from '../../../core/interfaces/channel.interface';
 
 @Component({
   selector: 'app-chat-window',
@@ -9,9 +11,18 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-export class ChatWindowComponent {
-  messages: any[] = []; // Initialize as empty array
-  messageText = ''; // Remove explicit type as it's inferred
+export class ChatWindowComponent implements OnInit {
+  messages: any[] = [];
+  messageText = '';
+  currentChannel: Channel | null = null;
+
+  constructor(private channelStateService: ChannelStateService) {}
+
+  ngOnInit() {
+    this.channelStateService.selectedChannel$.subscribe(channel => {
+      this.currentChannel = channel;
+    });
+  }
 
   openEmojiPicker() {
     // Implement emoji picker logic

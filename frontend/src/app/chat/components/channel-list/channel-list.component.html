@@ -1,0 +1,15 @@
+<div class="channel-list">
+  <h3 class="channel-header gradient-text">Channels</h3>
+  
+  <div class="channels-grid">
+    <div *ngFor="let channel of channels" 
+         class="channel-card" 
+         [class.active]="channel.id === selectedChannel?.id"
+         (click)="selectChannel(channel)">
+      <div class="channel-placeholder">
+        <span class="channel-initial">#</span>
+      </div>
+      <span class="channel-name">{{channel.name}}</span>
+    </div>
+  </div>
+</div> 
