@@ -86,16 +86,17 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Set up presence interval (every 15 seconds instead of every minute)
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      // Initial presence update
-      this.websocketService.updatePresence(currentUser.id);
-      
-      setInterval(() => {
-        this.websocketService.updatePresence(currentUser.id);
-      }, 15000); // Update presence every 15 seconds
-    }
+// Set up presence interval for all users (including anonymous)
+const currentUser = this.authService.getCurrentUser();
+const userId = currentUser?.id || this.anonymousId;
+
+// Initial presence update
+this.websocketService.updatePresence(userId);
+
+// Update presence every 15 seconds
+setInterval(() => {
+  this.websocketService.updatePresence(userId);
+}, 15000);
   }
 
   ngOnDestroy() {
@@ -193,7 +194,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   getUserStatus(message: Message): string {
-    if (message.anonymousId) return 'none';
+    if (message.anonymousId) {
+      return this.userStatuses.get(message.anonymousId) || 'offline';
+    }
     return this.userStatuses.get(message.user?.id || '') || 'offline';
   }
 } 

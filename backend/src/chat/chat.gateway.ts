@@ -46,19 +46,15 @@ export class ChatGateway {
     const messages = await this.messageService.getChannelMessages(data.channelId);
     const userStatuses: { [key: string]: string } = {};
     
-    // Get unique user IDs from messages (excluding anonymous users)
+    // Get all user IDs (including anonymous)
     const userIds = [...new Set(
-      messages
-        .filter(msg => msg.user?.id)
-        .map(msg => msg.user.id)
+      messages.map(msg => msg.user?.id || msg.anonymousId).filter(Boolean)
     )];
     
     // Get status for each user
     for (const userId of userIds) {
-      if (userId) { // Extra check to ensure userId exists
-        const status = await this.presenceService.getUserStatus(userId);
-        userStatuses[userId] = status;
-      }
+      const status = await this.presenceService.getUserStatus(userId);
+      userStatuses[userId] = status;
     }
     
     // Send both messages and statuses
@@ -103,10 +99,8 @@ export class ChatGateway {
   async handlePresenceUpdate(
     @MessageBody() data: { userId: string }
   ) {
-    if (!data.userId.startsWith('anonymous-')) {
-      await this.presenceService.updatePresence(data.userId);
-      this.broadcastUserStatus(data.userId);
-    }
+    await this.presenceService.updatePresence(data.userId);
+    await this.broadcastUserStatus(data.userId);
   }
 
   private async broadcastUserStatus(userId: string) {

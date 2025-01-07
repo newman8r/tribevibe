@@ -17,6 +17,7 @@ export class UserProfileComponent implements OnInit {
   anonymousId: string;
   anonymousAvatar: string;
   anonymousUsername: string | null = null;
+  currentUserStatus: string = 'offline';
 
   constructor(
     private authService: AuthService,
@@ -49,6 +50,13 @@ export class UserProfileComponent implements OnInit {
         }
       });
     }
+
+    // Subscribe to status updates
+    this.websocketService.onUserStatusUpdate().subscribe(({userId, status}) => {
+      if (userId === (this.currentUser?.id || this.anonymousId)) {
+        this.currentUserStatus = status;
+      }
+    });
   }
 
   navigateToRegister() {

@@ -32,14 +32,10 @@ let ChatGateway = class ChatGateway {
         client.join(data.channelId);
         const messages = await this.messageService.getChannelMessages(data.channelId);
         const userStatuses = {};
-        const userIds = [...new Set(messages
-                .filter(msg => msg.user?.id)
-                .map(msg => msg.user.id))];
+        const userIds = [...new Set(messages.map(msg => msg.user?.id || msg.anonymousId).filter(Boolean))];
         for (const userId of userIds) {
-            if (userId) {
-                const status = await this.presenceService.getUserStatus(userId);
-                userStatuses[userId] = status;
-            }
+            const status = await this.presenceService.getUserStatus(userId);
+            userStatuses[userId] = status;
         }
         client.emit('channelHistory', {
             messages: messages.reverse(),
@@ -71,10 +67,8 @@ let ChatGateway = class ChatGateway {
         this.server.to(data.channelId).emit('newMessage', savedMessage);
     }
     async handlePresenceUpdate(data) {
-        if (!data.userId.startsWith('anonymous-')) {
-            await this.presenceService.updatePresence(data.userId);
-            this.broadcastUserStatus(data.userId);
-        }
+        await this.presenceService.updatePresence(data.userId);
+        await this.broadcastUserStatus(data.userId);
     }
     async broadcastUserStatus(userId) {
         const status = await this.presenceService.getUserStatus(userId);
