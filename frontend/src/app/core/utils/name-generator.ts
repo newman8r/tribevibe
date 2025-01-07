@@ -83,6 +83,7 @@ export function generateNickname(seed: string): string {
     case 3:
       return `${verbs[verbIndex]}${capitalize(adjectives[adjIndex])}`;
   }
+  return `${adjectives[adjIndex]}${capitalize(nouns[nounIndex])}`;
 }
 
 function capitalize(str: string): string {

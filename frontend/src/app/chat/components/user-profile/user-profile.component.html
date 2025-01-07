@@ -19,9 +19,15 @@
     <p *ngIf="!currentUser" class="hint-text">Create an account to change your username</p>
   </div>
 
-  <button *ngIf="!currentUser" 
-          class="register-btn" 
-          (click)="navigateToRegister()">
-    Register Account
-  </button>
+  <ng-container *ngIf="currentUser; else registerButton">
+    <button class="logout-btn" (click)="logout()">
+      Logout
+    </button>
+  </ng-container>
+  
+  <ng-template #registerButton>
+    <button class="register-btn" (click)="navigateToRegister()">
+      Register Account
+    </button>
+  </ng-template>
 </div> 

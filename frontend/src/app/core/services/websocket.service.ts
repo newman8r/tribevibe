@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { Message } from '../interfaces/message.interface';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,19 @@ export class WebsocketService {
   private socket: Socket;
   private readonly SOCKET_URL = 'http://localhost:3000';
 
-  constructor() {
-    this.socket = io(this.SOCKET_URL);
+  constructor(private authService: AuthService) {
+    this.socket = io(this.SOCKET_URL, {
+      auth: {
+        token: this.authService.getSessionToken()
+      }
+    });
+
+    // Update token when it changes
+    this.authService.sessionToken$.subscribe(token => {
+      if (this.socket) {
+        this.socket.auth = { token };
+      }
+    });
   }
 
   joinChannel(userId: string, channelId: string): void {

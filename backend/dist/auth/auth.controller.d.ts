@@ -5,7 +5,7 @@ export declare class AuthController {
     signUp(body: {
         email: string;
         password: string;
-        ticketId: string;
+        ticketId?: string;
     }): Promise<any>;
     signIn(body: {
         email: string;

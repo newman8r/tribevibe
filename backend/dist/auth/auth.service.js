@@ -65,7 +65,11 @@ let AuthService = class AuthService {
         if (error) {
             throw new Error(error.message);
         }
-        return data.user;
+        const user = await this.userService.findByEmail(email);
+        return {
+            user,
+            session: data.session
+        };
     }
     async validateToken(token) {
         const { data, error } = await this.supabase.auth.getUser(token);

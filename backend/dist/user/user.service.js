@@ -22,14 +22,32 @@ let UserService = class UserService {
         this.userRepository = userRepository;
     }
     async create(userData) {
-        const newUser = this.userRepository.create(userData);
-        return this.userRepository.save(newUser);
-    }
-    async findAll() {
-        return this.userRepository.find();
+        const user = this.userRepository.create(userData);
+        return await this.userRepository.save(user);
     }
     async findOne(id) {
-        return this.userRepository.findOneBy({ id });
+        return await this.userRepository.findOne({
+            where: { id },
+            relations: ['channels']
+        });
+    }
+    async findByEmail(email) {
+        return await this.userRepository.findOne({
+            where: { username: email.split('@')[0] },
+            relations: ['channels']
+        });
+    }
+    async findAll() {
+        return await this.userRepository.find({
+            relations: ['channels']
+        });
+    }
+    async update(id, updateData) {
+        await this.userRepository.update(id, updateData);
+        return await this.findOne(id);
+    }
+    async delete(id) {
+        await this.userRepository.delete(id);
     }
 };
 exports.UserService = UserService;

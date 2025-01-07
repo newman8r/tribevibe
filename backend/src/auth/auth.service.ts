@@ -67,7 +67,12 @@ export class AuthService {
       throw new Error(error.message);
     }
 
-    return data.user;
+    const user = await this.userService.findByEmail(email);
+    
+    return {
+      user,
+      session: data.session
+    };
   }
 
   async validateToken(token: string): Promise<any> {

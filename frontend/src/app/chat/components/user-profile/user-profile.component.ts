@@ -54,4 +54,9 @@ export class UserProfileComponent implements OnInit {
   navigateToRegister() {
     this.router.navigate(['/auth']);
   }
+
+  logout() {
+    this.authService.signOut();
+    this.router.navigate(['/auth']);
+  }
 } 

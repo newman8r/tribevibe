@@ -18,14 +18,13 @@
       </div>
 
       <div class="form-group" *ngIf="!isLoginMode">
-        <input type="password" 
-               formControlName="confirmPassword" 
-               placeholder="Confirm Password"
-               [class.error]="authForm.get('confirmPassword')?.invalid && authForm.get('confirmPassword')?.touched">
+        <input type="text" 
+               formControlName="ticketId" 
+               placeholder="Ticket ID (Optional)">
       </div>
 
       <button type="submit" 
-              [disabled]="authForm.invalid || (authForm.get('confirmPassword')?.errors?.['passwordMismatch'] && !isLoginMode)" 
+              [disabled]="authForm.invalid" 
               class="submit-btn">
         {{ isLoginMode ? 'Login' : 'Register' }}
       </button>

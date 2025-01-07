@@ -20,7 +20,7 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     async signUp(body) {
-        return this.authService.signUp(body.email, body.password, body.ticketId);
+        return this.authService.signUp(body.email, body.password, body.ticketId || '');
     }
     async signIn(body) {
         return this.authService.signIn(body.email, body.password);
