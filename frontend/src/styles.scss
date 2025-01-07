@@ -77,3 +77,12 @@ h1, h2, h3, h4, h5, h6 {
 .pulse {
   animation: pulse 2s infinite;
 }
+
+body.loading .auth-container {
+  visibility: hidden;
+}
+
+.auth-container {
+  visibility: visible;
+  transition: visibility 0s;
+}

@@ -93,4 +93,11 @@ h2 {
       text-decoration: underline;
     }
   }
+}
+
+.loading-state {
+  min-height: 300px; // Adjust this value to match your form's approximate height
+  display: flex;
+  align-items: center;
+  justify-content: center;
 } 

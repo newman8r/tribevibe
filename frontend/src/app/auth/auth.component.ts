@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 
@@ -9,7 +9,7 @@ import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angula
   imports: [CommonModule, ReactiveFormsModule],
   standalone: true
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
   isLoginMode = true;
   authForm: FormGroup;
 
@@ -19,6 +19,16 @@ export class AuthComponent {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['']
     });
+  }
+
+  ngOnInit() {
+    // Add loading class when component initializes
+    document.body.classList.add('loading');
+
+    // Remove loading class after a small delay to ensure styles are applied
+    setTimeout(() => {
+      document.body.classList.remove('loading');
+    }, 100);
   }
 
   toggleMode() {

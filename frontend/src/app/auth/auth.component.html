@@ -1,6 +1,5 @@
 <div class="auth-container">
-
-  <div class="auth-card">
+  <div class="auth-card" *ngIf="authForm; else loading">
     <h2 class="gradient-text">{{ isLoginMode ? 'Login' : 'Register' }}</h2>
     
     <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
@@ -37,4 +36,10 @@
       </span>
     </p>
   </div>
-</div> 
+</div>
+
+<ng-template #loading>
+  <div class="auth-card loading-state">
+    <!-- You can add a loading spinner here if desired -->
+  </div>
+</ng-template> 
