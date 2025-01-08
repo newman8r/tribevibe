@@ -154,6 +154,7 @@
           <div class="message-content">
             <div class="message-header">
               <span class="username">
+                <span class="status-dot" [class]="getUserStatus(reply)"></span>
                 <span class="anon-badge" *ngIf="reply.anonymousId">
                   <span class="anon-text">anon</span>
                 </span>
