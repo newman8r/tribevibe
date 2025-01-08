@@ -34,6 +34,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   // Thread-related properties
   activeThread: Message | null = null;
   threadReplyText = '';
+  threadReplies: Message[] = [];
+  @ViewChild('threadContent') private threadContent!: ElementRef;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -125,6 +127,40 @@ this.websocketService.updatePresence(userId);
 setInterval(() => {
   this.websocketService.updatePresence(userId);
 }, 15000);
+
+    // Subscribe to thread history
+    this.subscriptions.push(
+      this.websocketService.onThreadHistory().subscribe(message => {
+        // Preserve the parent message data but update the thread/replies
+        if (this.activeThread) {
+          this.activeThread = {
+            ...this.activeThread,
+            thread: message.thread
+          };
+        }
+        if (message.thread?.replies) {
+          this.threadReplies = message.thread.replies;
+          this.scrollThreadToBottom();
+        }
+      })
+    );
+
+    // Subscribe to thread updates
+    this.subscriptions.push(
+      this.websocketService.onThreadUpdate().subscribe(message => {
+        // Preserve the parent message data but update the thread/replies
+        if (this.activeThread) {
+          this.activeThread = {
+            ...this.activeThread,
+            thread: message.thread
+          };
+        }
+        if (message.thread?.replies) {
+          this.threadReplies = message.thread.replies;
+          this.scrollThreadToBottom();
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -166,10 +202,23 @@ setInterval(() => {
 
   // Helper method to get consistent avatar URL
   getAvatarUrl(message: Message): string {
+    // For registered users, use their avatar
     if (message.user?.avatarUrl) {
       return message.user.avatarUrl;
     }
-    return message.avatarUrl || `https://api.dicebear.com/7.x/identicon/svg?seed=${message.anonymousId}`;
+    
+    // For anonymous users, generate an avatar
+    if (message.anonymousId) {
+      return `https://api.dicebear.com/7.x/identicon/svg?seed=${message.anonymousId}`;
+    }
+
+    // If message has a direct avatarUrl property, use that
+    if (message.avatarUrl) {
+      return message.avatarUrl;
+    }
+
+    // Fallback to generated avatar using message ID
+    return `https://api.dicebear.com/7.x/identicon/svg?seed=${message.id}`;
   }
 
   ngAfterViewInit() {
@@ -269,7 +318,16 @@ setInterval(() => {
   }
 
   openThread(message: Message) {
-    this.activeThread = message;
+    // Create a deep copy of the message to preserve its data
+    this.activeThread = {
+      ...message,
+      user: message.user ? { ...message.user } : undefined,
+      reactions: [...(message.reactions || [])],
+      channel: { ...message.channel }
+    };
+    this.threadReplies = [];
+    this.websocketService.joinThread(message.id);
+    
     // Add animation class after a brief delay to ensure DOM is ready
     requestAnimationFrame(() => {
       const threadPanel = document.querySelector('.thread-panel');
@@ -280,20 +338,43 @@ setInterval(() => {
   }
 
   closeThread() {
+    if (this.activeThread) {
+      this.websocketService.leaveThread(this.activeThread.id);
+    }
+
     const threadPanel = document.querySelector('.thread-panel');
     if (threadPanel) {
       threadPanel.classList.add('closing');
       // Wait for animation to complete before removing the thread
       setTimeout(() => {
         this.activeThread = null;
+        this.threadReplies = [];
         threadPanel.classList.remove('closing', 'animating');
       }, 300); // Match this with CSS animation duration
     }
   }
 
   sendThreadReply() {
-    // Will be implemented in the next step
-    console.log('Sending thread reply:', this.threadReplyText);
-    this.threadReplyText = '';
+    if (this.threadReplyText.trim() && this.activeThread) {
+      const currentUser = this.authService.getCurrentUser();
+      const userId = currentUser?.id || this.anonymousId;
+      
+      this.websocketService.sendThreadReply(
+        this.activeThread.id,
+        userId,
+        this.threadReplyText.trim()
+      );
+      
+      this.threadReplyText = '';
+    }
+  }
+
+  private scrollThreadToBottom() {
+    setTimeout(() => {
+      if (this.threadContent) {
+        const element = this.threadContent.nativeElement;
+        element.scrollTop = element.scrollHeight;
+      }
+    });
   }
 } 

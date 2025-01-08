@@ -15,7 +15,8 @@ export class WebsocketService {
     this.socket = io(this.SOCKET_URL, {
       auth: {
         token: this.authService.getSessionToken()
-      }
+      },
+      transports: ['websocket', 'polling']
     });
 
     // Update token when it changes
@@ -77,6 +78,35 @@ export class WebsocketService {
   onMessageReactionUpdate(): Observable<Message> {
     return new Observable(observer => {
       this.socket.on('messageReactionUpdate', message => observer.next(message));
+    });
+  }
+
+  // Thread-related methods
+  joinThread(messageId: string) {
+    this.socket.emit('joinThread', { messageId });
+  }
+
+  leaveThread(messageId: string) {
+    this.socket.emit('leaveThread', { messageId });
+  }
+
+  sendThreadReply(parentMessageId: string, userId: string, content: string) {
+    this.socket.emit('sendThreadReply', { parentMessageId, userId, content });
+  }
+
+  onThreadHistory(): Observable<Message> {
+    return new Observable(observer => {
+      this.socket.on('threadHistory', (message: Message) => {
+        observer.next(message);
+      });
+    });
+  }
+
+  onThreadUpdate(): Observable<Message> {
+    return new Observable(observer => {
+      this.socket.on('threadUpdate', (message: Message) => {
+        observer.next(message);
+      });
     });
   }
 } 

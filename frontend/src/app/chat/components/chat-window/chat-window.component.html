@@ -29,7 +29,7 @@
            (mouseenter)="onMessageMouseEnter(message.id)"
            (mouseleave)="onMessageMouseLeave()">
         <div class="message-avatar">
-          <img [src]="message.user?.avatarUrl || message.avatarUrl" [alt]="message.username">
+          <img [src]="getAvatarUrl(message)" [alt]="message.username">
         </div>
         <div class="message-content">
           <div class="message-header">
@@ -127,21 +127,43 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-    <div class="thread-content">
+    <div class="thread-content" #threadContent>
       <div class="parent-message" *ngIf="activeThread">
         <div class="message-avatar">
-          <img [src]="activeThread.user?.avatarUrl || activeThread.avatarUrl" [alt]="activeThread.username">
+          <img [src]="getAvatarUrl(activeThread)" [alt]="activeThread.username">
         </div>
         <div class="message-content">
           <div class="message-header">
-            <span class="username">{{ activeThread.user?.username || activeThread.username }}</span>
+            <span class="username">
+              <span class="status-dot" [class]="getUserStatus(activeThread)"></span>
+              <span class="anon-badge" *ngIf="activeThread.anonymousId">
+                <span class="anon-text">anon</span>
+              </span>
+              {{ activeThread.user?.username || activeThread.username }}
+            </span>
             <span class="timestamp">{{ activeThread.createdAt | date:'shortTime' }}</span>
           </div>
           <div class="message-text">{{ activeThread.content }}</div>
         </div>
       </div>
       <div class="thread-replies">
-        <!-- Replies will be implemented in the next step -->
+        <div class="message" *ngFor="let reply of threadReplies">
+          <div class="message-avatar">
+            <img [src]="getAvatarUrl(reply)" [alt]="reply.username">
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="username">
+                <span class="anon-badge" *ngIf="reply.anonymousId">
+                  <span class="anon-text">anon</span>
+                </span>
+                {{ reply.user?.username || reply.username }}
+              </span>
+              <span class="timestamp">{{ reply.createdAt | date:'shortTime' }}</span>
+            </div>
+            <div class="message-text">{{ reply.content }}</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="thread-editor">

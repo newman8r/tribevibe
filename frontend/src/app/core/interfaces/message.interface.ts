@@ -1,6 +1,12 @@
 import { User } from './user.interface';
 import { Channel } from './channel.interface';
 
+export interface Thread {
+  id: string;
+  parentMessage: Message;
+  replies: Message[];
+}
+
 export interface Reaction {
   id: string;
   emoji: string;
@@ -18,4 +24,10 @@ export interface Message {
   avatarUrl?: string;
   channel: Channel;
   reactions: Reaction[];
+  thread?: {
+    id: string;
+    replies: Message[];
+  };
+  threadParent?: Thread;
+  replyCount?: number;
 } 
