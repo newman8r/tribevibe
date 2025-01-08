@@ -2,6 +2,9 @@
 
 **TribeVibe** is a fun communication and information tool for live music events and festivals that connects attendees, organizers, and artists.
 
+<img src="docs/assets/frontend-screenshot.png" alt="TribeVibe Frontend Screenshot" width="800"/>
+
+
 ## Tech Stack
 - **Frontend**: Angular
 - **Backend**: NestJS
