@@ -5,6 +5,7 @@ import { Message } from '../entities/message.entity';
 import { Channel } from '../entities/channel.entity';
 import { User } from '../entities/user.entity';
 import { Reaction } from '../entities/reaction.entity';
+import { Thread } from '../entities/thread.entity';
 
 @Injectable()
 export class MessageService {
@@ -13,6 +14,8 @@ export class MessageService {
     private messageRepository: Repository<Message>,
     @InjectRepository(Reaction)
     private reactionRepository: Repository<Reaction>,
+    @InjectRepository(Thread)
+    private threadRepository: Repository<Thread>,
   ) {}
 
   async create(data: {
@@ -84,5 +87,75 @@ export class MessageService {
     });
 
     return this.findMessageWithReactions(messageId);
+  }
+
+  async createThreadReply(data: {
+    content: string;
+    parentMessageId: string;
+    user?: User;
+    anonymousId?: string;
+    username: string;
+  }): Promise<Message> {
+    const parentMessage = await this.messageRepository.findOne({
+      where: { id: data.parentMessageId },
+      relations: ['thread']
+    });
+
+    if (!parentMessage) {
+      throw new Error('Parent message not found');
+    }
+
+    let thread = parentMessage.thread;
+    if (!thread) {
+      // Create new thread if it doesn't exist
+      thread = this.threadRepository.create({
+        parentMessage
+      });
+      thread = await this.threadRepository.save(thread);
+    }
+
+    const reply = this.messageRepository.create({
+      content: data.content,
+      user: data.user,
+      anonymousId: data.anonymousId,
+      username: data.username,
+      threadParent: thread
+    });
+
+    const savedReply = await this.messageRepository.save(reply);
+
+    // Update reply count
+    await this.messageRepository.update(
+      { id: parentMessage.id },
+      { replyCount: () => '"replyCount" + 1' }
+    );
+
+    return savedReply;
+  }
+
+  async getThreadReplies(messageId: string): Promise<Message[]> {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['thread', 'thread.replies', 'thread.replies.user']
+    });
+
+    if (!message || !message.thread) {
+      return [];
+    }
+
+    return message.thread.replies;
+  }
+
+  async findMessageWithThread(messageId: string): Promise<Message> {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['thread', 'thread.replies', 'thread.replies.user', 'reactions', 'reactions.user']
+    });
+
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    return message;
   }
 } 

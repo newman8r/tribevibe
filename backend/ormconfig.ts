@@ -6,6 +6,7 @@ import { Channel } from './src/entities/channel.entity';
 import { Message } from './src/entities/message.entity';
 import { UserPresence } from './src/entities/user-presence.entity';
 import { Reaction } from './src/entities/reaction.entity';
+import { Thread } from './src/entities/thread.entity';
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const dataSource = new DataSource({
   username: configService.get('DB_USERNAME'),
   password: configService.get('DB_PASSWORD'),
   database: configService.get('DB_NAME'),
-  entities: [User, Channel, Message, UserPresence, Reaction],
+  entities: [User, Channel, Message, UserPresence, Reaction, Thread],
   synchronize: true,
   dropSchema: true,
   logging: true

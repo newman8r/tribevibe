@@ -162,6 +162,78 @@ export class ChatGateway {
     }
   }
 
+  @SubscribeMessage('joinThread')
+  async handleJoinThread(
+    @MessageBody() data: { messageId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const message = await this.messageService.findMessageWithThread(data.messageId);
+    if (!message) return;
+
+    // Join the thread's room
+    const threadRoom = `thread:${data.messageId}`;
+    client.join(threadRoom);
+
+    // Send thread history
+    client.emit('threadHistory', message);
+  }
+
+  @SubscribeMessage('sendThreadReply')
+  async handleThreadReply(
+    @MessageBody() data: { 
+      parentMessageId: string;
+      userId: string;
+      content: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    let replyData: any = {
+      content: data.content,
+      parentMessageId: data.parentMessageId,
+    };
+
+    if (data.userId.startsWith('anonymous-')) {
+      replyData.anonymousId = data.userId;
+      replyData.username = `anon ${this.nameGenerator.generateNickname(data.userId)}`;
+    } else {
+      const user = await this.userService.findOne(data.userId);
+      if (user) {
+        replyData.user = user;
+        replyData.username = user.username;
+      }
+    }
+
+    try {
+      const savedReply = await this.messageService.createThreadReply(replyData);
+      
+      // Get updated message with thread
+      const updatedMessage = await this.messageService.findMessageWithThread(data.parentMessageId);
+      
+      // Emit to thread room
+      const threadRoom = `thread:${data.parentMessageId}`;
+      this.server.to(threadRoom).emit('threadUpdate', updatedMessage);
+      
+      // Also emit message update to channel for reply count update
+      if (updatedMessage.channel) {
+        this.server.to(updatedMessage.channel.id).emit('messageUpdate', {
+          id: updatedMessage.id,
+          replyCount: updatedMessage.replyCount
+        });
+      }
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('leaveThread')
+  async handleLeaveThread(
+    @MessageBody() data: { messageId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const threadRoom = `thread:${data.messageId}`;
+    client.leave(threadRoom);
+  }
+
   private async broadcastUserStatus(userId: string) {
     const status = await this.presenceService.getUserStatus(userId);
     this.server.emit('userStatusUpdate', { userId, status });

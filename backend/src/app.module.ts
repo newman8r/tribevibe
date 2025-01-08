@@ -13,6 +13,7 @@ import { UtilsModule } from './utils/utils.module';
 import { UserPresence } from './entities/user-presence.entity';
 import { Reaction } from './entities/reaction.entity';
 import { PresenceModule } from './presence/presence.module';
+import { Thread } from './entities/thread.entity';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { PresenceModule } from './presence/presence.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, Channel, Message, UserPresence, Reaction],
+        entities: [User, Channel, Message, UserPresence, Reaction, Thread],
         synchronize: true,
         logging: true
       }),

@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 import { Channel } from './channel.entity';
 import { Reaction } from './reaction.entity';
+import { Thread } from './thread.entity';
 
 @Entity()
 export class Message {
@@ -31,5 +32,14 @@ export class Message {
 
   @OneToMany(() => Reaction, reaction => reaction.message, { eager: true })
   reactions: Reaction[];
+
+  @OneToOne(() => Thread, thread => thread.parentMessage, { nullable: true })
+  thread: Thread;
+
+  @ManyToOne(() => Thread, thread => thread.replies, { nullable: true })
+  threadParent: Thread;
+
+  @Column({ nullable: true, default: 0 })
+  replyCount: number;
 }
 
