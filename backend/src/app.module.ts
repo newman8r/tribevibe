@@ -11,6 +11,7 @@ import { Channel } from './entities/channel.entity';
 import { Message } from './entities/message.entity';
 import { UtilsModule } from './utils/utils.module';
 import { UserPresence } from './entities/user-presence.entity';
+import { Reaction } from './entities/reaction.entity';
 import { PresenceModule } from './presence/presence.module';
 
 @Module({
@@ -27,7 +28,7 @@ import { PresenceModule } from './presence/presence.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, Channel, Message, UserPresence],
+        entities: [User, Channel, Message, UserPresence, Reaction],
         synchronize: true,
         logging: true
       }),

@@ -385,4 +385,48 @@
   &.none {
     display: none;
   }
+}
+
+.reactions-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  .existing-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .reaction-badge {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.85em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      background: var(--surface-medium);
+    }
+  }
+}
+
+.emoji-button {
+  &.active {
+    background: var(--primary) !important;
+    color: white;
+  }
 } 

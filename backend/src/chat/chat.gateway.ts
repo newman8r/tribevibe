@@ -112,6 +112,56 @@ export class ChatGateway {
     await this.broadcastUserStatus(data.userId);
   }
 
+  @SubscribeMessage('addReaction')
+  async handleAddReaction(
+    @MessageBody() data: { 
+      messageId: string; 
+      emoji: string;
+      userId: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const isAnonymous = data.userId.startsWith('anonymous-');
+      const updatedMessage = await this.messageService.addReaction(
+        data.messageId,
+        data.emoji,
+        isAnonymous ? undefined : data.userId,
+        isAnonymous ? data.userId : undefined
+      );
+      
+      // Broadcast to all clients in the channel
+      this.server.to(updatedMessage.channel.id).emit('messageReactionUpdate', updatedMessage);
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('removeReaction')
+  async handleRemoveReaction(
+    @MessageBody() data: { 
+      messageId: string; 
+      emoji: string;
+      userId: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const isAnonymous = data.userId.startsWith('anonymous-');
+      const updatedMessage = await this.messageService.removeReaction(
+        data.messageId,
+        data.emoji,
+        isAnonymous ? undefined : data.userId,
+        isAnonymous ? data.userId : undefined
+      );
+      
+      // Broadcast to all clients in the channel
+      this.server.to(updatedMessage.channel.id).emit('messageReactionUpdate', updatedMessage);
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
   private async broadcastUserStatus(userId: string) {
     const status = await this.presenceService.getUserStatus(userId);
     this.server.emit('userStatusUpdate', { userId, status });

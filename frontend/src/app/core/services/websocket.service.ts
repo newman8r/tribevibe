@@ -65,4 +65,18 @@ export class WebsocketService {
   updateManualStatus(userId: string, status: string): void {
     this.socket.emit('updateManualStatus', { userId, status });
   }
+
+  addReaction(messageId: string, emoji: string, userId: string): void {
+    this.socket.emit('addReaction', { messageId, emoji, userId });
+  }
+
+  removeReaction(messageId: string, emoji: string, userId: string): void {
+    this.socket.emit('removeReaction', { messageId, emoji, userId });
+  }
+
+  onMessageReactionUpdate(): Observable<Message> {
+    return new Observable(observer => {
+      this.socket.on('messageReactionUpdate', message => observer.next(message));
+    });
+  }
 } 

@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { Channel } from './channel.entity';
+import { Reaction } from './reaction.entity';
 
 @Entity()
 export class Message {
@@ -27,5 +28,8 @@ export class Message {
 
   @ManyToOne(() => Channel, channel => channel.messages)
   channel: Channel;
+
+  @OneToMany(() => Reaction, reaction => reaction.message, { eager: true })
+  reactions: Reaction[];
 }
 

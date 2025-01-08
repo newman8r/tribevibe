@@ -29,6 +29,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   private viewInitialized = false;
   userStatuses: Map<string, string> = new Map();
   hoveredMessageId: string | null = null;
+  availableEmojis = ['👍', '👎', '🔥', '💯', '❤️', '😄'];
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -84,6 +85,28 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.websocketService.onUserStatusUpdate().subscribe(({userId, status}) => {
         this.userStatuses.set(userId, status);
+      })
+    );
+
+    // Subscribe to reaction updates
+    this.subscriptions.push(
+      this.websocketService.onMessageReactionUpdate().subscribe(updatedMessage => {
+        const index = this.messages.findIndex(m => m.id === updatedMessage.id);
+        if (index !== -1) {
+          // Merge the updated message with the existing one to preserve all properties
+          const existingMessage = this.messages[index];
+          const mergedMessage = {
+            ...existingMessage,
+            reactions: updatedMessage.reactions
+          };
+
+          // Create a new array to trigger change detection
+          this.messages = [
+            ...this.messages.slice(0, index),
+            mergedMessage,
+            ...this.messages.slice(index + 1)
+          ];
+        }
       })
     );
 
@@ -207,5 +230,37 @@ setInterval(() => {
 
   onMessageMouseLeave() {
     this.hoveredMessageId = null;
+  }
+
+  addReaction(message: Message, emoji: string) {
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || this.anonymousId;
+    
+    // Check if user already reacted with this emoji
+    const existingReaction = message.reactions?.find(r => 
+      (userId.startsWith('anonymous-') && r.anonymousId === userId) ||
+      (!userId.startsWith('anonymous-') && r.user?.id === userId)
+    );
+
+    if (existingReaction?.emoji === emoji) {
+      this.websocketService.removeReaction(message.id, emoji, userId);
+    } else {
+      this.websocketService.addReaction(message.id, emoji, userId);
+    }
+  }
+
+  getReactionCount(message: Message, emoji: string): number {
+    return message.reactions?.filter(r => r.emoji === emoji).length || 0;
+  }
+
+  hasUserReacted(message: Message, emoji: string): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || this.anonymousId;
+    
+    return message.reactions?.some(r => 
+      r.emoji === emoji && 
+      ((userId.startsWith('anonymous-') && r.anonymousId === userId) ||
+       (!userId.startsWith('anonymous-') && r.user?.id === userId))
+    ) || false;
   }
 } 

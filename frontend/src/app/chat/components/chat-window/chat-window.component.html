@@ -41,19 +41,33 @@
               {{ message.user?.username || message.username }}
             </span>
             <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
-            <div class="reaction-button">
-              <button class="reaction-trigger" 
-                      [class.visible]="hoveredMessageId === message.id"
-                      (click)="$event.stopPropagation()">
-                <i class="far fa-face-smile"></i>
-              </button>
-              <div class="reaction-menu">
-                <button class="emoji-button">👍</button>
-                <button class="emoji-button">👎</button>
-                <button class="emoji-button">🔥</button>
-                <button class="emoji-button">💯</button>
-                <button class="emoji-button">❤️</button>
-                <button class="emoji-button">😄</button>
+            <div class="reactions-container">
+              <div class="existing-reactions" *ngIf="message.reactions?.length">
+                <ng-container *ngFor="let emoji of availableEmojis">
+                  <button 
+                    class="reaction-badge"
+                    [class.active]="hasUserReacted(message, emoji)"
+                    (click)="addReaction(message, emoji)"
+                    *ngIf="getReactionCount(message, emoji) > 0">
+                    {{ emoji }} {{ getReactionCount(message, emoji) }}
+                  </button>
+                </ng-container>
+              </div>
+              <div class="reaction-button">
+                <button class="reaction-trigger" 
+                        [class.visible]="hoveredMessageId === message.id"
+                        (click)="$event.stopPropagation()">
+                  <i class="far fa-face-smile"></i>
+                </button>
+                <div class="reaction-menu">
+                  <button 
+                    *ngFor="let emoji of availableEmojis"
+                    class="emoji-button"
+                    [class.active]="hasUserReacted(message, emoji)"
+                    (click)="addReaction(message, emoji)">
+                    {{ emoji }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
