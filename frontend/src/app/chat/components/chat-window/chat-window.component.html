@@ -170,7 +170,8 @@
       <textarea 
         class="reply-input" 
         placeholder="Reply in thread..."
-        [(ngModel)]="threadReplyText">
+        [(ngModel)]="threadReplyText"
+        (keydown.enter)="onThreadReplyEnterPress($event)">
       </textarea>
       <button 
         class="send-button" 

@@ -377,4 +377,12 @@ setInterval(() => {
       }
     });
   }
+
+  onThreadReplyEnterPress(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
+    if (!keyboardEvent.shiftKey) {
+      event.preventDefault();
+      this.sendThreadReply();
+    }
+  }
 } 
