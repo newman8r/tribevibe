@@ -40,9 +40,8 @@ exports.AppModule = AppModule = __decorate([
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_NAME'),
                     entities: [user_entity_1.User, channel_entity_1.Channel, message_entity_1.Message, user_presence_entity_1.UserPresence],
-                    synchronize: false,
-                    migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-                    migrationsRun: true,
+                    synchronize: true,
+                    logging: true
                 }),
                 inject: [config_1.ConfigService],
             }),

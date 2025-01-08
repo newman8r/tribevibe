@@ -28,9 +28,8 @@ import { PresenceModule } from './presence/presence.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [User, Channel, Message, UserPresence],
-        synchronize: false, // Disable auto-sync
-        migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-        migrationsRun: true, // Automatically run migrations on startup
+        synchronize: true,
+        logging: true
       }),
       inject: [ConfigService],
     }),

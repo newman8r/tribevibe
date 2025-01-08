@@ -50,7 +50,7 @@ let AuthService = class AuthService {
             ticketId: ticketId,
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${authData.user.id}`,
         });
-        const welcomeChannel = await this.channelService.findOne('cae31388-5a90-4506-98fb-288f34ca0f40');
+        const welcomeChannel = await this.channelService.findOne('2d6bd759-b896-495a-a8b7-fd8a2bf7dba9');
         if (welcomeChannel) {
             await this.channelService.addUserToChannel(welcomeChannel, newUser);
         }
