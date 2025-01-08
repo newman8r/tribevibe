@@ -54,6 +54,7 @@
                     </button>
                   </ng-container>
                 </div>
+
                 <div class="reaction-button">
                   <button class="reaction-trigger" 
                           [class.visible]="hoveredMessageId === message.id"
@@ -70,12 +71,10 @@
                     </button>
                   </div>
                 </div>
-                <button class="reply-button" 
-                        [class.visible]="hoveredMessageId === message.id"
-                        (click)="openThread(message)"
-                        title="Reply in thread">
-                  <i class="fas fa-reply"></i>
-                </button>
+    
+                <div class="reply-count" *ngIf="message.replyCount" (click)="openThread(message)">
+                  <i class="fas fa-reply"></i> {{ message.replyCount }}
+                </div>
               </div>
             </div>
           </div>

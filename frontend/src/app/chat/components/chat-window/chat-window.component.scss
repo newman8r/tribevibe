@@ -395,8 +395,29 @@
 
   .existing-reactions {
     display: flex;
+    gap: 4px;
     flex-wrap: wrap;
-    gap: 0.25rem;
+  }
+
+  .reply-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--bg-hover);
+    }
+
+    i {
+      font-size: 0.9em;
+    }
   }
 
   .reaction-badge {
