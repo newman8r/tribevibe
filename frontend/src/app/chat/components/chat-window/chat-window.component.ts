@@ -30,6 +30,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   userStatuses: Map<string, string> = new Map();
   hoveredMessageId: string | null = null;
   availableEmojis = ['👍', '👎', '🔥', '💯', '❤️', '😄'];
+  
+  // Thread-related properties
+  activeThread: Message | null = null;
+  threadReplyText = '';
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -262,5 +266,34 @@ setInterval(() => {
       ((userId.startsWith('anonymous-') && r.anonymousId === userId) ||
        (!userId.startsWith('anonymous-') && r.user?.id === userId))
     ) || false;
+  }
+
+  openThread(message: Message) {
+    this.activeThread = message;
+    // Add animation class after a brief delay to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const threadPanel = document.querySelector('.thread-panel');
+      if (threadPanel) {
+        threadPanel.classList.add('animating');
+      }
+    });
+  }
+
+  closeThread() {
+    const threadPanel = document.querySelector('.thread-panel');
+    if (threadPanel) {
+      threadPanel.classList.add('closing');
+      // Wait for animation to complete before removing the thread
+      setTimeout(() => {
+        this.activeThread = null;
+        threadPanel.classList.remove('closing', 'animating');
+      }, 300); // Match this with CSS animation duration
+    }
+  }
+
+  sendThreadReply() {
+    // Will be implemented in the next step
+    console.log('Sending thread reply:', this.threadReplyText);
+    this.threadReplyText = '';
   }
 } 

@@ -41,33 +41,41 @@
               {{ message.user?.username || message.username }}
             </span>
             <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
-            <div class="reactions-container">
-              <div class="existing-reactions" *ngIf="message.reactions?.length">
-                <ng-container *ngFor="let emoji of availableEmojis">
-                  <button 
-                    class="reaction-badge"
-                    [class.active]="hasUserReacted(message, emoji)"
-                    (click)="addReaction(message, emoji)"
-                    *ngIf="getReactionCount(message, emoji) > 0">
-                    {{ emoji }} {{ getReactionCount(message, emoji) }}
-                  </button>
-                </ng-container>
-              </div>
-              <div class="reaction-button">
-                <button class="reaction-trigger" 
-                        [class.visible]="hoveredMessageId === message.id"
-                        (click)="$event.stopPropagation()">
-                  <i class="far fa-face-smile"></i>
-                </button>
-                <div class="reaction-menu">
-                  <button 
-                    *ngFor="let emoji of availableEmojis"
-                    class="emoji-button"
-                    [class.active]="hasUserReacted(message, emoji)"
-                    (click)="addReaction(message, emoji)">
-                    {{ emoji }}
-                  </button>
+            <div class="message-actions" [class.visible]="hoveredMessageId === message.id">
+              <div class="reactions-container">
+                <div class="existing-reactions" *ngIf="message.reactions?.length">
+                  <ng-container *ngFor="let emoji of availableEmojis">
+                    <button 
+                      class="reaction-badge"
+                      [class.active]="hasUserReacted(message, emoji)"
+                      (click)="addReaction(message, emoji)"
+                      *ngIf="getReactionCount(message, emoji) > 0">
+                      {{ emoji }} {{ getReactionCount(message, emoji) }}
+                    </button>
+                  </ng-container>
                 </div>
+                <div class="reaction-button">
+                  <button class="reaction-trigger" 
+                          [class.visible]="hoveredMessageId === message.id"
+                          (click)="$event.stopPropagation()">
+                    <i class="far fa-face-smile"></i>
+                  </button>
+                  <div class="reaction-menu">
+                    <button 
+                      *ngFor="let emoji of availableEmojis"
+                      class="emoji-button"
+                      [class.active]="hasUserReacted(message, emoji)"
+                      (click)="addReaction(message, emoji)">
+                      {{ emoji }}
+                    </button>
+                  </div>
+                </div>
+                <button class="reply-button" 
+                        [class.visible]="hoveredMessageId === message.id"
+                        (click)="openThread(message)"
+                        title="Reply in thread">
+                  <i class="fas fa-reply"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -106,6 +114,46 @@
         class="send-button" 
         [disabled]="!messageText.trim()"
         (click)="sendMessage()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Thread Panel -->
+  <div class="thread-panel" [class.open]="activeThread">
+    <div class="thread-header">
+      <div class="thread-title">Thread</div>
+      <button class="close-thread" (click)="closeThread()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="thread-content">
+      <div class="parent-message" *ngIf="activeThread">
+        <div class="message-avatar">
+          <img [src]="activeThread.user?.avatarUrl || activeThread.avatarUrl" [alt]="activeThread.username">
+        </div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="username">{{ activeThread.user?.username || activeThread.username }}</span>
+            <span class="timestamp">{{ activeThread.createdAt | date:'shortTime' }}</span>
+          </div>
+          <div class="message-text">{{ activeThread.content }}</div>
+        </div>
+      </div>
+      <div class="thread-replies">
+        <!-- Replies will be implemented in the next step -->
+      </div>
+    </div>
+    <div class="thread-editor">
+      <textarea 
+        class="reply-input" 
+        placeholder="Reply in thread..."
+        [(ngModel)]="threadReplyText">
+      </textarea>
+      <button 
+        class="send-button" 
+        [disabled]="!threadReplyText.trim()"
+        (click)="sendThreadReply()">
         <i class="fas fa-paper-plane"></i>
       </button>
     </div>
