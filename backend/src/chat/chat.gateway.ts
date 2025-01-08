@@ -130,8 +130,16 @@ export class ChatGateway {
         isAnonymous ? data.userId : undefined
       );
       
-      // Broadcast to all clients in the channel
-      this.server.to(updatedMessage.channel.id).emit('messageReactionUpdate', updatedMessage);
+      // If the message is a thread reply, emit to thread room
+      if (updatedMessage.threadParent) {
+        const threadRoom = `thread:${updatedMessage.threadParent.parentMessage.id}`;
+        this.server.to(threadRoom).emit('threadUpdate', 
+          await this.messageService.findMessageWithThread(updatedMessage.threadParent.parentMessage.id)
+        );
+      } else {
+        // Regular message, broadcast to channel
+        this.server.to(updatedMessage.channel.id).emit('messageReactionUpdate', updatedMessage);
+      }
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -155,8 +163,16 @@ export class ChatGateway {
         isAnonymous ? data.userId : undefined
       );
       
-      // Broadcast to all clients in the channel
-      this.server.to(updatedMessage.channel.id).emit('messageReactionUpdate', updatedMessage);
+      // If the message is a thread reply, emit to thread room
+      if (updatedMessage.threadParent) {
+        const threadRoom = `thread:${updatedMessage.threadParent.parentMessage.id}`;
+        this.server.to(threadRoom).emit('threadUpdate', 
+          await this.messageService.findMessageWithThread(updatedMessage.threadParent.parentMessage.id)
+        );
+      } else {
+        // Regular message, broadcast to channel
+        this.server.to(updatedMessage.channel.id).emit('messageReactionUpdate', updatedMessage);
+      }
     } catch (error) {
       client.emit('error', { message: error.message });
     }

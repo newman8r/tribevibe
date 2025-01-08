@@ -149,7 +149,16 @@ export class MessageService {
   async findMessageWithThread(messageId: string): Promise<Message> {
     const message = await this.messageRepository.findOne({
       where: { id: messageId },
-      relations: ['thread', 'thread.replies', 'thread.replies.user', 'reactions', 'reactions.user']
+      relations: [
+        'thread',
+        'thread.replies',
+        'thread.replies.user',
+        'thread.replies.reactions',
+        'thread.replies.reactions.user',
+        'reactions',
+        'reactions.user',
+        'channel'
+      ]
     });
 
     if (!message) {
