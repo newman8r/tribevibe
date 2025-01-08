@@ -28,6 +28,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   unreadCount = 0;
   private viewInitialized = false;
   userStatuses: Map<string, string> = new Map();
+  hoveredMessageId: string | null = null;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -198,5 +199,13 @@ setInterval(() => {
       return this.userStatuses.get(message.anonymousId) || 'offline';
     }
     return this.userStatuses.get(message.user?.id || '') || 'offline';
+  }
+
+  onMessageMouseEnter(messageId: string) {
+    this.hoveredMessageId = messageId;
+  }
+
+  onMessageMouseLeave() {
+    this.hoveredMessageId = null;
   }
 } 

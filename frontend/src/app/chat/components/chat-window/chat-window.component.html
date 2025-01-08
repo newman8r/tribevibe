@@ -24,7 +24,10 @@
     </div>
     
     <div class="messages-list" *ngIf="messages.length > 0">
-      <div class="message" *ngFor="let message of messages">
+      <div class="message" 
+           *ngFor="let message of messages"
+           (mouseenter)="onMessageMouseEnter(message.id)"
+           (mouseleave)="onMessageMouseLeave()">
         <div class="message-avatar">
           <img [src]="message.user?.avatarUrl || message.avatarUrl" [alt]="message.username">
         </div>
@@ -38,6 +41,21 @@
               {{ message.user?.username || message.username }}
             </span>
             <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
+            <div class="reaction-button">
+              <button class="reaction-trigger" 
+                      [class.visible]="hoveredMessageId === message.id"
+                      (click)="$event.stopPropagation()">
+                <i class="far fa-face-smile"></i>
+              </button>
+              <div class="reaction-menu">
+                <button class="emoji-button">👍</button>
+                <button class="emoji-button">👎</button>
+                <button class="emoji-button">🔥</button>
+                <button class="emoji-button">💯</button>
+                <button class="emoji-button">❤️</button>
+                <button class="emoji-button">😄</button>
+              </div>
+            </div>
           </div>
           <div class="message-text">{{ message.content }}</div>
         </div>

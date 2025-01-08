@@ -204,12 +204,83 @@
           font-size: 0.8rem;
           color: var(--text-muted);
         }
+
+        .reaction-button {
+          position: relative;
+          margin-left: auto;
+          
+          .reaction-trigger {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 0.2s ease;
+            
+            &.visible {
+              opacity: 1;
+            }
+            
+            &:hover {
+              background: var(--surface-light);
+              color: var(--text-primary);
+            }
+          }
+
+          .reaction-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--surface-medium);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px;
+            display: none;
+            gap: 4px;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+            .emoji-button {
+              background: none;
+              border: none;
+              padding: 4px;
+              cursor: pointer;
+              border-radius: 4px;
+              transition: transform 0.2s ease;
+
+              &:hover {
+                transform: scale(1.2);
+                background: var(--surface-light);
+              }
+            }
+          }
+
+          &:hover {
+            .reaction-menu {
+              display: flex;
+            }
+          }
+        }
+
+        &:hover {
+          .reaction-trigger {
+            opacity: 1;
+          }
+        }
       }
 
       .message-text {
         color: var(--primary-light);
         line-height: 1.4;
         word-break: break-word;
+      }
+    }
+
+    &.message:hover {
+      .reaction-trigger {
+        opacity: 1;
       }
     }
   }
