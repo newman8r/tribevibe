@@ -15,7 +15,10 @@ import { UserStatus } from '../core/interfaces/user-status.enum';
 
 @WebSocketGateway({
   cors: {
-    origin: true,  // Allow all origins in development
+    origin: [
+      'http://localhost:4200',
+      'http://23.23.150.233'
+    ],
     methods: ['GET', 'POST'],
     credentials: true,
     allowedHeaders: ['my-custom-header'],
