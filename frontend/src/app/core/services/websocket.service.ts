@@ -31,9 +31,9 @@ export class WebsocketService {
     this.socket.emit('joinChannel', { userId, channelId });
   }
 
-  onJoinedChannel(): Observable<{ channelId: string }> {
+  onJoinedChannel(): Observable<{ channelId: string; userId: string }> {
     return new Observable(observer => {
-      this.socket.on('joinedChannel', data => observer.next(data));
+      this.socket.on('joinedChannel', (data: { channelId: string; userId: string }) => observer.next(data));
     });
   }
 
@@ -47,15 +47,17 @@ export class WebsocketService {
     });
   }
 
-  onChannelHistory(): Observable<{messages: Message[], userStatuses: {[key: string]: string}}> {
+  onChannelHistory(): Observable<{ messages: Message[]; userStatuses: { [key: string]: string } }> {
     return new Observable(observer => {
-      this.socket.on('channelHistory', data => observer.next(data));
+      this.socket.on('channelHistory', (data: { messages: Message[]; userStatuses: { [key: string]: string } }) => {
+        observer.next(data);
+      });
     });
   }
 
-  onUserStatusUpdate(): Observable<{userId: string, status: string}> {
+  onUserStatusUpdate(): Observable<{ userId: string; status: string }> {
     return new Observable(observer => {
-      this.socket.on('userStatusUpdate', status => observer.next(status));
+      this.socket.on('userStatusUpdate', (status: { userId: string; status: string }) => observer.next(status));
     });
   }
 
