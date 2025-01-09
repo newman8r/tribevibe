@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ChannelStateService } from '../../../core/services/channel-state.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DirectMessageService } from '../../../core/services/direct-message.service';
 import { Channel } from '../../../core/interfaces/channel.interface';
 import { Message } from '../../../core/interfaces/message.interface';
+import { User } from '../../../core/interfaces/user.interface';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -30,6 +32,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   userStatuses: Map<string, string> = new Map();
   hoveredMessageId: string | null = null;
   availableEmojis = ['👍', '👎', '🔥', '💯', '❤️', '😄'];
+  users: User[] = [];
   
   // Thread-related properties
   activeThread: Message | null = null;
@@ -37,10 +40,18 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   threadReplies: Message[] = [];
   @ViewChild('threadContent') private threadContent!: ElementRef;
 
+  // Direct Message properties
+  activeDMUser: User | null = null;
+  directMessages: Message[] = [];
+  dmMessageText = '';
+  @ViewChild('dmContent') private dmContent!: ElementRef;
+  private currentDMConversationId: string | null = null;
+
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
-    private authService: AuthService
+    private authService: AuthService,
+    private directMessageService: DirectMessageService
   ) {
     // Get or create anonymous ID
     this.anonymousId = localStorage.getItem('anonymousId') || 
@@ -161,6 +172,41 @@ setInterval(() => {
         }
       })
     );
+
+    // Subscribe to user list updates
+    this.subscriptions.push(
+      this.websocketService.onUserList().subscribe(users => {
+        this.users = users;
+      })
+    );
+
+    // Subscribe to direct message history
+    this.subscriptions.push(
+      this.websocketService.onDirectMessageHistory().subscribe(({conversation, messages, userStatuses}) => {
+        this.directMessages = messages;
+        // Update user statuses
+        Object.entries(userStatuses).forEach(([userId, status]) => {
+          this.userStatuses.set(userId, status);
+        });
+        this.currentDMConversationId = conversation.id;
+        this.scrollDMToBottom(true);
+      })
+    );
+
+    // Subscribe to new direct messages
+    this.subscriptions.push(
+      this.websocketService.onNewDirectMessage().subscribe(message => {
+        this.directMessages.push(message);
+        this.scrollDMToBottom();
+      })
+    );
+
+    // Subscribe to direct message requests
+    this.subscriptions.push(
+      this.directMessageService.openDM$.subscribe(userId => {
+        this.openDirectMessage(userId);
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -271,10 +317,10 @@ setInterval(() => {
   }
 
   getUserStatus(message: Message): string {
-    if (message.anonymousId) {
-      return this.userStatuses.get(message.anonymousId) || 'offline';
+    if (message.user?.id) {
+      return this.userStatuses.get(message.user.id) || 'offline';
     }
-    return this.userStatuses.get(message.user?.id || '') || 'offline';
+    return message.anonymousId ? 'none' : 'offline';
   }
 
   onMessageMouseEnter(messageId: string) {
@@ -384,5 +430,91 @@ setInterval(() => {
       event.preventDefault();
       this.sendThreadReply();
     }
+  }
+
+  openDirectMessage(userId: string | undefined) {
+    if (!userId || userId.startsWith('anonymous-')) return;
+    
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    // Leave current DM conversation if any
+    if (this.currentDMConversationId) {
+      this.websocketService.leaveDirectMessage(this.currentDMConversationId);
+    }
+
+    // Start new DM conversation
+    this.websocketService.startDirectMessage(currentUser.id, userId);
+    
+    // Find and set the active user
+    const targetUser = this.users.find(u => u.id === userId);
+    if (targetUser) {
+      this.activeDMUser = targetUser;
+      
+      // Add animation class after a brief delay to ensure DOM is ready
+      requestAnimationFrame(() => {
+        const dmPanel = document.querySelector('.direct-message-panel');
+        if (dmPanel) {
+          dmPanel.classList.add('animating');
+        }
+      });
+    }
+  }
+
+  closeDirectMessage() {
+    if (this.currentDMConversationId) {
+      this.websocketService.leaveDirectMessage(this.currentDMConversationId);
+    }
+
+    const dmPanel = document.querySelector('.direct-message-panel');
+    if (dmPanel) {
+      dmPanel.classList.add('closing');
+      // Wait for animation to complete before clearing data
+      setTimeout(() => {
+        this.activeDMUser = null;
+        this.directMessages = [];
+        this.currentDMConversationId = null;
+        this.dmMessageText = '';
+        dmPanel.classList.remove('closing', 'animating');
+      }, 300); // Match this with CSS animation duration
+    }
+  }
+
+  onDMEnterPress(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
+    if (!keyboardEvent.shiftKey) {
+      event.preventDefault();
+      this.sendDirectMessage();
+    }
+  }
+
+  sendDirectMessage() {
+    if (this.dmMessageText.trim() && this.currentDMConversationId && this.activeDMUser) {
+      const currentUser = this.authService.getCurrentUser();
+      if (!currentUser) return;
+      
+      this.websocketService.sendDirectMessage(
+        currentUser.id,
+        this.currentDMConversationId,
+        this.dmMessageText.trim()
+      );
+      
+      this.dmMessageText = '';
+      this.scrollDMToBottom();
+    }
+  }
+
+  getDMUserStatus(): string {
+    if (!this.activeDMUser) return 'offline';
+    return this.userStatuses.get(this.activeDMUser.id) || 'offline';
+  }
+
+  private scrollDMToBottom(force = false) {
+    setTimeout(() => {
+      if (this.dmContent) {
+        const element = this.dmContent.nativeElement;
+        element.scrollTop = element.scrollHeight;
+      }
+    });
   }
 } 

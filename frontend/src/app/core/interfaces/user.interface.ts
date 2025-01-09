@@ -2,8 +2,8 @@ import { Channel } from './channel.interface';
 
 export interface User {
   id: string;
+  email: string;
   username: string;
-  ticketId: string;
   avatarUrl: string;
-  channels: Channel[];
+  status?: string;
 } 

@@ -9,6 +9,7 @@ import { ChannelModule } from '../channel/channel.module';
   imports: [ConfigModule, UserModule, ChannelModule],
   providers: [AuthService],
   controllers: [AuthController],
+  exports: [AuthService]
 })
 export class AuthModule {}
 

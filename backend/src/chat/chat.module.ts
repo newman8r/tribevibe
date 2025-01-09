@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 import { PresenceModule } from '../presence/presence.module';
 import { WsGuard } from './ws.guard';
 import { NameGenerator } from '../utils/name-generator';
+import { DirectMessageModule } from '../direct-message/direct-message.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { NameGenerator } from '../utils/name-generator';
     ChannelModule,
     MessageModule,
     AuthModule,
-    PresenceModule
+    PresenceModule,
+    DirectMessageModule
   ],
   providers: [
     ChatGateway,

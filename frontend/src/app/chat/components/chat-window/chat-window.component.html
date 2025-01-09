@@ -33,7 +33,7 @@
         </div>
         <div class="message-content">
           <div class="message-header">
-            <span class="username">
+            <span class="username" (click)="message.user?.id && openDirectMessage(message.user?.id)">
               <span class="status-dot" [class]="getUserStatus(message)"></span>
               <span class="anon-badge" *ngIf="message.anonymousId">
                 <span class="anon-text">anon</span>
@@ -133,7 +133,7 @@
         </div>
         <div class="message-content">
           <div class="message-header">
-            <span class="username">
+            <span class="username" (click)="activeThread.user?.id && openDirectMessage(activeThread.user?.id)">
               <span class="status-dot" [class]="getUserStatus(activeThread)"></span>
               <span class="anon-badge" *ngIf="activeThread.anonymousId">
                 <span class="anon-text">anon</span>
@@ -152,7 +152,7 @@
           </div>
           <div class="message-content">
             <div class="message-header">
-              <span class="username">
+              <span class="username" (click)="reply.user?.id && openDirectMessage(reply.user?.id)">
                 <span class="status-dot" [class]="getUserStatus(reply)"></span>
                 <span class="anon-badge" *ngIf="reply.anonymousId">
                   <span class="anon-text">anon</span>
@@ -177,6 +177,58 @@
         class="send-button" 
         [disabled]="!threadReplyText.trim()"
         (click)="sendThreadReply()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Direct Message Panel -->
+  <div class="direct-message-panel" [class.open]="activeDMUser">
+    <div class="dm-header">
+      <div class="dm-title">
+        <span class="status-dot" [class]="getDMUserStatus()"></span>
+        {{ activeDMUser?.username || 'Direct Message' }}
+      </div>
+      <button class="close-dm" (click)="closeDirectMessage()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="dm-content" #dmContent>
+      <div class="empty-state" *ngIf="directMessages.length === 0">
+        <i class="fas fa-paper-plane"></i>
+        <h3 class="gradient-text-blue">No messages yet ✨</h3>
+        <p>Start a conversation with {{ activeDMUser?.username }}!</p>
+      </div>
+      
+      <div class="messages-list" *ngIf="directMessages.length > 0">
+        <div class="message" *ngFor="let message of directMessages">
+          <div class="message-avatar">
+            <img [src]="getAvatarUrl(message)" [alt]="message.username">
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="username">
+                <span class="status-dot" [class]="getUserStatus(message)"></span>
+                {{ message.user?.username || message.username }}
+              </span>
+              <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
+            </div>
+            <div class="message-text">{{ message.content }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dm-editor">
+      <textarea 
+        class="dm-input" 
+        placeholder="Message {{ activeDMUser?.username }}..."
+        [(ngModel)]="dmMessageText"
+        (keydown.enter)="onDMEnterPress($event)">
+      </textarea>
+      <button 
+        class="send-button" 
+        [disabled]="!dmMessageText.trim()"
+        (click)="sendDirectMessage()">
         <i class="fas fa-paper-plane"></i>
       </button>
     </div>

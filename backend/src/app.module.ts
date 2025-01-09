@@ -5,7 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ChannelModule } from './channel/channel.module';
 import { MessageModule } from './message/message.module';
-import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
 import { User } from './entities/user.entity';
 import { Channel } from './entities/channel.entity';
 import { Message } from './entities/message.entity';
@@ -14,6 +14,8 @@ import { UserPresence } from './entities/user-presence.entity';
 import { Reaction } from './entities/reaction.entity';
 import { PresenceModule } from './presence/presence.module';
 import { Thread } from './entities/thread.entity';
+import { DirectMessageModule } from './direct-message/direct-message.module';
+import { DirectMessageConversation } from './entities/direct-message-conversation.entity';
 
 @Module({
   imports: [
@@ -41,8 +43,9 @@ import { Thread } from './entities/thread.entity';
     MessageModule,
     UtilsModule,
     PresenceModule,
+    DirectMessageModule,
+    ChatModule
   ],
-  providers: [ChatGateway],
 })
 export class AppModule {}
 

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebsocketService } from '../../../core/services/websocket.service';
+import { DirectMessageService } from '../../../core/services/direct-message.service';
 import { User } from '../../../core/interfaces/user.interface';
 import { UserStatus } from '../../../core/interfaces/user-status.enum';
 import { Subscription } from 'rxjs';
@@ -29,7 +30,10 @@ export class UserListComponent implements OnInit, OnDestroy {
   
   private subscriptions: Subscription[] = [];
 
-  constructor(private websocketService: WebsocketService) {}
+  constructor(
+    private websocketService: WebsocketService,
+    private directMessageService: DirectMessageService
+  ) {}
 
   ngOnInit() {
     this.websocketService.getUserList();
@@ -73,6 +77,10 @@ export class UserListComponent implements OnInit, OnDestroy {
     Object.values(this.groupedUsers).forEach(group => {
       group.sort((a, b) => a.username.localeCompare(b.username));
     });
+  }
+
+  openDirectMessage(userId: string) {
+    this.directMessageService.openDirectMessage(userId);
   }
 
   ngOnDestroy() {

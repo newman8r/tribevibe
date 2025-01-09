@@ -12,6 +12,7 @@ import { MessageService } from '../message/message.service';
 import { NameGenerator } from '../utils/name-generator';
 import { PresenceService } from '../presence/presence.service';
 import { UserStatus } from '../core/interfaces/user-status.enum';
+import { DirectMessageService } from '../direct-message/direct-message.service';
 
 @WebSocketGateway({
   cors: {
@@ -37,6 +38,7 @@ export class ChatGateway {
     private messageService: MessageService,
     private nameGenerator: NameGenerator,
     private presenceService: PresenceService,
+    private directMessageService: DirectMessageService,
   ) {}
 
   @SubscribeMessage('joinChannel')
@@ -268,6 +270,107 @@ export class ChatGateway {
     });
     
     this.server.emit('userList', usersWithStatus);
+  }
+
+  @SubscribeMessage('startDirectMessage')
+  async handleStartDirectMessage(
+    @MessageBody() data: { userId: string; otherUserId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const conversation = await this.directMessageService.findOrCreateConversation(
+        data.userId,
+        data.otherUserId
+      );
+
+      // Join the DM room
+      const dmRoom = `dm:${conversation.id}`;
+      client.join(dmRoom);
+
+      // Get messages
+      const messages = await this.directMessageService.getConversationMessages(conversation.id);
+      const userStatuses: { [key: string]: string } = {};
+
+      // Get status for each user
+      const user1Status = await this.presenceService.getUserStatus(conversation.user1.id);
+      const user2Status = await this.presenceService.getUserStatus(conversation.user2.id);
+      userStatuses[conversation.user1.id] = user1Status;
+      userStatuses[conversation.user2.id] = user2Status;
+
+      // Send conversation data and messages
+      client.emit('directMessageHistory', {
+        conversation,
+        messages: messages.reverse(),
+        userStatuses
+      });
+
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('sendDirectMessage')
+  async handleDirectMessage(
+    @MessageBody() data: { 
+      userId: string;
+      conversationId: string;
+      content: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const user = await this.userService.findOne(data.userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const savedMessage = await this.directMessageService.createMessage({
+        content: data.content,
+        conversationId: data.conversationId,
+        user
+      });
+
+      // Emit to the DM room
+      const dmRoom = `dm:${data.conversationId}`;
+      this.server.to(dmRoom).emit('newDirectMessage', savedMessage);
+
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('getUserConversations')
+  async handleGetUserConversations(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const conversations = await this.directMessageService.getUserConversations(data.userId);
+      
+      // Get statuses for all users in conversations
+      const userStatuses: { [key: string]: string } = {};
+      for (const conversation of conversations) {
+        userStatuses[conversation.user1.id] = await this.presenceService.getUserStatus(conversation.user1.id);
+        userStatuses[conversation.user2.id] = await this.presenceService.getUserStatus(conversation.user2.id);
+      }
+
+      client.emit('userConversations', {
+        conversations,
+        userStatuses
+      });
+
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('leaveDirectMessage')
+  async handleLeaveDirectMessage(
+    @MessageBody() data: { conversationId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const dmRoom = `dm:${data.conversationId}`;
+    client.leave(dmRoom);
   }
 
   private async broadcastUserStatus(userId: string) {

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Message } from '../interfaces/message.interface';
 import { AuthService } from './auth.service';
 import { User } from '../interfaces/user.interface';
+import { DirectMessageConversation } from '../interfaces/direct-message-conversation.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -133,6 +134,48 @@ export class WebsocketService {
         console.log('Received user list:', users);
         observer.next(users);
       });
+    });
+  }
+
+  // Direct Message Methods
+  startDirectMessage(userId: string, otherUserId: string): void {
+    this.socket.emit('startDirectMessage', { userId, otherUserId });
+  }
+
+  onDirectMessageHistory(): Observable<{
+    conversation: DirectMessageConversation;
+    messages: Message[];
+    userStatuses: { [key: string]: string };
+  }> {
+    return new Observable(observer => {
+      this.socket.on('directMessageHistory', data => observer.next(data));
+    });
+  }
+
+  sendDirectMessage(userId: string, conversationId: string, content: string): void {
+    this.socket.emit('sendDirectMessage', { userId, conversationId, content });
+  }
+
+  onNewDirectMessage(): Observable<Message> {
+    return new Observable(observer => {
+      this.socket.on('newDirectMessage', message => observer.next(message));
+    });
+  }
+
+  leaveDirectMessage(conversationId: string): void {
+    this.socket.emit('leaveDirectMessage', { conversationId });
+  }
+
+  getUserConversations(userId: string): void {
+    this.socket.emit('getUserConversations', { userId });
+  }
+
+  onUserConversations(): Observable<{
+    conversations: DirectMessageConversation[];
+    userStatuses: { [key: string]: string };
+  }> {
+    return new Observable(observer => {
+      this.socket.on('userConversations', data => observer.next(data));
     });
   }
 } 

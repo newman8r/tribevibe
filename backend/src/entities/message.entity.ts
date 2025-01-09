@@ -3,6 +3,7 @@ import { User } from './user.entity';
 import { Channel } from './channel.entity';
 import { Reaction } from './reaction.entity';
 import { Thread } from './thread.entity';
+import { DirectMessageConversation } from './direct-message-conversation.entity';
 
 @Entity()
 export class Message {
@@ -27,8 +28,11 @@ export class Message {
   @ManyToOne(() => User, { nullable: true })
   user: User;
 
-  @ManyToOne(() => Channel, channel => channel.messages)
+  @ManyToOne(() => Channel, channel => channel.messages, { nullable: true })
   channel: Channel;
+
+  @ManyToOne(() => DirectMessageConversation, conversation => conversation.messages, { nullable: true })
+  directMessageConversation: DirectMessageConversation;
 
   @OneToMany(() => Reaction, reaction => reaction.message, { eager: true })
   reactions: Reaction[];
