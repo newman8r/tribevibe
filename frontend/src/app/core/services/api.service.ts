@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../src/environments/environment';
 import { User } from '../interfaces/user.interface';
 import { Channel } from '../interfaces/channel.interface';
 import { SignUpDto, SignInDto, AuthResponse } from '../interfaces/auth.interface';
