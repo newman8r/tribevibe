@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { 
     path: '', 
-    redirectTo: 'auth', 
-    pathMatch: 'full' 
+    redirectTo: 'chat',
+    pathMatch: 'full'
   },
   {
     path: 'auth',
@@ -12,10 +13,11 @@ export const routes: Routes = [
   },
   {
     path: 'chat',
-    loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule)
+    loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule),
+    canActivate: [authGuard]
   },
   { 
     path: '**', 
-    redirectTo: 'auth' 
+    redirectTo: 'chat' 
   }
 ];
