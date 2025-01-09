@@ -72,9 +72,10 @@
                   </div>
                 </div>
     
-                <div class="reply-count" *ngIf="message.replyCount" (click)="openThread(message)">
-                  <i class="fas fa-reply"></i> {{ message.replyCount }}
-                </div>
+                <button class="reply-count" (click)="openThread(message)">
+                  <i class="fas fa-reply"></i>
+                  <span *ngIf="message.replyCount"> {{ message.replyCount }}</span>
+                </button>
               </div>
             </div>
           </div>
