@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { Message } from '../interfaces/message.interface';
@@ -9,10 +10,10 @@ import { AuthService } from './auth.service';
 })
 export class WebsocketService {
   private socket: Socket;
-  private readonly SOCKET_URL = 'http://localhost:3000';
+  private readonly WS_URL = environment.apiBaseUrl; // Socket.IO will automatically convert http:// to ws://
 
   constructor(private authService: AuthService) {
-    this.socket = io(this.SOCKET_URL, {
+    this.socket = io(this.WS_URL, {
       auth: {
         token: this.authService.getSessionToken()
       },

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { User } from '../interfaces/user.interface';
 import { Channel } from '../interfaces/channel.interface';
 import { SignUpDto, SignInDto, AuthResponse } from '../interfaces/auth.interface';
@@ -9,7 +10,7 @@ import { SignUpDto, SignInDto, AuthResponse } from '../interfaces/auth.interface
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly API_URL = 'http://localhost:3000'; // Should be in environment config
+  private readonly API_URL = environment.apiBaseUrl.replace(/\/$/, ''); // Remove trailing slash if present
 
   constructor(private http: HttpClient) {}
 
