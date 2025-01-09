@@ -83,6 +83,11 @@ overflow: scroll;
       border-bottom: 1px solid var(--surface-light);
     }
   }
+
+  .user-list-section {
+    height: 300px;
+    border-bottom: 1px solid var(--surface-light);
+  }
 }
 
 .center-panel {

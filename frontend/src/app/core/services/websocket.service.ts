@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { Message } from '../interfaces/message.interface';
 import { AuthService } from './auth.service';
+import { User } from '../interfaces/user.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,14 @@ export class WebsocketService {
       if (this.socket) {
         this.socket.auth = { token };
       }
+    });
+
+    this.socket.on('connect', () => {
+      console.log('WebSocket connected');
+    });
+
+    this.socket.on('error', (error) => {
+      console.error('WebSocket error:', error);
     });
   }
 
@@ -109,6 +118,20 @@ export class WebsocketService {
     return new Observable(observer => {
       this.socket.on('threadUpdate', (message: Message) => {
         observer.next(message);
+      });
+    });
+  }
+
+  getUserList(): void {
+    console.log('Requesting user list');
+    this.socket.emit('getUserList');
+  }
+
+  onUserList(): Observable<(User & { status: string })[]> {
+    return new Observable(observer => {
+      this.socket.on('userList', (users: (User & { status: string })[]) => {
+        console.log('Received user list:', users);
+        observer.next(users);
       });
     });
   }

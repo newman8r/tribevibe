@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserPresence } from '../entities/user-presence.entity';
 import { UserStatus } from '../core/interfaces/user-status.enum';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class PresenceService {
@@ -11,7 +12,8 @@ export class PresenceService {
 
   constructor(
     @InjectRepository(UserPresence)
-    private presenceRepository: Repository<UserPresence>
+    private presenceRepository: Repository<UserPresence>,
+    private userService: UserService
   ) {}
 
   async updatePresence(userId: string): Promise<void> {
@@ -79,5 +81,27 @@ export class PresenceService {
 
   clearManualStatus(userId: string): void {
     this.manualStatuses.delete(userId);
+  }
+
+  async getAllUserStatuses(): Promise<{ userId: string; status: UserStatus }[]> {
+    const allUsers = await this.userService.findAll();
+    const statuses: { userId: string; status: UserStatus }[] = [];
+
+    for (const user of allUsers) {
+      const status = await this.getUserStatus(user.id);
+      statuses.push({ userId: user.id, status });
+    }
+
+    return statuses;
+  }
+
+  private getAnonymousUserStatus(lastActivity: Date): UserStatus {
+    const now = new Date();
+    const diff = now.getTime() - lastActivity.getTime();
+    const minutesDiff = diff / (1000 * 60);
+
+    if (minutesDiff <= 15) return UserStatus.ONLINE;
+    if (minutesDiff <= 30) return UserStatus.AWAY;
+    return UserStatus.OFFLINE;
   }
 } 

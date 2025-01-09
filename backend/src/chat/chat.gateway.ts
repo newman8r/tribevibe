@@ -253,6 +253,23 @@ export class ChatGateway {
     client.leave(threadRoom);
   }
 
+  @SubscribeMessage('getUserList')
+  async handleGetUserList() {
+    const users = await this.userService.findAll();
+    const userStatuses = await this.presenceService.getAllUserStatuses();
+    
+    // Combine user data with their statuses
+    const usersWithStatus = users.map(user => {
+      const statusObj = userStatuses.find(status => status.userId === user.id);
+      return {
+        ...user,
+        status: statusObj?.status || UserStatus.OFFLINE
+      };
+    });
+    
+    this.server.emit('userList', usersWithStatus);
+  }
+
   private async broadcastUserStatus(userId: string) {
     const status = await this.presenceService.getUserStatus(userId);
     this.server.emit('userStatusUpdate', { userId, status });

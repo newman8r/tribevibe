@@ -5,8 +5,8 @@ import { ExplorerComponent } from './components/explorer/explorer.component';
 import { ChannelListComponent } from './components/channel-list/channel-list.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { SocialHubComponent } from './components/social-hub/social-hub.component';
-import { PromoSpaceComponent } from './components/promo-space/promo-space.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { UserListComponent } from './components/user-list/user-list.component';
 
 @Component({
   selector: 'app-chat',
@@ -18,8 +18,8 @@ import { UserProfileComponent } from './components/user-profile/user-profile.com
     ChannelListComponent,
     ChatWindowComponent,
     SocialHubComponent,
-    PromoSpaceComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    UserListComponent
   ],
   standalone: true
 })

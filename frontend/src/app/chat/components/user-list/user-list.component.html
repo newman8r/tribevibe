@@ -1,0 +1,75 @@
+<div class="user-list">
+  <div class="user-list-header">
+    <h3>Users ({{ users.length }})</h3>
+  </div>
+  
+  <div class="users">
+    <!-- Online Users -->
+    <div class="status-group" *ngIf="groupedUsers[UserStatus.ONLINE].length">
+      <div class="status-header">
+        <span class="status-dot online"></span>
+        Online - {{ groupedUsers[UserStatus.ONLINE].length }}
+      </div>
+      <div class="user-item" *ngFor="let user of groupedUsers[UserStatus.ONLINE]">
+        <div class="user-avatar">
+          <img [src]="user.avatarUrl" [alt]="user.username">
+          <span class="status-dot online"></span>
+        </div>
+        <div class="user-info">
+          <span class="username">{{ user.username }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Away Users -->
+    <div class="status-group" *ngIf="groupedUsers[UserStatus.AWAY].length">
+      <div class="status-header">
+        <span class="status-dot away"></span>
+        Away - {{ groupedUsers[UserStatus.AWAY].length }}
+      </div>
+      <div class="user-item" *ngFor="let user of groupedUsers[UserStatus.AWAY]">
+        <div class="user-avatar">
+          <img [src]="user.avatarUrl" [alt]="user.username">
+          <span class="status-dot away"></span>
+        </div>
+        <div class="user-info">
+          <span class="username">{{ user.username }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Busy Users -->
+    <div class="status-group" *ngIf="groupedUsers[UserStatus.BUSY].length">
+      <div class="status-header">
+        <span class="status-dot busy"></span>
+        Busy - {{ groupedUsers[UserStatus.BUSY].length }}
+      </div>
+      <div class="user-item" *ngFor="let user of groupedUsers[UserStatus.BUSY]">
+        <div class="user-avatar">
+          <img [src]="user.avatarUrl" [alt]="user.username">
+          <span class="status-dot busy"></span>
+        </div>
+        <div class="user-info">
+          <span class="username">{{ user.username }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Offline Users -->
+    <div class="status-group" *ngIf="groupedUsers[UserStatus.OFFLINE].length">
+      <div class="status-header">
+        <span class="status-dot offline"></span>
+        Offline - {{ groupedUsers[UserStatus.OFFLINE].length }}
+      </div>
+      <div class="user-item" *ngFor="let user of groupedUsers[UserStatus.OFFLINE]">
+        <div class="user-avatar">
+          <img [src]="user.avatarUrl" [alt]="user.username">
+          <span class="status-dot offline"></span>
+        </div>
+        <div class="user-info">
+          <span class="username">{{ user.username }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
