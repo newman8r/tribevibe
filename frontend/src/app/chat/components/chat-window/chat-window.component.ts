@@ -11,6 +11,7 @@ import { User } from '../../../core/interfaces/user.interface';
 import { Subscription } from 'rxjs';
 import { SearchPanelComponent } from '../search-panel/search-panel.component';
 import { SearchResult } from '../../../core/services/search.service';
+import { FileUploadPanelComponent } from '../file-upload-panel/file-upload-panel.component';
 
 @Component({
   selector: 'app-chat-window',
@@ -20,7 +21,8 @@ import { SearchResult } from '../../../core/services/search.service';
   imports: [
     CommonModule,
     FormsModule,
-    SearchPanelComponent
+    SearchPanelComponent,
+    FileUploadPanelComponent
   ]
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
@@ -57,6 +59,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   private highlightedMessageId: string | null = null;
   private highlightTimeout: any;
+
+  isFileUploadPanelOpen = false;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -559,5 +563,9 @@ setInterval(() => {
 
   isMessageHighlighted(messageId: string): boolean {
     return this.highlightedMessageId === messageId;
+  }
+
+  toggleFileUploadPanel() {
+    this.isFileUploadPanelOpen = !this.isFileUploadPanelOpen;
   }
 } 

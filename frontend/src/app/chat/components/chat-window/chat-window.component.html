@@ -99,7 +99,7 @@
       <button class="toolbar-btn" (click)="openEmojiPicker()" title="Add emoji">
         <i class="far fa-smile"></i>
       </button>
-      <button class="toolbar-btn" title="Upload file">
+      <button class="toolbar-btn" (click)="toggleFileUploadPanel()" title="Upload file">
         <i class="fas fa-paperclip"></i>
       </button>
     </div>
@@ -243,4 +243,10 @@
     (close)="isSearchPanelOpen = false"
     (jumpToMessage)="onJumpToMessage($event)">
   </app-search-panel>
+
+  <!-- Add the file upload panel component -->
+  <app-file-upload-panel
+    [isOpen]="isFileUploadPanelOpen"
+    (close)="isFileUploadPanelOpen = false">
+  </app-file-upload-panel>
 </div> 

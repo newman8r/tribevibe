@@ -17,6 +17,7 @@ import { Thread } from './entities/thread.entity';
 import { DirectMessageModule } from './direct-message/direct-message.module';
 import { DirectMessageConversation } from './entities/direct-message-conversation.entity';
 import { SearchModule } from './search/search.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -46,7 +47,8 @@ import { SearchModule } from './search/search.module';
     PresenceModule,
     DirectMessageModule,
     ChatModule,
-    SearchModule
+    SearchModule,
+    FileModule,
   ],
 })
 export class AppModule {}

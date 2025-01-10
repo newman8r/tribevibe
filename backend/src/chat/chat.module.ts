@@ -22,6 +22,7 @@ import { DirectMessageModule } from '../direct-message/direct-message.module';
     ChatGateway,
     WsGuard,
     NameGenerator
-  ]
+  ],
+  exports: [ChatGateway]
 })
 export class ChatModule {} 

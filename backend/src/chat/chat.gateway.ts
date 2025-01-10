@@ -373,6 +373,24 @@ export class ChatGateway {
     client.leave(dmRoom);
   }
 
+  @SubscribeMessage('joinFileUpdates')
+  async handleJoinFileUpdates(
+    @MessageBody() data: { channelId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = `channel:${data.channelId}`;
+    client.join(room);
+  }
+
+  @SubscribeMessage('leaveFileUpdates')
+  async handleLeaveFileUpdates(
+    @MessageBody() data: { channelId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = `channel:${data.channelId}`;
+    client.leave(room);
+  }
+
   private async broadcastUserStatus(userId: string) {
     const status = await this.presenceService.getUserStatus(userId);
     this.server.emit('userStatusUpdate', { userId, status });

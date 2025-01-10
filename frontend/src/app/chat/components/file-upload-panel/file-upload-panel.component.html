@@ -1,0 +1,89 @@
+<div class="file-upload-overlay" [class.open]="isOpen" (click)="onClose()">
+  <div class="file-upload-panel" (click)="$event.stopPropagation()">
+    <div class="panel-header">
+      <h2>Upload File</h2>
+      <button class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="panel-content">
+      <!-- Drop Zone -->
+      <div 
+        class="drop-zone" 
+        [class.active]="dragActive"
+        [class.has-file]="selectedFile"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="!selectedFile && fileInput.click()">
+        
+        <input 
+          #fileInput
+          type="file"
+          class="file-input"
+          (change)="onFileSelected($event)"
+          hidden>
+
+        <div class="drop-zone-content" *ngIf="!selectedFile">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drag & drop a file here or click to browse</p>
+        </div>
+
+        <div class="selected-file" *ngIf="selectedFile">
+          <i class="fas fa-file"></i>
+          <span class="filename">{{ selectedFile.name }}</span>
+          <span class="filesize">{{ selectedFile.size | number }} bytes</span>
+        </div>
+      </div>
+
+      <!-- Metadata Form -->
+      <div class="metadata-form" *ngIf="selectedFile">
+        <div class="form-group">
+          <label>Filename</label>
+          <input 
+            type="text" 
+            [(ngModel)]="metadata.filename" 
+            placeholder="Enter filename">
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea 
+            [(ngModel)]="metadata.description" 
+            placeholder="Add a description (optional)">
+          </textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Tags</label>
+          <div class="tags-input">
+            <div class="tags-list">
+              <span class="tag" *ngFor="let tag of metadata.tags">
+                {{ tag }}
+                <button class="remove-tag" (click)="removeTag(tag)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </span>
+            </div>
+            <input 
+              type="text" 
+              [(ngModel)]="newTag" 
+              (keyup.enter)="addTag()"
+              placeholder="Add tags (press Enter)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <button class="cancel-btn" (click)="onClose()">Cancel</button>
+      <button 
+        class="upload-btn" 
+        [disabled]="!selectedFile || !metadata.filename"
+        (click)="uploadFile()">
+        Upload File
+      </button>
+    </div>
+  </div>
+</div> 
