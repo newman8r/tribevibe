@@ -41,9 +41,9 @@ export class AuthService {
     if (!authData.user) throw new Error('Failed to create user');
 
     const newUser = await this.userService.create({
+      id: authData.user.id,
       email,
       username,
-      password,
       ticketId: ticketId,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${authData.user.id}`,
     });
