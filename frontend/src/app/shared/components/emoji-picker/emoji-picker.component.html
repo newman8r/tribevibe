@@ -1,0 +1,10 @@
+<div class="emoji-picker">
+  <div class="emoji-grid">
+    <button 
+      *ngFor="let emoji of emojis" 
+      class="emoji-btn"
+      (click)="selectEmoji(emoji)">
+      {{ emoji }}
+    </button>
+  </div>
+</div> 

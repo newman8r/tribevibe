@@ -128,12 +128,18 @@
   <!-- Editor Section -->
   <div class="message-editor">
     <div class="editor-toolbar">
-      <button class="toolbar-btn" (click)="openEmojiPicker()" title="Add emoji">
+      <button class="toolbar-btn emoji-trigger" (click)="openEmojiPicker()" title="Add emoji">
         <i class="far fa-smile"></i>
       </button>
       <button class="toolbar-btn" (click)="toggleFileUploadPanel()" title="Upload file">
         <i class="fas fa-paperclip"></i>
       </button>
+      
+      <!-- Add the emoji picker -->
+      <app-emoji-picker
+        *ngIf="showEmojiPicker"
+        (emojiSelected)="onEmojiSelected($event)">
+      </app-emoji-picker>
     </div>
     
     <!-- File Attachment Indicator -->

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChannelStateService } from '../../../core/services/channel-state.service';
@@ -14,6 +14,7 @@ import { SearchPanelComponent } from '../search-panel/search-panel.component';
 import { SearchResult } from '../../../core/services/search.service';
 import { FileUploadPanelComponent } from '../file-upload-panel/file-upload-panel.component';
 import { AuthPromptModalComponent } from '../../../shared/components/auth-prompt-modal/auth-prompt-modal.component';
+import { EmojiPickerComponent } from '../../../shared/components/emoji-picker/emoji-picker.component';
 
 interface AttachedFile {
   id: string;
@@ -31,7 +32,8 @@ interface AttachedFile {
     FormsModule,
     SearchPanelComponent,
     FileUploadPanelComponent,
-    AuthPromptModalComponent
+    AuthPromptModalComponent,
+    EmojiPickerComponent
   ]
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
@@ -78,6 +80,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   showAuthPromptModal = false;
 
   authPromptFeature = '';
+
+  showEmojiPicker = false;
+  private messageInputElement: HTMLTextAreaElement | null = null;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -255,7 +260,7 @@ setInterval(() => {
   }
 
   openEmojiPicker() {
-    // Implement emoji picker logic
+    this.showEmojiPicker = !this.showEmojiPicker;
   }
 
   onEnterPress(event: Event) {
@@ -625,5 +630,45 @@ setInterval(() => {
       return false;
     }
     return true;
+  }
+
+  onEmojiSelected(emoji: string) {
+    if (!this.messageInputElement) {
+      const element = document.querySelector('.message-input');
+      if (element instanceof HTMLTextAreaElement) {
+        this.messageInputElement = element;
+      } else {
+        this.messageText += emoji;
+        return;
+      }
+    }
+
+    const start = this.messageInputElement.selectionStart ?? this.messageText.length;
+    const end = this.messageInputElement.selectionEnd ?? this.messageText.length;
+    const text = this.messageText;
+    
+    this.messageText = text.substring(0, start) + emoji + text.substring(end);
+    
+    // Reset cursor position after emoji insertion
+    setTimeout(() => {
+      if (this.messageInputElement) {
+        this.messageInputElement.selectionStart = start + emoji.length;
+        this.messageInputElement.selectionEnd = start + emoji.length;
+        this.messageInputElement.focus();
+      }
+    });
+    
+    this.showEmojiPicker = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const emojiButton = document.querySelector('.emoji-trigger');
+    const emojiPicker = document.querySelector('.emoji-picker');
+    
+    if (!emojiButton?.contains(event.target as Node) && 
+        !emojiPicker?.contains(event.target as Node)) {
+      this.showEmojiPicker = false;
+    }
   }
 } 
