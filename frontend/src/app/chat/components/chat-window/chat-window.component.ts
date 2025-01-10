@@ -330,7 +330,7 @@ setInterval(() => {
     if (!this.isUserScrolled || force) {
       setTimeout(() => {
         container.scrollTo({
-          top: container.scrollHeight,
+          top: container.scrollHeight + 100,
           behavior: force ? 'auto' : 'smooth'
         });
         this.lastScrollHeight = container.scrollHeight;
