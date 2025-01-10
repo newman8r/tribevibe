@@ -4,6 +4,7 @@ import { Channel } from './channel.entity';
 import { Reaction } from './reaction.entity';
 import { Thread } from './thread.entity';
 import { DirectMessageConversation } from './direct-message-conversation.entity';
+import { File } from './file.entity';
 
 @Entity()
 export class Message {
@@ -45,5 +46,8 @@ export class Message {
 
   @Column({ nullable: true, default: 0 })
   replyCount: number;
+
+  @OneToMany(() => File, file => file.message)
+  files: File[];
 }
 

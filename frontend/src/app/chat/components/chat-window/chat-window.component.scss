@@ -115,6 +115,51 @@
       }
     }
   }
+
+  .file-attachment {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: rgba(var(--surface-light-rgb), 0.1);
+    border: 1px solid rgba(var(--accent-1-rgb), 0.1);
+    border-radius: 6px;
+    
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      i {
+        color: var(--accent-1);
+      }
+      
+      .filename {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+      
+      .filesize {
+        color: var(--text-muted);
+        font-size: 0.9em;
+      }
+    }
+    
+    .remove-file {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.25rem;
+      cursor: pointer;
+      border-radius: 4px;
+      
+      &:hover {
+        background: rgba(var(--surface-light-rgb), 0.2);
+        color: var(--text-primary);
+      }
+    }
+  }
   
   .editor-input-wrapper {
     display: flex;
@@ -274,9 +319,63 @@
       }
 
       .message-text {
-        color: var(--primary-light);
-        line-height: 1.4;
-        word-break: break-word;
+        color: var(--text-primary);
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      .message-files {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .file-attachment {
+          background: rgba(var(--surface-light-rgb), 0.1);
+          border: 1px solid rgba(var(--accent-1-rgb), 0.1);
+          border-radius: 6px;
+          padding: 0.5rem;
+
+          .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+
+            i {
+              color: var(--accent-1);
+              font-size: 1.2rem;
+            }
+
+            .filename {
+              color: var(--primary-light);
+              text-decoration: none;
+              font-weight: 500;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+
+            .filesize {
+              color: var(--text-muted);
+              font-size: 0.9em;
+            }
+          }
+
+          .file-preview {
+            margin-top: 0.5rem;
+            border-radius: 4px;
+            overflow: hidden;
+            max-width: 300px;
+
+            img {
+              width: 100%;
+              height: auto;
+              display: block;
+            }
+          }
+        }
       }
     }
 

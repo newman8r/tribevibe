@@ -10,9 +10,11 @@ import { SignUpDto, SignInDto, AuthResponse } from '../interfaces/auth.interface
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
-  private sessionTokenSubject = new BehaviorSubject<string | null>(null);
+  private accessTokenSubject = new BehaviorSubject<string | null>(null);
+  private hadPreviousSessionFlag = false;
+  
   currentUser$ = this.currentUserSubject.asObservable();
-  sessionToken$ = this.sessionTokenSubject.asObservable();
+  accessToken$ = this.accessTokenSubject.asObservable();
 
   constructor(private apiService: ApiService) {
     this.initializeFromStorage();
@@ -20,64 +22,69 @@ export class AuthService {
 
   private initializeFromStorage(): void {
     try {
-      const storedUser = localStorage.getItem('currentUser');
-      const storedToken = localStorage.getItem('sessionToken');
-      
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser && typeof parsedUser === 'object') {
-          this.currentUserSubject.next(parsedUser);
+      const storedAuth = localStorage.getItem('auth');
+      if (storedAuth) {
+        const auth = JSON.parse(storedAuth);
+        this.hadPreviousSessionFlag = true;
+        if (auth.user) this.currentUserSubject.next(auth.user);
+        if (auth.session?.access_token) {
+          console.log('Initializing with token:', auth.session.access_token);
+          this.accessTokenSubject.next(auth.session.access_token);
         }
       }
-      
-      if (storedToken) {
-        this.sessionTokenSubject.next(storedToken);
-      }
     } catch (error) {
-      console.error('Error parsing stored user data:', error);
-      this.clearStorage();
+      console.error('Error parsing stored auth data:', error);
+      this.clearAuth();
     }
   }
 
   signUp(data: SignUpDto): Observable<AuthResponse> {
     return this.apiService.signUp(data).pipe(
-      tap(response => {
-        this.setSession(response);
-      })
+      tap(response => this.handleAuthResponse(response))
     );
   }
 
   signIn(data: SignInDto): Observable<AuthResponse> {
     return this.apiService.signIn(data).pipe(
-      tap(response => {
-        this.setSession(response);
-      })
+      tap(response => this.handleAuthResponse(response))
     );
   }
 
-  private setSession(response: AuthResponse): void {
-    if (response.user) {
-      localStorage.setItem('currentUser', JSON.stringify(response.user));
-      this.currentUserSubject.next(response.user);
-    }
+  private handleAuthResponse(response: AuthResponse): void {
+    const authData = {
+      user: response.user,
+      session: response.session
+    };
     
+    console.log('Handling auth response:', authData);
+    localStorage.setItem('auth', JSON.stringify(authData));
+    this.hadPreviousSessionFlag = true;
+    
+    this.currentUserSubject.next(response.user);
     if (response.session?.access_token) {
-      localStorage.setItem('sessionToken', response.session.access_token);
-      this.sessionTokenSubject.next(response.session.access_token);
+      this.accessTokenSubject.next(response.session.access_token);
     }
   }
 
-  private clearStorage(): void {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('sessionToken');
-    localStorage.removeItem('anonymousId');
-    localStorage.removeItem('anonymousUsername');
-    this.currentUserSubject.next(null);
-    this.sessionTokenSubject.next(null);
+  getAccessToken(): string | null {
+    const token = this.accessTokenSubject.value;
+    console.log('Getting access token:', token);
+    return token;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getAccessToken();
   }
 
   signOut(): void {
-    this.clearStorage();
+    this.clearAuth();
+  }
+
+  private clearAuth(): void {
+    localStorage.removeItem('auth');
+    this.currentUserSubject.next(null);
+    this.accessTokenSubject.next(null);
+    // Don't reset hadPreviousSessionFlag on logout
   }
 
   getCurrentUser(): User | null {
@@ -85,6 +92,10 @@ export class AuthService {
   }
 
   getSessionToken(): string | null {
-    return this.sessionTokenSubject.value;
+    return this.accessTokenSubject.value;
+  }
+
+  hadPreviousSession(): boolean {
+    return this.hadPreviousSessionFlag;
   }
 } 

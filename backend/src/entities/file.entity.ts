@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Channel } from './channel.entity';
+import { Message } from './message.entity';
 
 export enum FileType {
   DOCUMENT = 'document',
@@ -46,11 +47,17 @@ export class File {
   @Column('jsonb', { nullable: true })
   metadata: Record<string, any>;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn()
   uploader: User;
 
   @ManyToOne(() => Channel, { nullable: true })
+  @JoinColumn()
   channel: Channel;
+
+  @ManyToOne(() => Message, message => message.files, { nullable: true })
+  @JoinColumn()
+  message: Message;
 
   @CreateDateColumn()
   createdAt: Date;

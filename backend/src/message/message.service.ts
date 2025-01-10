@@ -6,6 +6,17 @@ import { Channel } from '../entities/channel.entity';
 import { User } from '../entities/user.entity';
 import { Reaction } from '../entities/reaction.entity';
 import { Thread } from '../entities/thread.entity';
+import { File, FileType } from '../entities/file.entity';
+import { FileService } from '../file/file.service';
+
+interface FileWithUrls extends File {
+  url: string;
+  thumbnailUrl?: string;
+}
+
+interface MessageWithFileUrls extends Omit<Message, 'files'> {
+  files: FileWithUrls[];
+}
 
 @Injectable()
 export class MessageService {
@@ -16,6 +27,9 @@ export class MessageService {
     private reactionRepository: Repository<Reaction>,
     @InjectRepository(Thread)
     private threadRepository: Repository<Thread>,
+    @InjectRepository(File)
+    private fileRepository: Repository<File>,
+    private fileService: FileService,
   ) {}
 
   async create(data: {
@@ -29,13 +43,34 @@ export class MessageService {
     return this.messageRepository.save(message);
   }
 
-  async getChannelMessages(channelId: string, limit = 100): Promise<Message[]> {
-    return this.messageRepository.find({
+  async getChannelMessages(channelId: string, limit = 100): Promise<MessageWithFileUrls[]> {
+    const messages = await this.messageRepository.find({
       where: { channel: { id: channelId } },
-      relations: ['user'],
+      relations: ['user', 'files'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
+
+    // Add URLs for files
+    const messagesWithFileUrls = await Promise.all(messages.map(async (message) => {
+      if (message.files?.length) {
+        const filesWithUrls = await Promise.all(message.files.map(async (file) => {
+          const fileWithUrls = file as FileWithUrls;
+          fileWithUrls.url = await this.fileService.getPresignedUrl(file);
+          if (file.type === FileType.IMAGE) {
+            const thumbnailUrl = await this.fileService.getThumbnailUrl(file);
+            if (thumbnailUrl) {
+              fileWithUrls.thumbnailUrl = thumbnailUrl;
+            }
+          }
+          return fileWithUrls;
+        }));
+        return { ...message, files: filesWithUrls };
+      }
+      return { ...message, files: [] };
+    }));
+
+    return messagesWithFileUrls;
   }
 
   async findMessageWithReactions(messageId: string): Promise<Message> {
@@ -166,5 +201,45 @@ export class MessageService {
     }
 
     return message;
+  }
+
+  async attachFileToMessage(messageId: string, fileId: string): Promise<void> {
+    const message = await this.messageRepository.findOne({ where: { id: messageId } });
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    await this.fileRepository.update(
+      { id: fileId },
+      { message: { id: messageId } }
+    );
+  }
+
+  async findMessageWithFiles(messageId: string): Promise<MessageWithFileUrls> {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['user', 'files'],
+    });
+
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    // Add URLs for files
+    if (message.files?.length) {
+      const filesWithUrls = await Promise.all(message.files.map(async (file) => {
+        const fileWithUrls = file as FileWithUrls;
+        fileWithUrls.url = await this.fileService.getPresignedUrl(file);
+        if (file.type === FileType.IMAGE) {
+          const thumbnailUrl = await this.fileService.getThumbnailUrl(file);
+          if (thumbnailUrl) {
+            fileWithUrls.thumbnailUrl = thumbnailUrl;
+          }
+        }
+        return fileWithUrls;
+      }));
+      return { ...message, files: filesWithUrls };
+    }
+    return { ...message, files: [] };
   }
 } 

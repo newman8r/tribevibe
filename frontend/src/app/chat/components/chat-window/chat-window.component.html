@@ -82,6 +82,30 @@
             </div>
           </div>
           <div class="message-text">{{ message.content }}</div>
+          
+          <!-- File Attachments -->
+          <div class="message-files" *ngIf="message.files?.length">
+            <div class="file-attachment" *ngFor="let file of message.files">
+              <div class="file-info">
+                <i class="fas" [ngClass]="{
+                  'fa-file-image': file.type === 'image',
+                  'fa-file-video': file.type === 'video',
+                  'fa-file-alt': file.type === 'document',
+                  'fa-file-code': file.type === 'code',
+                  'fa-file': file.type === 'other'
+                }"></i>
+                <a [href]="file.url" target="_blank" class="filename">{{ file.displayName || file.originalName }}</a>
+                <span class="filesize">{{ formatFileSize(file.size) }}</span>
+              </div>
+              
+              <!-- Preview for images -->
+              <div class="file-preview" *ngIf="file.type === 'image' && file.thumbnailUrl">
+                <a [href]="file.url" target="_blank">
+                  <img [src]="file.thumbnailUrl" [alt]="file.originalName">
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -104,6 +128,18 @@
       </button>
     </div>
     
+    <!-- File Attachment Indicator -->
+    <div class="file-attachment" *ngIf="attachedFile">
+      <div class="file-info">
+        <i class="fas fa-file"></i>
+        <span class="filename">{{ attachedFile.name }}</span>
+        <span class="filesize">{{ formatFileSize(attachedFile.size) }}</span>
+      </div>
+      <button class="remove-file" (click)="removeAttachedFile()" title="Remove file">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
     <div class="editor-input-wrapper">
       <textarea 
         class="message-input" 
@@ -114,7 +150,7 @@
       
       <button 
         class="send-button" 
-        [disabled]="!messageText.trim()"
+        [disabled]="!messageText.trim() && !attachedFile"
         (click)="sendMessage()">
         <i class="fas fa-paper-plane"></i>
       </button>
@@ -247,6 +283,8 @@
   <!-- Add the file upload panel component -->
   <app-file-upload-panel
     [isOpen]="isFileUploadPanelOpen"
-    (close)="isFileUploadPanelOpen = false">
+    [channelId]="selectedChannel?.id"
+    (close)="isFileUploadPanelOpen = false"
+    (uploadComplete)="onFileUploaded($event)">
   </app-file-upload-panel>
 </div> 

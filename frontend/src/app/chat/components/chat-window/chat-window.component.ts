@@ -8,10 +8,17 @@ import { DirectMessageService } from '../../../core/services/direct-message.serv
 import { Channel } from '../../../core/interfaces/channel.interface';
 import { Message } from '../../../core/interfaces/message.interface';
 import { User } from '../../../core/interfaces/user.interface';
+import { FileService } from '../../../core/services/file.service';
 import { Subscription } from 'rxjs';
 import { SearchPanelComponent } from '../search-panel/search-panel.component';
 import { SearchResult } from '../../../core/services/search.service';
 import { FileUploadPanelComponent } from '../file-upload-panel/file-upload-panel.component';
+
+interface AttachedFile {
+  id: string;
+  name: string;
+  size: number;
+}
 
 @Component({
   selector: 'app-chat-window',
@@ -62,11 +69,16 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   isFileUploadPanelOpen = false;
 
+  selectedChannel: Channel | null = null;
+
+  attachedFile: AttachedFile | null = null;
+
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
     private authService: AuthService,
-    private directMessageService: DirectMessageService
+    private directMessageService: DirectMessageService,
+    private fileService: FileService
   ) {
     // Get or create anonymous ID
     this.anonymousId = localStorage.getItem('anonymousId') || 
@@ -79,6 +91,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     const initialChannel = this.channelStateService.getCurrentChannel();
     if (initialChannel) {
       this.currentChannel = initialChannel;
+      this.selectedChannel = initialChannel;
       this.joinChannel(initialChannel.id);
     }
 
@@ -87,6 +100,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       this.channelStateService.selectedChannel$.subscribe(channel => {
         if (channel && channel.id !== this.currentChannel?.id) {
           this.currentChannel = channel;
+          this.selectedChannel = channel;
           this.messages = [];
           this.joinChannel(channel.id);
         }
@@ -247,17 +261,19 @@ setInterval(() => {
   }
 
   sendMessage() {
-    if (this.messageText.trim() && this.currentChannel) {
+    if ((this.messageText.trim() || this.attachedFile) && this.currentChannel) {
       const currentUser = this.authService.getCurrentUser();
       const userId = currentUser?.id || this.anonymousId;
       
       this.websocketService.sendMessage(
         userId,
         this.currentChannel.id,
-        this.messageText.trim()
+        this.messageText.trim(),
+        this.attachedFile?.id
       );
       
       this.messageText = '';
+      this.attachedFile = null;
     }
   }
 
@@ -567,5 +583,27 @@ setInterval(() => {
 
   toggleFileUploadPanel() {
     this.isFileUploadPanelOpen = !this.isFileUploadPanelOpen;
+  }
+
+  onFileUploaded(fileId: string) {
+    this.isFileUploadPanelOpen = false;
+    // Get file metadata to display in the attachment indicator
+    this.fileService.getFileUrl(fileId).subscribe(metadata => {
+      this.attachedFile = {
+        id: fileId,
+        name: metadata.metadata.displayName,
+        size: metadata.metadata.size
+      };
+    });
+  }
+
+  removeAttachedFile() {
+    this.attachedFile = null;
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 } 

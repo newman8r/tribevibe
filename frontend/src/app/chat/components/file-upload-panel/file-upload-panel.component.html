@@ -77,12 +77,13 @@
     </div>
 
     <div class="panel-footer">
-      <button class="cancel-btn" (click)="onClose()">Cancel</button>
+      <button class="cancel-btn" [disabled]="isUploading" (click)="onClose()">Cancel</button>
       <button 
         class="upload-btn" 
-        [disabled]="!selectedFile || !metadata.filename"
+        [disabled]="!selectedFile || !metadata.filename || isUploading"
         (click)="uploadFile()">
-        Upload File
+        <span *ngIf="!isUploading">Upload File</span>
+        <span *ngIf="isUploading">Uploading...</span>
       </button>
     </div>
   </div>

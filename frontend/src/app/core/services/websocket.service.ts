@@ -22,10 +22,14 @@ export class WebsocketService {
       transports: ['websocket', 'polling']
     });
 
-    // Update token when it changes
-    this.authService.sessionToken$.subscribe(token => {
+    // Subscribe to token changes
+    this.authService.accessToken$.subscribe((token: string | null) => {
       if (this.socket) {
         this.socket.auth = { token };
+        // Reconnect with new token if socket is already connected
+        if (this.socket.connected) {
+          this.socket.disconnect().connect();
+        }
       }
     });
 
@@ -48,8 +52,8 @@ export class WebsocketService {
     });
   }
 
-  sendMessage(userId: string, channelId: string, content: string): void {
-    this.socket.emit('sendMessage', { userId, channelId, content });
+  sendMessage(userId: string, channelId: string, content: string, fileId?: string): void {
+    this.socket.emit('sendMessage', { userId, channelId, content, fileId });
   }
 
   onNewMessage(): Observable<Message> {

@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { File, FileType } from '../entities/file.entity';
 import { User } from '../entities/user.entity';
 import { Channel } from '../entities/channel.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class FileService {
@@ -20,6 +21,7 @@ export class FileService {
     @InjectRepository(File)
     private fileRepository: Repository<File>,
     private configService: ConfigService,
+    private userService: UserService
   ) {
     this.s3Client = new S3Client({
       region: this.configService.getOrThrow('AWS_REGION'),
@@ -46,6 +48,11 @@ export class FileService {
     uploader: User,
     channel?: Channel,
   ): Promise<{ uploadUrl: string; file: File }> {
+    const completeUser = await this.userService.findOne(uploader.id);
+    if (!completeUser) {
+      throw new Error('Uploader not found');
+    }
+
     const fileType = this.determineFileType(mimeType);
     const key = `${fileType}/${uuidv4()}/${originalName}`;
 
@@ -55,10 +62,11 @@ export class FileService {
       size,
       mimeType,
       type: fileType,
-      uploader,
+      uploader: completeUser,
       channel,
     });
 
+    console.log('Creating file with uploader:', completeUser);
     await this.fileRepository.save(file);
 
     const command = new PutObjectCommand({
@@ -68,7 +76,10 @@ export class FileService {
       ServerSideEncryption: 'AES256',
     });
 
-    const uploadUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+    const uploadUrl = await getSignedUrl(this.s3Client, command, {
+      expiresIn: 3600,
+      signableHeaders: new Set(['host', 'x-amz-server-side-encryption']),
+    });
 
     return { uploadUrl, file };
   }
