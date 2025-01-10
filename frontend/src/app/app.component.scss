@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host ::ng-deep body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}

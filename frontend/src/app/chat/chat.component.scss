@@ -2,10 +2,13 @@
   display: grid;
   grid-template-columns: 280px 1fr 320px;
   height: 100vh;
+  max-height: 100vh;
   background-color: var(--primary-dark);
   gap: 1px;
   position: relative;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 
   &::before {
     content: '';
