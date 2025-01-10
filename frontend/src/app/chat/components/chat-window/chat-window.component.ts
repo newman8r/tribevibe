@@ -9,13 +9,19 @@ import { Channel } from '../../../core/interfaces/channel.interface';
 import { Message } from '../../../core/interfaces/message.interface';
 import { User } from '../../../core/interfaces/user.interface';
 import { Subscription } from 'rxjs';
+import { SearchPanelComponent } from '../search-panel/search-panel.component';
+import { SearchResult } from '../../../core/services/search.service';
 
 @Component({
   selector: 'app-chat-window',
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [
+    CommonModule,
+    FormsModule,
+    SearchPanelComponent
+  ]
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
   messages: Message[] = [];
@@ -46,6 +52,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   dmMessageText = '';
   @ViewChild('dmContent') private dmContent!: ElementRef;
   private currentDMConversationId: string | null = null;
+
+  isSearchPanelOpen = false;
+
+  private highlightedMessageId: string | null = null;
+  private highlightTimeout: any;
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -516,5 +527,37 @@ setInterval(() => {
         element.scrollTop = element.scrollHeight;
       }
     });
+  }
+
+  toggleSearchPanel() {
+    this.isSearchPanelOpen = !this.isSearchPanelOpen;
+  }
+
+  onJumpToMessage(result: SearchResult) {
+    // Wait for messages to load if we switched channels
+    setTimeout(() => {
+      const messageElement = this.messages.find(m => m.id === result.id);
+      if (messageElement) {
+        // Find the DOM element
+        const element = document.querySelector(`[data-message-id="${result.id}"]`);
+        if (element) {
+          // Scroll the message into view
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Add highlight effect
+          this.highlightedMessageId = result.id;
+          if (this.highlightTimeout) {
+            clearTimeout(this.highlightTimeout);
+          }
+          this.highlightTimeout = setTimeout(() => {
+            this.highlightedMessageId = null;
+          }, 3000); // Remove highlight after 3 seconds
+        }
+      }
+    }, 500); // Give time for channel switch and message loading
+  }
+
+  isMessageHighlighted(messageId: string): boolean {
+    return this.highlightedMessageId === messageId;
   }
 } 

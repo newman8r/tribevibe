@@ -6,7 +6,7 @@
       <span class="channel-name">{{currentChannel?.name || 'Select a channel'}}</span>
     </div>
     <div class="header-actions">
-      <button class="action-btn" title="Search">
+      <button class="action-btn" title="Search" (click)="toggleSearchPanel()">
         <i class="fas fa-search"></i>
       </button>
       <button class="action-btn" title="More options">
@@ -26,6 +26,8 @@
     <div class="messages-list" *ngIf="messages.length > 0">
       <div class="message" 
            *ngFor="let message of messages"
+           [class.highlighted]="isMessageHighlighted(message.id)"
+           [attr.data-message-id]="message.id"
            (mouseenter)="onMessageMouseEnter(message.id)"
            (mouseleave)="onMessageMouseLeave()">
         <div class="message-avatar">
@@ -234,4 +236,11 @@
       </button>
     </div>
   </div>
+
+  <!-- Add the search panel component -->
+  <app-search-panel
+    [isOpen]="isSearchPanelOpen"
+    (close)="isSearchPanelOpen = false"
+    (jumpToMessage)="onJumpToMessage($event)">
+  </app-search-panel>
 </div> 

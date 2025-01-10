@@ -1,0 +1,58 @@
+<div class="search-panel" [class.open]="isOpen">
+  <div class="search-panel-header">
+    <div class="search-input-container">
+      <i class="fas fa-search"></i>
+      <input 
+        #searchInput
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (keyup)="onSearch($event)"
+        placeholder="Search messages..."
+        class="search-input"
+      >
+    </div>
+    <button class="close-btn" (click)="closePanel()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="search-results" *ngIf="!isLoading">
+    <div class="no-results" *ngIf="searchResults.length === 0">
+      <i class="fas fa-search"></i>
+      <p>No messages found</p>
+    </div>
+
+    <div class="results-list" *ngIf="searchResults.length > 0">
+      <div class="search-result" *ngFor="let result of searchResults" (click)="onJumpToMessage(result)">
+        <div class="result-content-wrapper">
+          <div class="result-header">
+            <span class="channel-name" *ngIf="result.channelName">
+              #{{result.channelName}}
+            </span>
+            <span class="dm-indicator" *ngIf="result.directMessageConversationId">
+              Direct Message
+            </span>
+            <span class="timestamp">
+              {{result.createdAt | date:'MMM d, y h:mm a'}}
+            </span>
+          </div>
+          <div class="result-content">
+            <div class="user-info">
+              <img [src]="getAvatarUrl(result)" [alt]="result.username" class="avatar">
+              <span class="username">{{result.username}}</span>
+            </div>
+            <p class="message-content">{{result.content}}</p>
+          </div>
+        </div>
+        <div class="goto-arrow">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Searching messages...</p>
+  </div>
+</div> 
