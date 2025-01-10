@@ -71,9 +71,9 @@ overflow: scroll;
 
 .right-panel {
   border-left: 1px solid var(--surface-light);
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  gap: 1px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   
   > div {
     background-color: var(--surface-dark);
@@ -85,8 +85,13 @@ overflow: scroll;
   }
 
   .user-list-section {
-    height: 300px;
-    border-bottom: 1px solid var(--surface-light);
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .explorer-section,
+  .promo-section {
+    flex-shrink: 0;
   }
 }
 

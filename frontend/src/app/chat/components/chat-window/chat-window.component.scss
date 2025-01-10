@@ -558,7 +558,7 @@
     color: var(--text-secondary);
     font-size: 0.85em;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     border: none;
 
     &:hover {
@@ -567,6 +567,15 @@
 
     i {
       font-size: 0.9em;
+    }
+
+    &.no-replies {
+      opacity: 0;
+      padding: 4px;
+      
+      &.visible {
+        opacity: 1;
+      }
     }
   }
 
@@ -606,27 +615,39 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-
-  &.visible {
-    opacity: 1;
+  
+  .reaction-button {
+    .reaction-trigger {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      
+      &.visible {
+        opacity: 1;
+      }
+    }
   }
 
-  .reply-button {
+  // Add styles for the reply trigger button
+  .reply-trigger {
+    opacity: 0;
+    transition: opacity 0.2s ease;
     background: none;
     border: none;
-    color: var(--text-muted);
     padding: 4px 8px;
-    cursor: pointer;
     border-radius: 4px;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    cursor: pointer;
 
     &:hover {
-      background: var(--surface-light);
-      color: var(--primary-light);
+      background-color: var(--bg-hover);
+    }
+
+    &.visible {
+      opacity: 1;
+    }
+
+    i {
+      font-size: 0.9em;
     }
   }
 }
