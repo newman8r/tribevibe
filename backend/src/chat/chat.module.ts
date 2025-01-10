@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
 import { UserModule } from '../user/user.module';
 import { ChannelModule } from '../channel/channel.module';
@@ -13,7 +13,7 @@ import { DirectMessageModule } from '../direct-message/direct-message.module';
   imports: [
     UserModule,
     ChannelModule,
-    MessageModule,
+    forwardRef(() => MessageModule),
     AuthModule,
     PresenceModule,
     DirectMessageModule

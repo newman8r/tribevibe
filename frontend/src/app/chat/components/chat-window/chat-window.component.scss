@@ -319,9 +319,63 @@
       }
 
       .message-text {
-        color: var(--primary-light);
-        line-height: 1.4;
-        word-break: break-word;
+        color: var(--text-primary);
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      .message-files {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .file-attachment {
+          background: rgba(var(--surface-light-rgb), 0.1);
+          border: 1px solid rgba(var(--accent-1-rgb), 0.1);
+          border-radius: 6px;
+          padding: 0.5rem;
+
+          .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+
+            i {
+              color: var(--accent-1);
+              font-size: 1.2rem;
+            }
+
+            .filename {
+              color: var(--primary-light);
+              text-decoration: none;
+              font-weight: 500;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+
+            .filesize {
+              color: var(--text-muted);
+              font-size: 0.9em;
+            }
+          }
+
+          .file-preview {
+            margin-top: 0.5rem;
+            border-radius: 4px;
+            overflow: hidden;
+            max-width: 300px;
+
+            img {
+              width: 100%;
+              height: auto;
+              display: block;
+            }
+          }
+        }
       }
     }
 

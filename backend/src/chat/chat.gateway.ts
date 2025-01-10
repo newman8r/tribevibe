@@ -102,9 +102,12 @@ export class ChatGateway {
     // If there's a file ID, update the file's message association
     if (data.fileId) {
       await this.messageService.attachFileToMessage(savedMessage.id, data.fileId);
+      // Fetch the complete message with file URLs
+      const messageWithFiles = await this.messageService.findMessageWithFiles(savedMessage.id);
+      this.server.to(data.channelId).emit('newMessage', messageWithFiles);
+    } else {
+      this.server.to(data.channelId).emit('newMessage', savedMessage);
     }
-
-    this.server.to(data.channelId).emit('newMessage', savedMessage);
   }
 
   @SubscribeMessage('updatePresence')

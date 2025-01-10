@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { FileService } from './file.service';
@@ -12,7 +12,7 @@ import { UserModule } from '../user/user.module';
   imports: [
     TypeOrmModule.forFeature([File]),
     ConfigModule,
-    ChatModule, // For WebSocket notifications
+    forwardRef(() => ChatModule),
     AuthModule,
     UserModule,
   ],

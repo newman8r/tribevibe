@@ -82,6 +82,30 @@
             </div>
           </div>
           <div class="message-text">{{ message.content }}</div>
+          
+          <!-- File Attachments -->
+          <div class="message-files" *ngIf="message.files?.length">
+            <div class="file-attachment" *ngFor="let file of message.files">
+              <div class="file-info">
+                <i class="fas" [ngClass]="{
+                  'fa-file-image': file.type === 'image',
+                  'fa-file-video': file.type === 'video',
+                  'fa-file-alt': file.type === 'document',
+                  'fa-file-code': file.type === 'code',
+                  'fa-file': file.type === 'other'
+                }"></i>
+                <a [href]="file.url" target="_blank" class="filename">{{ file.displayName || file.originalName }}</a>
+                <span class="filesize">{{ formatFileSize(file.size) }}</span>
+              </div>
+              
+              <!-- Preview for images -->
+              <div class="file-preview" *ngIf="file.type === 'image' && file.thumbnailUrl">
+                <a [href]="file.url" target="_blank">
+                  <img [src]="file.thumbnailUrl" [alt]="file.originalName">
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

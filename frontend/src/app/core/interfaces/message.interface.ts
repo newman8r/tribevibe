@@ -1,5 +1,6 @@
 import { User } from './user.interface';
 import { Channel } from './channel.interface';
+import { FileAttachment } from './file.interface';
 
 export interface Thread {
   id: string;
@@ -30,4 +31,5 @@ export interface Message {
   };
   threadParent?: Thread;
   replyCount?: number;
+  files?: FileAttachment[];
 } 
