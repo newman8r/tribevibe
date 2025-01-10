@@ -36,13 +36,20 @@ export class FileController {
       mimeType: string;
       size: number;
       channelId?: string;
+      metadata?: {
+        description?: string;
+        tags?: string[];
+      };
     }
   ) {
+    // Debug log to see what user data we have
+    console.log('Request user:', req.user);
+
     const { uploadUrl, file } = await this.fileService.createPresignedUploadUrl(
       body.filename,
       body.mimeType,
       body.size,
-      req.user,
+      req.user, // Make sure we're passing the full user object
       body.channelId ? { id: body.channelId } as any : undefined
     );
 

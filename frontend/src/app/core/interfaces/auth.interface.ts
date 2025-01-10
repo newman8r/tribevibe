@@ -1,5 +1,16 @@
 import { User } from './user.interface';
 
+export interface AuthSession {
+  access_token: string;
+  expires_in: number;
+  refresh_token?: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  session: AuthSession;
+}
+
 export interface SignUpDto {
   email: string;
   username: string;
@@ -10,13 +21,4 @@ export interface SignUpDto {
 export interface SignInDto {
   email: string;
   password: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  session?: {
-    access_token: string;
-    expires_in?: number;
-    refresh_token?: string;
-  };
 } 

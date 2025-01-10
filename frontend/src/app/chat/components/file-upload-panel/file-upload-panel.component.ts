@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FileService } from '../../../core/services/file.service';
+import { finalize } from 'rxjs/operators';
 
 interface FileUploadMetadata {
   filename: string;
@@ -23,14 +24,15 @@ export class FileUploadPanelComponent {
   @Output() uploadComplete = new EventEmitter<string>();
   
   selectedFile: File | null = null;
-  metadata: FileUploadMetadata = {
+  metadata = {
     filename: '',
     description: '',
-    tags: []
+    tags: [] as string[]
   };
   newTag = '';
   dragActive = false;
   isUploading = false;
+  uploadError: string | null = null;
 
   constructor(private fileService: FileService) {}
 
@@ -88,18 +90,23 @@ export class FileUploadPanelComponent {
     }
 
     this.isUploading = true;
-    this.fileService.uploadFile(this.selectedFile, this.metadata, this.channelId)
-      .subscribe({
-        next: (fileId) => {
-          this.isUploading = false;
-          this.uploadComplete.emit(fileId);
-          this.onClose();
-        },
-        error: (error) => {
-          console.error('Upload failed:', error);
-          this.isUploading = false;
-          // Here you could add error handling UI feedback
-        }
-      });
+    this.uploadError = null;
+
+    this.fileService.uploadFile(
+      this.selectedFile,
+      this.metadata,
+      this.channelId
+    ).pipe(
+      finalize(() => this.isUploading = false)
+    ).subscribe({
+      next: (fileId) => {
+        this.uploadComplete.emit(fileId);
+        this.onClose();
+      },
+      error: (error) => {
+        console.error('Upload failed:', error);
+        this.uploadError = error.message || 'Failed to upload file';
+      }
+    });
   }
 } 
