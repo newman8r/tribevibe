@@ -295,4 +295,11 @@
     (close)="isFileUploadPanelOpen = false"
     (uploadComplete)="onFileUploaded($event)">
   </app-file-upload-panel>
+
+  <!-- Add the auth prompt modal component -->
+  <app-auth-prompt-modal
+    *ngIf="showAuthPromptModal"
+    [feature]="authPromptFeature"
+    (close)="showAuthPromptModal = false">
+  </app-auth-prompt-modal>
 </div> 

@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 import { SearchPanelComponent } from '../search-panel/search-panel.component';
 import { SearchResult } from '../../../core/services/search.service';
 import { FileUploadPanelComponent } from '../file-upload-panel/file-upload-panel.component';
+import { AuthPromptModalComponent } from '../../../shared/components/auth-prompt-modal/auth-prompt-modal.component';
 
 interface AttachedFile {
   id: string;
@@ -29,7 +30,8 @@ interface AttachedFile {
     CommonModule,
     FormsModule,
     SearchPanelComponent,
-    FileUploadPanelComponent
+    FileUploadPanelComponent,
+    AuthPromptModalComponent
   ]
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
@@ -72,6 +74,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   selectedChannel: Channel | null = null;
 
   attachedFile: AttachedFile | null = null;
+
+  showAuthPromptModal = false;
+
+  authPromptFeature = '';
 
   constructor(
     private channelStateService: ChannelStateService,
@@ -363,6 +369,7 @@ setInterval(() => {
   }
 
   addReaction(message: Message, emoji: string) {
+    if (!this.checkAuthAndPrompt('Message reactions')) return;
     const currentUser = this.authService.getCurrentUser();
     const userId = currentUser?.id || this.anonymousId;
     
@@ -395,6 +402,7 @@ setInterval(() => {
   }
 
   openThread(message: Message) {
+    if (!this.checkAuthAndPrompt('Threaded replies')) return;
     // Create a deep copy of the message to preserve its data
     this.activeThread = {
       ...message,
@@ -464,6 +472,7 @@ setInterval(() => {
   }
 
   openDirectMessage(userId: string | undefined) {
+    if (!this.checkAuthAndPrompt('Direct messages')) return;
     if (!userId || userId.startsWith('anonymous-')) return;
     
     const currentUser = this.authService.getCurrentUser();
@@ -582,6 +591,7 @@ setInterval(() => {
   }
 
   toggleFileUploadPanel() {
+    if (!this.checkAuthAndPrompt('File upload')) return;
     this.isFileUploadPanelOpen = !this.isFileUploadPanelOpen;
   }
 
@@ -605,5 +615,15 @@ setInterval(() => {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  private checkAuthAndPrompt(feature: string): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.authPromptFeature = feature;
+      this.showAuthPromptModal = true;
+      return false;
+    }
+    return true;
   }
 } 
