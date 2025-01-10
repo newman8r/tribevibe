@@ -62,6 +62,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   isFileUploadPanelOpen = false;
 
+  selectedChannel: Channel | null = null;
+
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
@@ -567,5 +569,11 @@ setInterval(() => {
 
   toggleFileUploadPanel() {
     this.isFileUploadPanelOpen = !this.isFileUploadPanelOpen;
+  }
+
+  onFileUploaded(fileId: string) {
+    this.isFileUploadPanelOpen = false;
+    // Here you can add any additional handling needed after successful upload
+    // For example, you might want to refresh the file list or show a success message
   }
 } 

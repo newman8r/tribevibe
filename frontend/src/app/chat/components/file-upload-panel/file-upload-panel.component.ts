@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FileService } from '../../../core/services/file.service';
 
 interface FileUploadMetadata {
   filename: string;
@@ -17,7 +18,9 @@ interface FileUploadMetadata {
 })
 export class FileUploadPanelComponent {
   @Input() isOpen = false;
+  @Input() channelId?: string;
   @Output() close = new EventEmitter<void>();
+  @Output() uploadComplete = new EventEmitter<string>();
   
   selectedFile: File | null = null;
   metadata: FileUploadMetadata = {
@@ -27,6 +30,9 @@ export class FileUploadPanelComponent {
   };
   newTag = '';
   dragActive = false;
+  isUploading = false;
+
+  constructor(private fileService: FileService) {}
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -77,7 +83,23 @@ export class FileUploadPanelComponent {
   }
 
   uploadFile() {
-    // This will be implemented in the next step
-    console.log('File upload triggered:', { file: this.selectedFile, metadata: this.metadata });
+    if (!this.selectedFile || !this.metadata.filename) {
+      return;
+    }
+
+    this.isUploading = true;
+    this.fileService.uploadFile(this.selectedFile, this.metadata, this.channelId)
+      .subscribe({
+        next: (fileId) => {
+          this.isUploading = false;
+          this.uploadComplete.emit(fileId);
+          this.onClose();
+        },
+        error: (error) => {
+          console.error('Upload failed:', error);
+          this.isUploading = false;
+          // Here you could add error handling UI feedback
+        }
+      });
   }
 } 

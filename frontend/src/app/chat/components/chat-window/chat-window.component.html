@@ -247,6 +247,8 @@
   <!-- Add the file upload panel component -->
   <app-file-upload-panel
     [isOpen]="isFileUploadPanelOpen"
-    (close)="isFileUploadPanelOpen = false">
+    [channelId]="selectedChannel?.id"
+    (close)="isFileUploadPanelOpen = false"
+    (uploadComplete)="onFileUploaded($event)">
   </app-file-upload-panel>
 </div> 
