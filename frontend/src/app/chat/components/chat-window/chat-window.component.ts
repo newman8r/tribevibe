@@ -81,6 +81,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     const initialChannel = this.channelStateService.getCurrentChannel();
     if (initialChannel) {
       this.currentChannel = initialChannel;
+      this.selectedChannel = initialChannel;
       this.joinChannel(initialChannel.id);
     }
 
@@ -89,6 +90,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       this.channelStateService.selectedChannel$.subscribe(channel => {
         if (channel && channel.id !== this.currentChannel?.id) {
           this.currentChannel = channel;
+          this.selectedChannel = channel;
           this.messages = [];
           this.joinChannel(channel.id);
         }

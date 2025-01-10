@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Channel } from './channel.entity';
+import { Message } from './message.entity';
 
 export enum FileType {
   DOCUMENT = 'document',
@@ -53,6 +54,10 @@ export class File {
   @ManyToOne(() => Channel, { nullable: true })
   @JoinColumn()
   channel: Channel;
+
+  @ManyToOne(() => Message, message => message.files, { nullable: true })
+  @JoinColumn()
+  message: Message;
 
   @CreateDateColumn()
   createdAt: Date;
