@@ -52,8 +52,8 @@ export class WebsocketService {
     });
   }
 
-  sendMessage(userId: string, channelId: string, content: string): void {
-    this.socket.emit('sendMessage', { userId, channelId, content });
+  sendMessage(userId: string, channelId: string, content: string, fileId?: string): void {
+    this.socket.emit('sendMessage', { userId, channelId, content, fileId });
   }
 
   onNewMessage(): Observable<Message> {

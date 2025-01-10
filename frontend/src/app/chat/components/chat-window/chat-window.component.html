@@ -104,6 +104,18 @@
       </button>
     </div>
     
+    <!-- File Attachment Indicator -->
+    <div class="file-attachment" *ngIf="attachedFile">
+      <div class="file-info">
+        <i class="fas fa-file"></i>
+        <span class="filename">{{ attachedFile.name }}</span>
+        <span class="filesize">{{ formatFileSize(attachedFile.size) }}</span>
+      </div>
+      <button class="remove-file" (click)="removeAttachedFile()" title="Remove file">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
     <div class="editor-input-wrapper">
       <textarea 
         class="message-input" 
@@ -114,7 +126,7 @@
       
       <button 
         class="send-button" 
-        [disabled]="!messageText.trim()"
+        [disabled]="!messageText.trim() && !attachedFile"
         (click)="sendMessage()">
         <i class="fas fa-paper-plane"></i>
       </button>

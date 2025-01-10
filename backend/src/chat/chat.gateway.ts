@@ -74,7 +74,7 @@ export class ChatGateway {
 
   @SubscribeMessage('sendMessage')
   async handleMessage(
-    @MessageBody() data: { userId: string; channelId: string; content: string },
+    @MessageBody() data: { userId: string; channelId: string; content: string; fileId?: string },
     @ConnectedSocket() client: Socket,
   ) {
     const channel = await this.channelService.findOne(data.channelId);
@@ -98,6 +98,12 @@ export class ChatGateway {
     }
 
     const savedMessage = await this.messageService.create(messageData);
+
+    // If there's a file ID, update the file's message association
+    if (data.fileId) {
+      await this.messageService.attachFileToMessage(savedMessage.id, data.fileId);
+    }
+
     this.server.to(data.channelId).emit('newMessage', savedMessage);
   }
 

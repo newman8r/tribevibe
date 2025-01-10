@@ -6,6 +6,7 @@ import { Channel } from '../entities/channel.entity';
 import { User } from '../entities/user.entity';
 import { Reaction } from '../entities/reaction.entity';
 import { Thread } from '../entities/thread.entity';
+import { File } from '../entities/file.entity';
 
 @Injectable()
 export class MessageService {
@@ -16,6 +17,8 @@ export class MessageService {
     private reactionRepository: Repository<Reaction>,
     @InjectRepository(Thread)
     private threadRepository: Repository<Thread>,
+    @InjectRepository(File)
+    private fileRepository: Repository<File>,
   ) {}
 
   async create(data: {
@@ -166,5 +169,17 @@ export class MessageService {
     }
 
     return message;
+  }
+
+  async attachFileToMessage(messageId: string, fileId: string): Promise<void> {
+    const message = await this.messageRepository.findOne({ where: { id: messageId } });
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    await this.fileRepository.update(
+      { id: fileId },
+      { message: { id: messageId } }
+    );
   }
 } 
