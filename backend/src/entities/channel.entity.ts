@@ -10,6 +10,9 @@ export class Channel {
   @Column({ unique: true })
   name: string;
 
+  @Column({ default: true })
+  visible: boolean;
+
   @ManyToMany(() => User, user => user.channels)
   users: User[];
 

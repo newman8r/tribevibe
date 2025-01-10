@@ -17,7 +17,9 @@ export class ChannelService {
   }
 
   async findAll(): Promise<Channel[]> {
-    return this.channelRepository.find();
+    return this.channelRepository.find({
+      where: { visible: true }
+    });
   }
 
   async findOne(id: string): Promise<Channel> {
@@ -28,6 +30,12 @@ export class ChannelService {
 
   async addUserToChannel(channel: Channel, user: User): Promise<Channel> {
     channel.users.push(user);
+    return this.channelRepository.save(channel);
+  }
+
+  async setChannelVisibility(id: string, visible: boolean): Promise<Channel> {
+    const channel = await this.findOne(id);
+    channel.visible = visible;
     return this.channelRepository.save(channel);
   }
 }
