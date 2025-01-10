@@ -43,45 +43,53 @@
               {{ message.user?.username || message.username }}
             </span>
             <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
-            <div class="message-actions" [class.visible]="hoveredMessageId === message.id">
-              <div class="reactions-container">
-                <div class="existing-reactions" *ngIf="message.reactions?.length">
-                  <ng-container *ngFor="let emoji of availableEmojis">
-                    <button 
-                      class="reaction-badge"
-                      [class.active]="hasUserReacted(message, emoji)"
-                      (click)="addReaction(message, emoji)"
-                      *ngIf="getReactionCount(message, emoji) > 0">
-                      {{ emoji }} {{ getReactionCount(message, emoji) }}
-                    </button>
-                  </ng-container>
-                </div>
-
-                <div class="reaction-button">
-                  <button class="reaction-trigger" 
-                          [class.visible]="hoveredMessageId === message.id"
-                          (click)="$event.stopPropagation()">
-                    <i class="far fa-face-smile"></i>
-                  </button>
-                  <div class="reaction-menu">
-                    <button 
-                      *ngFor="let emoji of availableEmojis"
-                      class="emoji-button"
-                      [class.active]="hasUserReacted(message, emoji)"
-                      (click)="addReaction(message, emoji)">
-                      {{ emoji }}
-                    </button>
-                  </div>
-                </div>
-    
-                <button class="reply-count" (click)="openThread(message)">
-                  <i class="fas fa-reply"></i>
-                  <span *ngIf="message.replyCount"> {{ message.replyCount }}</span>
+            
+            <!-- Move reaction button to message actions -->
+            <div class="message-actions">
+              <div class="reaction-button">
+                <button class="reaction-trigger" 
+                        [class.visible]="hoveredMessageId === message.id"
+                        (click)="$event.stopPropagation()">
+                  <i class="far fa-face-smile"></i>
                 </button>
+                <div class="reaction-menu">
+                  <button 
+                    *ngFor="let emoji of availableEmojis"
+                    class="emoji-button"
+                    [class.active]="hasUserReacted(message, emoji)"
+                    (click)="addReaction(message, emoji)">
+                    {{ emoji }}
+                  </button>
+                </div>
               </div>
+              <button class="reply-trigger"
+                      [class.visible]="hoveredMessageId === message.id"
+                      (click)="openThread(message)">
+                <i class="fas fa-reply"></i>
+              </button>
             </div>
           </div>
           <div class="message-text">{{ message.content }}</div>
+          
+          <!-- Always show reactions and reply count if they exist -->
+          <div class="reactions-container" *ngIf="message.reactions?.length || message.replyCount">
+            <div class="existing-reactions" *ngIf="message.reactions?.length">
+              <ng-container *ngFor="let emoji of availableEmojis">
+                <button 
+                  class="reaction-badge"
+                  [class.active]="hasUserReacted(message, emoji)"
+                  (click)="addReaction(message, emoji)"
+                  *ngIf="getReactionCount(message, emoji) > 0">
+                  {{ emoji }} {{ getReactionCount(message, emoji) }}
+                </button>
+              </ng-container>
+            </div>
+
+            <button class="reply-count" *ngIf="message.replyCount" (click)="openThread(message)">
+              <i class="fas fa-reply"></i>
+              <span>{{ message.replyCount }}</span>
+            </button>
+          </div>
           
           <!-- File Attachments -->
           <div class="message-files" *ngIf="message.files?.length">
