@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
-import { ChannelService } from '../channel/channel.service';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +10,6 @@ export class AuthService {
   constructor(
     private configService: ConfigService,
     private userService: UserService,
-    private channelService: ChannelService,
   ) {
     const supabaseUrl = this.configService.getOrThrow<string>('SUPABASE_URL');
     const supabaseKey = this.configService.getOrThrow<string>('SUPABASE_KEY');
@@ -47,11 +45,6 @@ export class AuthService {
       ticketId: ticketId,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${authData.user.id}`,
     });
-
-    const welcomeChannel = await this.channelService.findOne('2d6bd759-b896-495a-a8b7-fd8a2bf7dba9');
-    if (welcomeChannel) {
-      await this.channelService.addUserToChannel(welcomeChannel, newUser);
-    }
 
     return {
       user: newUser,

@@ -3,10 +3,9 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from '../user/user.module';
-import { ChannelModule } from '../channel/channel.module';
 
 @Module({
-  imports: [ConfigModule, UserModule, ChannelModule],
+  imports: [ConfigModule, UserModule],
   providers: [AuthService],
   controllers: [AuthController],
   exports: [AuthService]
