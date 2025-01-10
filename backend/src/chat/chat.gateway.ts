@@ -400,6 +400,21 @@ export class ChatGateway {
     client.leave(room);
   }
 
+  @SubscribeMessage('createChannel')
+  async handleCreateChannel(
+    @MessageBody() data: { name: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const channel = await this.channelService.create(data.name);
+      // Broadcast to all connected clients
+      this.server.emit('channelCreated', channel);
+      return channel;
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
   private async broadcastUserStatus(userId: string) {
     const status = await this.presenceService.getUserStatus(userId);
     this.server.emit('userStatusUpdate', { userId, status });

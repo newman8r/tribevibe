@@ -6,6 +6,7 @@ import { Message } from '../interfaces/message.interface';
 import { AuthService } from './auth.service';
 import { User } from '../interfaces/user.interface';
 import { DirectMessageConversation } from '../interfaces/direct-message-conversation.interface';
+import { Channel } from '../interfaces/channel.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -180,6 +181,12 @@ export class WebsocketService {
   }> {
     return new Observable(observer => {
       this.socket.on('userConversations', data => observer.next(data));
+    });
+  }
+
+  onChannelCreated(): Observable<Channel> {
+    return new Observable(observer => {
+      this.socket.on('channelCreated', (channel: Channel) => observer.next(channel));
     });
   }
 } 

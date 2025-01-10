@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChannelStateService } from '../../../core/services/channel-state.service';
 import { Channel } from '../../../core/interfaces/channel.interface';
+import { WebsocketService } from '../../../core/services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-channel-list',
@@ -13,17 +15,19 @@ import { Channel } from '../../../core/interfaces/channel.interface';
   imports: [CommonModule, FormsModule],
   standalone: true
 })
-export class ChannelListComponent implements OnInit {
+export class ChannelListComponent implements OnInit, OnDestroy {
   channels: Channel[] = [];
   selectedChannel: Channel | null = null;
   isLoggedIn = false;
   showCreateModal = false;
   newChannelName = '';
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
-    private channelStateService: ChannelStateService
+    private channelStateService: ChannelStateService,
+    private websocketService: WebsocketService
   ) {}
 
   ngOnInit() {
@@ -35,6 +39,19 @@ export class ChannelListComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
     });
+
+    // Subscribe to new channel notifications
+    this.subscriptions.push(
+      this.websocketService.onChannelCreated().subscribe(channel => {
+        if (!this.channels.find(c => c.id === channel.id)) {
+          this.channels.push(channel);
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   loadChannels() {
@@ -63,13 +80,12 @@ export class ChannelListComponent implements OnInit {
     if (this.newChannelName.trim()) {
       this.apiService.createChannel(this.newChannelName.trim()).subscribe({
         next: (newChannel) => {
-          this.channels.push(newChannel);
+          // No need to manually add the channel here as it will come through the WebSocket
           this.selectChannel(newChannel);
           this.closeCreateChannelModal();
         },
         error: (error) => {
           console.error('Error creating channel:', error);
-          // Here you could add error handling UI feedback
         }
       });
     }

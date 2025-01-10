@@ -11,12 +11,12 @@ import { DirectMessageModule } from '../direct-message/direct-message.module';
 
 @Module({
   imports: [
-    UserModule,
-    ChannelModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => ChannelModule),
     forwardRef(() => MessageModule),
-    AuthModule,
-    PresenceModule,
-    DirectMessageModule
+    forwardRef(() => AuthModule),
+    forwardRef(() => PresenceModule),
+    forwardRef(() => DirectMessageModule)
   ],
   providers: [
     ChatGateway,
