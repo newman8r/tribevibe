@@ -11,6 +11,7 @@ import { SignUpDto, SignInDto, AuthResponse } from '../interfaces/auth.interface
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private accessTokenSubject = new BehaviorSubject<string | null>(null);
+  private hadPreviousSessionFlag = false;
   
   currentUser$ = this.currentUserSubject.asObservable();
   accessToken$ = this.accessTokenSubject.asObservable();
@@ -24,6 +25,7 @@ export class AuthService {
       const storedAuth = localStorage.getItem('auth');
       if (storedAuth) {
         const auth = JSON.parse(storedAuth);
+        this.hadPreviousSessionFlag = true;
         if (auth.user) this.currentUserSubject.next(auth.user);
         if (auth.session?.access_token) {
           console.log('Initializing with token:', auth.session.access_token);
@@ -56,6 +58,7 @@ export class AuthService {
     
     console.log('Handling auth response:', authData);
     localStorage.setItem('auth', JSON.stringify(authData));
+    this.hadPreviousSessionFlag = true;
     
     this.currentUserSubject.next(response.user);
     if (response.session?.access_token) {
@@ -81,6 +84,7 @@ export class AuthService {
     localStorage.removeItem('auth');
     this.currentUserSubject.next(null);
     this.accessTokenSubject.next(null);
+    // Don't reset hadPreviousSessionFlag on logout
   }
 
   getCurrentUser(): User | null {
@@ -89,5 +93,9 @@ export class AuthService {
 
   getSessionToken(): string | null {
     return this.accessTokenSubject.value;
+  }
+
+  hadPreviousSession(): boolean {
+    return this.hadPreviousSessionFlag;
   }
 } 
