@@ -1,0 +1,25 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Feature Locked</h2>
+      <button class="close-button" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="icon-wrapper">
+        <i class="fas fa-lock"></i>
+      </div>
+      <p class="message">{{ feature }} requires registration</p>
+      <p class="sub-message">Join our community to unlock all features!</p>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="register-button" (click)="navigateToRegister()">
+        <span class="button-text">Register Now</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div> 
