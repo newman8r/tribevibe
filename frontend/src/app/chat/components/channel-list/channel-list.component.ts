@@ -7,12 +7,13 @@ import { ChannelStateService } from '../../../core/services/channel-state.servic
 import { Channel } from '../../../core/interfaces/channel.interface';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { Subscription } from 'rxjs';
+import { AuthPromptModalComponent } from '../../../shared/components/auth-prompt-modal/auth-prompt-modal.component';
 
 @Component({
   selector: 'app-channel-list',
   templateUrl: './channel-list.component.html',
   styleUrls: ['./channel-list.component.scss'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AuthPromptModalComponent],
   standalone: true
 })
 export class ChannelListComponent implements OnInit, OnDestroy {
@@ -20,6 +21,7 @@ export class ChannelListComponent implements OnInit, OnDestroy {
   selectedChannel: Channel | null = null;
   isLoggedIn = false;
   showCreateModal = false;
+  showAuthPromptModal = false;
   newChannelName = '';
   private subscriptions: Subscription[] = [];
 
@@ -68,6 +70,10 @@ export class ChannelListComponent implements OnInit, OnDestroy {
   }
 
   openCreateChannelModal() {
+    if (!this.isLoggedIn) {
+      this.showAuthPromptModal = true;
+      return;
+    }
     this.showCreateModal = true;
     this.newChannelName = '';
   }

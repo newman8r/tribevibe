@@ -2,7 +2,6 @@
   <div class="channel-header-container">
     <h3 class="channel-header gradient-text">Channels</h3>
     <button 
-      *ngIf="isLoggedIn" 
       class="create-channel-btn" 
       (click)="openCreateChannelModal()">
       +
@@ -41,4 +40,11 @@
       </button>
     </div>
   </div>
-</div> 
+</div>
+
+<!-- Auth Prompt Modal -->
+<app-auth-prompt-modal
+  *ngIf="showAuthPromptModal"
+  [feature]="'Creating channels'"
+  (close)="showAuthPromptModal = false">
+</app-auth-prompt-modal> 
