@@ -112,3 +112,53 @@ body.loading .auth-container {
   visibility: visible;
   transition: visibility 0s;
 }
+
+/* iOS Safari-specific styles */
+@supports (-webkit-touch-callout: none) {
+  .chat-container {
+    /* Prevent overscroll bounce */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Add padding for the safe area */
+  .mobile-nav {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Adjust message container for iOS */
+  .messages-container {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Ensure message editor stays above keyboard */
+  .message-editor {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    margin-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+// iOS Safari-specific fixes
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    height: -webkit-fill-available;
+    overflow: auto;
+    position: fixed;
+    width: 100%;
+    
+    // Prevent elastic scrolling
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chat-container {
+    height: -webkit-fill-available;
+    
+    // Ensure proper stacking context
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+}

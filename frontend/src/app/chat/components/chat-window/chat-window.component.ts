@@ -87,6 +87,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   showEmojiPicker = false;
   private messageInputElement: HTMLTextAreaElement | null = null;
 
+  // Add new property for iOS Safari detection
+  isSafariIOS = false;
+
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
@@ -98,6 +101,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.anonymousId = localStorage.getItem('anonymousId') || 
       'anonymous-' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('anonymousId', this.anonymousId);
+
+    // Add iOS Safari detection
+    this.isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                       !('MSStream' in window) &&
+                       /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   }
 
   ngOnInit() {

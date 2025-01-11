@@ -10,6 +10,30 @@
   position: relative;
   background-color: var(--surface-dark);
 
+  @supports (-webkit-touch-callout: none) {
+    // Prevent content from being hidden under the navigation bar in iOS Safari
+    padding-bottom: env(safe-area-inset-bottom);
+    min-height: -webkit-fill-available;
+    
+    .message-editor {
+      // Push the editor up when keyboard is open
+      position: sticky;
+      bottom: 0;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+      margin-bottom: env(safe-area-inset-bottom);
+      z-index: 1000;
+      
+      // Add backdrop blur for better visibility
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .messages-container {
+      // Ensure messages don't get hidden behind the keyboard
+      padding-bottom: calc(env(safe-area-inset-bottom) + 60px);
+    }
+  }
+
   .chat-header {
     flex-shrink: 0;
     padding: 1rem;
@@ -90,6 +114,11 @@
     background: rgba(var(--surface-medium-rgb), 0.3);
     padding: 1rem;
     position: relative;
+    
+    @supports (-webkit-touch-callout: none) {
+      /* Add padding for iOS devices */
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+    }
 
     .editor-toolbar {
       display: flex;
@@ -1508,5 +1537,12 @@
   100% {
     opacity: 0.2;
     filter: brightness(1);
+  }
+} 
+
+.nav-bar {
+  &.ios-safari {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    bottom: env(safe-area-inset-bottom, 0);
   }
 } 

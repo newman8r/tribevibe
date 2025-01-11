@@ -30,7 +30,7 @@
            [attr.data-message-id]="message.id"
            (mouseenter)="onMessageMouseEnter(message.id)"
            (mouseleave)="onMessageMouseLeave()">
-        <div class="message-avatar" (click)="message.user?.id && openDirectMessage(message.user?.id)" [class.clickable]="message.user?.id">
+        <div class="message-avatar">
           <img [src]="getAvatarUrl(message)" [alt]="message.username">
         </div>
         <div class="message-content">
@@ -187,7 +187,7 @@
     </div>
     <div class="thread-content" #threadContent>
       <div class="parent-message" *ngIf="activeThread">
-        <div class="message-avatar" (click)="activeThread.user?.id && openDirectMessage(activeThread.user?.id)" [class.clickable]="activeThread.user?.id">
+        <div class="message-avatar">
           <img [src]="getAvatarUrl(activeThread)" [alt]="activeThread.username">
         </div>
         <div class="message-content">
@@ -206,7 +206,7 @@
       </div>
       <div class="thread-replies">
         <div class="message" *ngFor="let reply of threadReplies">
-          <div class="message-avatar" (click)="reply.user?.id && openDirectMessage(reply.user?.id)" [class.clickable]="reply.user?.id">
+          <div class="message-avatar">
             <img [src]="getAvatarUrl(reply)" [alt]="reply.username">
           </div>
           <div class="message-content">
@@ -261,7 +261,7 @@
       
       <div class="messages-list" *ngIf="directMessages.length > 0">
         <div class="message" *ngFor="let message of directMessages">
-          <div class="message-avatar" (click)="message.user?.id && openDirectMessage(message.user?.id)" [class.clickable]="message.user?.id">
+          <div class="message-avatar">
             <img [src]="getAvatarUrl(message)" [alt]="message.username">
           </div>
           <div class="message-content">
@@ -291,27 +291,6 @@
         <i class="fas fa-paper-plane"></i>
       </button>
     </div>
-    <!-- Add user profile section -->
-    <div class="dm-profile" *ngIf="activeDMUser">
-      <div class="profile-avatar">
-        <img [src]="activeDMUser.avatarUrl || getDMAvatarUrl(activeDMUser)" [alt]="activeDMUser.username">
-        <span class="status-dot" [class]="getDMUserStatus()"></span>
-      </div>
-      <div class="profile-info">
-        <h3 class="profile-name">{{ activeDMUser.username }}</h3>
-        <p class="profile-status">{{ getDMUserStatus() }}</p>
-        <div class="profile-meta">
-          <span class="meta-item">
-            <i class="fas fa-clock"></i>
-            Local time: {{ getCurrentTime() | date:'shortTime' }}
-          </span>
-          <span class="meta-item">
-            <i class="fas fa-user"></i>
-            User ID: {{ activeDMUser.id }}
-          </span>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Add the search panel component -->
@@ -335,4 +314,9 @@
     [feature]="authPromptFeature"
     (close)="showAuthPromptModal = false">
   </app-auth-prompt-modal>
+
+  <!-- Add the nav bar component -->
+  <div class="nav-bar" [class.ios-safari]="isSafariIOS">
+    <!-- your nav bar content -->
+  </div>
 </div> 
