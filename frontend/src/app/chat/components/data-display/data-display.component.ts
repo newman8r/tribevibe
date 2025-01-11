@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
-export type ExplorerType = 'event' | 'map' | 'directions' | 'setlist' | 'stream' | 'photos';
+export type ExplorerType = 'map' | 'setlist' | 'stream' | 'photos' | 'merch' | 'tickets' | 'gear' | 'event' | 'directions';
 
 @Component({
   selector: 'app-data-display',
@@ -93,6 +93,18 @@ export class DataDisplayComponent implements OnInit {
     photos: {
       title: 'Photo Gallery',
       content: 'Captured moments from previous events and current installations.'
+    },
+    merch: {
+      title: 'Merchandise',
+      content: 'Official festival merchandise and exclusive collectibles.'
+    },
+    tickets: {
+      title: 'Tickets',
+      content: 'Purchase tickets and VIP packages for the festival.'
+    },
+    gear: {
+      title: 'Festival Gear',
+      content: 'Essential gear and accessories for the festival experience.'
     }
   };
 } 

@@ -495,6 +495,179 @@
           }
         }
       }
+
+      // Merchandise Styles
+      .merch {
+        .merch-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          
+          .merch-item {
+            background: rgba(var(--surface-medium-rgb), 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(var(--surface-light-rgb), 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            
+            &:hover {
+              transform: translateY(-2px);
+              border-color: var(--accent-1);
+              box-shadow: 0 0 20px rgba(var(--accent-1-rgb), 0.2);
+            }
+            
+            .merch-preview {
+              height: 150px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: rgba(0, 0, 0, 0.2);
+              
+              i {
+                font-size: 3rem;
+                color: var(--accent-1);
+              }
+            }
+            
+            .merch-info {
+              padding: 1rem;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              
+              .name {
+                font-weight: 500;
+              }
+              
+              .price {
+                color: var(--accent-2);
+              }
+            }
+          }
+        }
+      }
+
+      // Tickets Styles
+      .tickets {
+        .ticket-options {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+          
+          .ticket-tier {
+            background: rgba(var(--surface-medium-rgb), 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(var(--surface-light-rgb), 0.1);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            
+            &.featured {
+              border-color: var(--accent-1);
+              background: linear-gradient(
+                135deg,
+                rgba(var(--accent-1-rgb), 0.1),
+                rgba(var(--accent-2-rgb), 0.1)
+              );
+            }
+            
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 0 20px rgba(var(--accent-1-rgb), 0.2);
+            }
+            
+            .tier-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 1rem;
+              
+              h4 {
+                margin: 0;
+                font-size: 1.2rem;
+                color: var(--accent-1);
+              }
+              
+              .price {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--accent-2);
+              }
+            }
+            
+            .tier-features {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              
+              li {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid rgba(var(--surface-light-rgb), 0.1);
+                
+                &:last-child {
+                  border-bottom: none;
+                }
+                
+                &::before {
+                  content: '✓';
+                  color: var(--accent-1);
+                  margin-right: 0.5rem;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Gear Styles
+      .gear {
+        .gear-categories {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+          
+          .gear-category {
+            background: rgba(var(--surface-medium-rgb), 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(var(--surface-light-rgb), 0.1);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            
+            &:hover {
+              transform: translateY(-2px);
+              border-color: var(--accent-1);
+              box-shadow: 0 0 20px rgba(var(--accent-1-rgb), 0.2);
+            }
+            
+            i {
+              font-size: 2rem;
+              color: var(--accent-1);
+              margin-bottom: 1rem;
+            }
+            
+            h4 {
+              margin: 0 0 1rem 0;
+              color: var(--accent-2);
+            }
+            
+            ul {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              text-align: left;
+              
+              li {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid rgba(var(--surface-light-rgb), 0.1);
+                
+                &:last-child {
+                  border-bottom: none;
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

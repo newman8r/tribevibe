@@ -150,6 +150,83 @@
           </div>
         </div>
 
+        <!-- Merchandise -->
+        <div *ngSwitchCase="'merch'" class="merch content-section">
+          <div class="merch-grid">
+            <div class="merch-item" *ngFor="let i of [1,2,3,4]">
+              <div class="merch-preview">
+                <i class="fas fa-tshirt"></i>
+              </div>
+              <div class="merch-info">
+                <span class="name">Limited Edition Tee</span>
+                <span class="price">$35.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tickets -->
+        <div *ngSwitchCase="'tickets'" class="tickets content-section">
+          <div class="ticket-options">
+            <div class="ticket-tier">
+              <div class="tier-header">
+                <h4>General Admission</h4>
+                <span class="price">$199</span>
+              </div>
+              <ul class="tier-features">
+                <li>3-day festival access</li>
+                <li>Access to main stages</li>
+                <li>Food court access</li>
+              </ul>
+            </div>
+            <div class="ticket-tier featured">
+              <div class="tier-header">
+                <h4>VIP Experience</h4>
+                <span class="price">$399</span>
+              </div>
+              <ul class="tier-features">
+                <li>All GA benefits</li>
+                <li>VIP viewing areas</li>
+                <li>Exclusive lounge access</li>
+                <li>Meet & greet opportunities</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Festival Gear -->
+        <div *ngSwitchCase="'gear'" class="gear content-section">
+          <div class="gear-categories">
+            <div class="gear-category">
+              <i class="fas fa-campground"></i>
+              <h4>Camping</h4>
+              <ul>
+                <li>Tents</li>
+                <li>Sleeping bags</li>
+                <li>Portable chairs</li>
+              </ul>
+            </div>
+            <div class="gear-category">
+              <i class="fas fa-battery-full"></i>
+              <h4>Electronics</h4>
+              <ul>
+                <li>Portable chargers</li>
+                <li>LED accessories</li>
+                <li>Smart wristbands</li>
+              </ul>
+            </div>
+            <div class="gear-category">
+              <i class="fas fa-tint"></i>
+              <h4>Essentials</h4>
+              <ul>
+                <li>Water bottles</li>
+                <li>Sun protection</li>
+                <li>First aid kits</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <!-- Default Content -->
         <div *ngSwitchDefault class="default-content">
           {{ dummyData[activeType].content }}

@@ -95,18 +95,72 @@
       display: flex;
       gap: 0.5rem;
       margin-bottom: 0.5rem;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
       
-      .toolbar-btn {
-        background: transparent;
-        border: none;
-        color: var(--primary-light);
-        padding: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        
-        &:hover {
-          color: var(--accent-1);
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+
+        .welcome-message {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-left: 1rem;
+          font-size: 0.85rem;
+          color: var(--primary-light);
+          opacity: 0.7;
+
+          i {
+            color: var(--accent-1);
+            font-size: 0.9rem;
+          }
+
+          .login-link {
+            background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            position: relative;
+            padding: 0.25rem 0.5rem;
+            margin-left: 0.25rem;
+            
+            &::before {
+              content: '';
+              position: absolute;
+              inset: 0;
+              background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+              opacity: 0;
+              border-radius: 4px;
+              transition: opacity 0.3s ease;
+            }
+
+            &:hover {
+              text-shadow: 0 0 10px var(--accent-1);
+              
+              &::before {
+                opacity: 0.1;
+              }
+            }
+          }
         }
+      }
+    }
+
+    .toolbar-btn {
+      background: transparent;
+      border: none;
+      color: var(--primary-light);
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        color: var(--accent-1);
       }
     }
 

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { ChannelStateService } from '../../../core/services/channel-state.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -30,6 +31,7 @@ interface AttachedFile {
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     SearchPanelComponent,
     FileUploadPanelComponent,
     AuthPromptModalComponent,
@@ -40,6 +42,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   messages: Message[] = [];
   messageText = '';
   currentChannel: Channel | null = null;
+  currentUser: User | null = null;
   private subscriptions: Subscription[] = [];
   private anonymousId: string;
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -98,6 +101,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Subscribe to auth changes
+    this.subscriptions.push(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+      })
+    );
+
     // Get initial channel state
     const initialChannel = this.channelStateService.getCurrentChannel();
     if (initialChannel) {
