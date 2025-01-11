@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebsocketService } from '../core/services/websocket.service';
 import { ExplorerComponent } from './components/explorer/explorer.component';
@@ -26,24 +26,78 @@ import { ExplorerType } from './components/data-display/data-display.component';
   ],
   standalone: true
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
+  @ViewChild(DataDisplayComponent) dataDisplay!: DataDisplayComponent;
+  
   activeExplorerType: ExplorerType = 'event';
   showLeftPanel = false;
   showRightPanel = false;
   isMobile = window.innerWidth <= 992;
+  lastScrollTop = 0;
+  hideNavOnScroll = false;
+  isScrolling = false;
+  scrollTimeout: any;
 
   constructor(private websocketService: WebsocketService) {}
+
+  ngOnInit() {
+    // Set initial state based on screen size
+    if (this.isMobile && this.dataDisplay) {
+      this.dataDisplay.isExpanded = false;
+    }
+  }
 
   @HostListener('window:resize')
   onResize() {
     const wasMobile = this.isMobile;
     this.isMobile = window.innerWidth <= 992;
     
-    // Reset panels when transitioning from mobile to desktop
     if (wasMobile && !this.isMobile) {
+      // Switching to desktop
       this.showLeftPanel = false;
       this.showRightPanel = false;
+      if (this.dataDisplay) {
+        this.dataDisplay.isExpanded = true;
+      }
+    } else if (!wasMobile && this.isMobile) {
+      // Switching to mobile
+      if (this.dataDisplay) {
+        this.dataDisplay.isExpanded = false;
+      }
     }
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onScroll(event: any) {
+    if (!this.isMobile) return;
+
+    // Clear existing timeout
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+    }
+
+    const st = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Immediately collapse on scroll down
+    if (st > this.lastScrollTop && st > 20) {
+      this.hideNavOnScroll = true;
+      if (this.dataDisplay) {
+        this.dataDisplay.isExpanded = false;
+      }
+    } else if (st < this.lastScrollTop || st <= 20) {
+      this.hideNavOnScroll = false;
+      // Don't auto-expand on scroll up, let user control that
+    }
+    
+    this.lastScrollTop = st <= 0 ? 0 : st;
+    
+    // Set a flag that we're currently scrolling
+    this.isScrolling = true;
+    
+    // Reset the scrolling flag after scrolling stops
+    this.scrollTimeout = setTimeout(() => {
+      this.isScrolling = false;
+    }, 150);
   }
 
   toggleLeftPanel() {
@@ -62,9 +116,11 @@ export class ChatComponent {
 
   onExplorerItemSelected(type: ExplorerType) {
     this.activeExplorerType = type;
-    // On mobile, automatically close the right panel after selection
     if (this.isMobile) {
       this.showRightPanel = false;
+      if (this.dataDisplay) {
+        this.dataDisplay.isExpanded = true;
+      }
     }
   }
 } 

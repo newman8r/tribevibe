@@ -1,9 +1,9 @@
-import { Component, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { Component, Input, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { trigger, state, style, animate, transition } from '@angular/animations';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
-export type ExplorerType = 'map' | 'setlist' | 'stream' | 'photos' | 'merch' | 'tickets' | 'gear' | 'event' | 'directions';
+export type ExplorerType = 'event' | 'map' | 'directions' | 'setlist' | 'stream' | 'photos';
 
 @Component({
   selector: 'app-data-display',
@@ -15,23 +15,23 @@ export type ExplorerType = 'map' | 'setlist' | 'stream' | 'photos' | 'merch' | '
     trigger('panelState', [
       state('collapsed', style({
         height: '0',
-        opacity: 0,
-        padding: '0',
-        margin: '0'
+        opacity: '0',
+        padding: '0'
       })),
       state('expanded', style({
         height: '*',
-        opacity: 1
+        opacity: '1'
       })),
-      transition('collapsed <=> expanded', [
-        animate('300ms ease-in-out')
+      transition('expanded <=> collapsed', [
+        animate('300ms cubic-bezier(0.4, 0, 0.2, 1)')
       ])
     ])
   ]
 })
-export class DataDisplayComponent implements OnChanges, OnInit {
-  @Input() activeType: ExplorerType | null = 'event';
+export class DataDisplayComponent implements OnInit {
+  @Input() activeType: ExplorerType = 'event';
   isExpanded = true;
+  isMobile = window.innerWidth <= 992;
   youtubeUrl: SafeResourceUrl;
 
   constructor(private sanitizer: DomSanitizer) {
@@ -39,68 +39,60 @@ export class DataDisplayComponent implements OnChanges, OnInit {
   }
 
   ngOnInit() {
-    this.activeType = 'event';
-    this.isExpanded = true;
+    // Set initial state based on screen size
+    this.isExpanded = !this.isMobile;
   }
 
-  private getRandomizedYoutubeUrl(): SafeResourceUrl {
-    // Video is 2:13 long (133 seconds), let's start at a random point
-    const maxSeconds = 133;
-    const randomStart = Math.floor(Math.random() * maxSeconds);
-    const url = `https://www.youtube.com/embed/AkdzXzeiHF4?start=${randomStart}&autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=AkdzXzeiHF4`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-  }
-
-  // Dummy data for each type
-  dummyData = {
-    event: {
-      title: 'Event Information',
-      content: 'Neon Nights Festival 2025 - A three-day immersive experience featuring top electronic artists, interactive art installations, and cutting-edge technology displays.'
-    },
-    map: {
-      title: 'Event Map',
-      content: 'Interactive venue map showing all stages, facilities, and points of interest. Navigate between the Main Stage, Cyber Stage, and Digital Dreams Arena.'
-    },
-    directions: {
-      title: 'Getting Here',
-      content: 'Located at TechPark Plaza. Accessible via public transit (Cyber Line) or car with dedicated parking. Shuttle service available from downtown.'
-    },
-    setlist: {
-      title: 'Festival Lineup',
-      content: 'Complete schedule of performances across all stages. Featuring headliners ByteBeats, Digital Dreamers, and Quantum Collective.'
-    },
-    stream: {
-      title: 'Live Streams',
-      content: 'Watch live performances from any stage in real-time. Multi-angle views and interactive chat available.'
-    },
-    photos: {
-      title: 'Photo Gallery',
-      content: 'Explore professional shots and community uploads from the event. Share your own festival moments with #NeonNights2024.'
-    },
-    merch: {
-      title: 'Merchandise',
-      content: 'Official festival merchandise and limited edition collectibles. Pre-order exclusive items for pickup at the venue.'
-    },
-    tickets: {
-      title: 'Ticket Information',
-      content: 'Available passes include Single Day, Full Festival, and VIP Experience. Early bird pricing ends soon.'
-    },
-    gear: {
-      title: 'Festival Gear',
-      content: 'Essential gear recommendations and rental options. From LED accessories to comfort items for the perfect festival experience.'
+  @HostListener('window:resize')
+  onResize() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth <= 992;
+    
+    // Collapse when transitioning to mobile
+    if (!wasMobile && this.isMobile) {
+      this.isExpanded = false;
     }
-  };
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['activeType'] && changes['activeType'].currentValue) {
+    // Expand when transitioning to desktop
+    else if (wasMobile && !this.isMobile) {
       this.isExpanded = true;
-      if (changes['activeType'].currentValue === 'event') {
-        this.youtubeUrl = this.getRandomizedYoutubeUrl();
-      }
     }
   }
 
   togglePanel() {
     this.isExpanded = !this.isExpanded;
   }
+
+  private getRandomizedYoutubeUrl(): SafeResourceUrl {
+    const videoId = 'AkdzXzeiHF4';
+    const startTime = Math.floor(Math.random() * 300); // Random start time between 0-300 seconds
+    const url = `https://www.youtube.com/embed/${videoId}?start=${startTime}&autoplay=1&mute=1&controls=0&showinfo=0&loop=1&playlist=${videoId}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  readonly dummyData = {
+    event: {
+      title: 'Event Information',
+      content: 'Welcome to Neon Nights 2025, the most immersive cyberpunk music festival experience. Featuring groundbreaking artists, interactive installations, and cutting-edge technology integrations across multiple stages.'
+    },
+    map: {
+      title: 'Festival Map',
+      content: 'Interactive map showing all stages, facilities, and points of interest.'
+    },
+    directions: {
+      title: 'Getting There',
+      content: 'Multiple transportation options available including automated shuttles and designated landing pads for flying vehicles.'
+    },
+    setlist: {
+      title: 'Performance Schedule',
+      content: 'Complete lineup and timing information for all stages.'
+    },
+    stream: {
+      title: 'Live Streams',
+      content: 'Watch live performances from any stage in real-time.'
+    },
+    photos: {
+      title: 'Photo Gallery',
+      content: 'Captured moments from previous events and current installations.'
+    }
+  };
 } 

@@ -23,9 +23,9 @@
   </div>
 
   <ng-container *ngIf="currentUser; else registerButton">
-    <button class="logout-btn" (click)="logout()">
+    <a class="logout-link" (click)="logout()">
       Logout
-    </button>
+    </a>
   </ng-container>
   
   <ng-template #registerButton>

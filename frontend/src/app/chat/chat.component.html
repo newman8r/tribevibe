@@ -23,16 +23,19 @@
   </div>
 
   <!-- Mobile Navigation -->
-  <div class="mobile-nav">
+  <div class="mobile-nav" [class.hide-nav]="hideNavOnScroll">
     <button 
+      class="menu-button"
       [class.active]="showLeftPanel"
       (click)="toggleLeftPanel()">
       <i class="fas fa-bars"></i>
+      <span>Channels</span>
     </button>
     <button 
       [class.active]="showRightPanel"
       (click)="toggleRightPanel()">
       <i class="fas fa-compass"></i>
+      <span>Explorer</span>
     </button>
   </div>
 </div> 
