@@ -2,10 +2,13 @@
   display: block;
   height: 100vh;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 :host ::ng-deep body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  height: 100vh;
 }

@@ -9,6 +9,7 @@
   overflow: hidden;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 
   &::before {
     content: '';
@@ -28,12 +29,14 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  box-sizing: border-box;
 }
 
 .left-panel {
   border-right: 1px solid var(--surface-light);
-  height: 100%;
-overflow: scroll;
+  overflow: hidden;
   
   .user-profile {
     padding: 1.5rem;
@@ -41,6 +44,7 @@ overflow: scroll;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    flex-shrink: 0;
     
     .avatar-wrapper {
       position: relative;
@@ -76,8 +80,7 @@ overflow: scroll;
   border-left: 1px solid var(--surface-light);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
   
   // Cyberpunk scrollbar styling
   &::-webkit-scrollbar {
@@ -106,10 +109,6 @@ overflow: scroll;
     }
   }
 
-  .promo-section {
-    flex-shrink: 0;
-  }
-
   .explorer-section {
     flex-shrink: 0;
   }
@@ -117,6 +116,7 @@ overflow: scroll;
   .user-list-section {
     flex: 1;
     min-height: 200px;
+    overflow-y: auto;
   }
 }
 

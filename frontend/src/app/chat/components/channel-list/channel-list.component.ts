@@ -8,6 +8,7 @@ import { Channel } from '../../../core/interfaces/channel.interface';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { Subscription } from 'rxjs';
 import { AuthPromptModalComponent } from '../../../shared/components/auth-prompt-modal/auth-prompt-modal.component';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-channel-list',
@@ -25,11 +26,17 @@ export class ChannelListComponent implements OnInit, OnDestroy {
   newChannelName = '';
   private subscriptions: Subscription[] = [];
 
+  // SoundCloud player properties
+  soundcloudPlayerUrl: SafeResourceUrl | null = null;
+  readonly playlistUrl = 'https://soundcloud.com/bradmoontribe/sets/most-loved-moontribe-mixes';
+  private readonly embedUrl = 'https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/bradmoontribe/sets/most-loved-moontribe-mixes&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
     private channelStateService: ChannelStateService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -50,6 +57,9 @@ export class ChannelListComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Initialize SoundCloud player
+    this.soundcloudPlayerUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.embedUrl);
   }
 
   ngOnDestroy() {
