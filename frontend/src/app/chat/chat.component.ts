@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebsocketService } from '../core/services/websocket.service';
 import { ExplorerComponent } from './components/explorer/explorer.component';
@@ -28,10 +28,43 @@ import { ExplorerType } from './components/data-display/data-display.component';
 })
 export class ChatComponent {
   activeExplorerType: ExplorerType = 'event';
+  showLeftPanel = false;
+  showRightPanel = false;
+  isMobile = window.innerWidth <= 992;
 
   constructor(private websocketService: WebsocketService) {}
 
+  @HostListener('window:resize')
+  onResize() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth <= 992;
+    
+    // Reset panels when transitioning from mobile to desktop
+    if (wasMobile && !this.isMobile) {
+      this.showLeftPanel = false;
+      this.showRightPanel = false;
+    }
+  }
+
+  toggleLeftPanel() {
+    this.showLeftPanel = !this.showLeftPanel;
+    if (this.showLeftPanel && this.isMobile) {
+      this.showRightPanel = false;
+    }
+  }
+
+  toggleRightPanel() {
+    this.showRightPanel = !this.showRightPanel;
+    if (this.showRightPanel && this.isMobile) {
+      this.showLeftPanel = false;
+    }
+  }
+
   onExplorerItemSelected(type: ExplorerType) {
     this.activeExplorerType = type;
+    // On mobile, automatically close the right panel after selection
+    if (this.isMobile) {
+      this.showRightPanel = false;
+    }
   }
 } 

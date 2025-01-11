@@ -1,6 +1,6 @@
 <div class="chat-container">
   <!-- Left Section -->
-  <div class="left-panel">
+  <div class="left-panel" [class.show]="showLeftPanel">
     <app-user-profile></app-user-profile>
     <app-channel-list></app-channel-list>
   </div>
@@ -12,7 +12,7 @@
   </div>
 
   <!-- Right Section -->
-  <div class="right-panel">
+  <div class="right-panel" [class.show]="showRightPanel">
     <div class="explorer-section">
       <app-explorer (itemSelected)="onExplorerItemSelected($event)"></app-explorer>
     </div>
@@ -20,5 +20,19 @@
     <div class="user-list-section">
       <app-user-list></app-user-list>
     </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav">
+    <button 
+      [class.active]="showLeftPanel"
+      (click)="toggleLeftPanel()">
+      <i class="fas fa-bars"></i>
+    </button>
+    <button 
+      [class.active]="showRightPanel"
+      (click)="toggleRightPanel()">
+      <i class="fas fa-compass"></i>
+    </button>
   </div>
 </div> 
