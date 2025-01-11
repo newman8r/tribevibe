@@ -681,4 +681,16 @@ setInterval(() => {
       this.showEmojiPicker = false;
     }
   }
+
+  getCurrentTime(): Date {
+    return new Date();
+  }
+
+  getDMAvatarUrl(user: User): string {
+    if (user.avatarUrl) {
+      return user.avatarUrl;
+    }
+    // Generate an avatar using the user's ID
+    return `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`;
+  }
 } 

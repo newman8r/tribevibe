@@ -233,11 +233,24 @@
       width: 40px;
       height: 40px;
       
+      &.clickable {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        
+        &:hover {
+          transform: scale(1.1);
+          img {
+            box-shadow: 0 0 10px rgba(var(--accent-1-rgb), 0.5);
+          }
+        }
+      }
+      
       img {
         width: 100%;
         height: 100%;
         border-radius: 50%;
         object-fit: cover;
+        transition: box-shadow 0.2s ease;
       }
     }
 
@@ -1179,6 +1192,19 @@
     backdrop-filter: blur(8px);
     display: flex;
     gap: 0.5rem;
+    position: relative;
+
+    // Add a subtle cyberpunk pattern to the editor background
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(135deg, 
+          rgba(var(--accent-2-rgb), 0.02) 0%,
+          rgba(var(--accent-3-rgb), 0.02) 100%);
+      pointer-events: none;
+    }
 
     .dm-input {
       flex: 1;
@@ -1186,16 +1212,69 @@
       max-height: 120px;
       padding: 0.75rem;
       border-radius: 8px;
-      border: 1px solid rgba(var(--accent-2-rgb), 0.1);
-      background: rgba(var(--surface-medium-rgb), 0.6);
+      background: rgba(var(--surface-dark-rgb), 0.6);
       color: var(--text-primary);
       resize: vertical;
       font-family: inherit;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 0 0 1px rgba(var(--accent-1-rgb), 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+
+      // Neon border effect
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(
+          45deg,
+          rgba(255, 0, 128, 0.7),  /* Neon pink */
+          rgba(0, 255, 255, 0.7)   /* Neon cyan */
+        );
+        border-radius: 10px;
+        z-index: -1;
+        opacity: 0.2;
+        transition: opacity 0.3s ease;
+        animation: neonPulse 2s infinite;
+      }
+
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 
+          0 0 0 1px rgba(var(--accent-1-rgb), 0.5),
+          0 0 10px rgba(255, 0, 128, 0.3),
+          0 0 20px rgba(0, 255, 255, 0.2),
+          inset 0 0 30px rgba(0, 0, 0, 0.5);
+
+        &::before {
+          opacity: 0.4;
+        }
+      }
 
       &:focus {
         outline: none;
-        border-color: var(--accent-2);
-        box-shadow: 0 0 10px rgba(var(--accent-2-rgb), 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(var(--surface-dark-rgb), 0.8);
+        box-shadow: 
+          0 0 0 1px rgba(var(--accent-1-rgb), 0.7),
+          0 0 15px rgba(255, 0, 128, 0.4),
+          0 0 30px rgba(0, 255, 255, 0.3),
+          inset 0 0 30px rgba(0, 0, 0, 0.5);
+
+        &::before {
+          opacity: 0.6;
+        }
+
+        &::placeholder {
+          color: rgba(var(--primary-light-rgb), 0.7);
+        }
+      }
+
+      &::placeholder {
+        color: rgba(var(--primary-light-rgb), 0.5);
+        transition: color 0.3s ease;
       }
     }
 
@@ -1203,18 +1282,54 @@
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 8px;
-      background: var(--primary);
-      color: white;
+      background: linear-gradient(
+        45deg,
+        var(--accent-2),
+        var(--accent-3)
+      );
+      color: var(--primary-light);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        width: 300%;
+        height: 300%;
+        background: linear-gradient(
+          45deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: transform 0.5s ease;
+        transform: translate(-100%, -100%) rotate(45deg);
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 
+          0 5px 15px rgba(var(--accent-2-rgb), 0.2),
+          0 10px 30px rgba(var(--accent-3-rgb), 0.1);
+
+        &::before {
+          transform: translate(100%, 100%) rotate(45deg);
+        }
+      }
 
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        background: var(--surface-medium);
       }
 
-      &:not(:disabled):hover {
-        background: var(--primary-light);
+      i {
+        position: relative;
+        z-index: 1;
       }
     }
   }
@@ -1269,5 +1384,129 @@
   }
   100% {
     background-position: 200% 0;
+  }
+} 
+
+.dm-profile {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(var(--surface-dark-rgb), 0.7);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(var(--accent-2-rgb), 0.1);
+  position: relative;
+
+  // Add cyberpunk background effect
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      linear-gradient(135deg, 
+        rgba(var(--accent-2-rgb), 0.03) 0%,
+        rgba(var(--accent-3-rgb), 0.03) 100%),
+      repeating-linear-gradient(
+        45deg,
+        transparent 0,
+        transparent 10px,
+        rgba(var(--accent-2-rgb), 0.02) 10px,
+        rgba(var(--accent-2-rgb), 0.02) 11px
+      );
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .profile-avatar {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    z-index: 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent-2);
+      box-shadow: 0 0 20px rgba(var(--accent-2-rgb), 0.2);
+    }
+
+    .status-dot {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    z-index: 1;
+
+    .profile-name {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: linear-gradient(45deg, var(--accent-2), var(--accent-3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 15px rgba(var(--accent-2-rgb), 0.3);
+    }
+
+    .profile-status {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: capitalize;
+    }
+
+    .profile-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-light);
+        font-size: 0.9rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background: rgba(var(--surface-medium-rgb), 0.3);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(var(--accent-2-rgb), 0.1);
+
+        i {
+          color: var(--accent-2);
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+} 
+
+@keyframes neonPulse {
+  0% {
+    opacity: 0.2;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.3;
+    filter: brightness(1.2);
+  }
+  100% {
+    opacity: 0.2;
+    filter: brightness(1);
   }
 } 
