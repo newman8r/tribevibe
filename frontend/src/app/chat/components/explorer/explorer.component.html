@@ -5,6 +5,7 @@
     <div *ngFor="let item of explorerItems" 
          class="explorer-item" 
          [class.new]="item.isNew"
+         [class.active]="item.type === activeType"
          (click)="onItemClick(item.type)">
       <div class="item-main">
         <div class="icon">{{item.icon}}</div>

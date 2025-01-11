@@ -35,6 +35,30 @@
       color: var(--primary-light);
     }
 
+    &.active {
+      background-color: rgba(var(--accent-1-rgb), 0.15);
+      border-color: var(--accent-1);
+      box-shadow: 0 0 15px rgba(var(--accent-1-rgb), 0.3),
+                  inset 0 0 5px rgba(var(--accent-1-rgb), 0.2);
+      transform: translateX(4px);
+
+      .item-action {
+        opacity: 1;
+        color: var(--accent-1);
+      }
+
+      .hover-effect {
+        opacity: 0.15;
+      }
+
+      .item-info {
+        .label {
+          color: var(--accent-1);
+          text-shadow: 0 0 8px rgba(var(--accent-1-rgb), 0.5);
+        }
+      }
+    }
+
     .item-main {
       display: flex;
       align-items: center;

@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface ExplorerItem {
@@ -17,6 +17,7 @@ interface ExplorerItem {
   imports: [CommonModule]
 })
 export class ExplorerComponent {
+  @Input() activeType: ExplorerItem['type'] = 'event';
   @Output() itemSelected = new EventEmitter<ExplorerItem['type']>();
 
   explorerItems: ExplorerItem[] = [
