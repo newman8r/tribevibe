@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface ExplorerItem {
@@ -16,6 +16,8 @@ interface ExplorerItem {
   imports: [CommonModule]
 })
 export class ExplorerComponent {
+  @Output() itemSelected = new EventEmitter<ExplorerItem['type']>();
+
   explorerItems: ExplorerItem[] = [
     { icon: '🗺️', label: 'Event Map', type: 'map', isNew: true },
     { icon: '🎵', label: 'Lineup', type: 'setlist' },
@@ -24,4 +26,8 @@ export class ExplorerComponent {
     { icon: '👕', label: 'Gear', type: 'gear' },
     { icon: '🎟️', label: 'Tickets', type: 'tickets', isNew: true }
   ];
+
+  onItemClick(type: ExplorerItem['type']) {
+    this.itemSelected.emit(type);
+  }
 } 

@@ -7,13 +7,14 @@
 
   <!-- Center Section -->
   <div class="center-panel">
+    <app-data-display [activeType]="activeExplorerType"></app-data-display>
     <app-chat-window></app-chat-window>
   </div>
 
   <!-- Right Section -->
   <div class="right-panel">
     <div class="explorer-section">
-      <app-explorer></app-explorer>
+      <app-explorer (itemSelected)="onExplorerItemSelected($event)"></app-explorer>
     </div>
 
     <div class="user-list-section">

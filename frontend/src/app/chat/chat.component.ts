@@ -7,6 +7,8 @@ import { ChatWindowComponent } from './components/chat-window/chat-window.compon
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { UserListComponent } from './components/user-list/user-list.component';
 import { PromoSpaceComponent } from './components/promo-space/promo-space.component';
+import { DataDisplayComponent } from './components/data-display/data-display.component';
+import { ExplorerType } from './components/data-display/data-display.component';
 
 @Component({
   selector: 'app-chat',
@@ -19,10 +21,17 @@ import { PromoSpaceComponent } from './components/promo-space/promo-space.compon
     ChatWindowComponent,
     UserProfileComponent,
     UserListComponent,
-    PromoSpaceComponent
+    PromoSpaceComponent,
+    DataDisplayComponent
   ],
   standalone: true
 })
 export class ChatComponent {
+  activeExplorerType: ExplorerType | null = null;
+
   constructor(private websocketService: WebsocketService) {}
+
+  onExplorerItemSelected(type: ExplorerType) {
+    this.activeExplorerType = type;
+  }
 } 
