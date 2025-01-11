@@ -16,10 +16,14 @@ import { DirectMessageService } from '../direct-message/direct-message.service';
 
 @WebSocketGateway({
   cors: {
-    origin: [
-      'http://localhost:4200',
-      'http://23.23.150.233'
-    ],
+    origin: process.env.NODE_ENV !== 'production'
+      ? [
+          'http://localhost:4200',
+          /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/,
+          /^http:\/\/172\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/,
+          /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/
+        ]
+      : ['http://23.23.150.233'],
     methods: ['GET', 'POST'],
     credentials: true,
     allowedHeaders: ['my-custom-header'],
