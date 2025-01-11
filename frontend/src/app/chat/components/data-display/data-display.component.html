@@ -1,4 +1,15 @@
 <div class="data-display" [class.collapsed]="!isExpanded">
+  <!-- Persistent Video Background -->
+  <div class="video-background">
+    <iframe
+      [src]="youtubeUrl"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+    <div class="video-overlay"></div>
+  </div>
+
   <div class="panel-header">
     <h2 class="gradient-text">{{ activeType ? dummyData[activeType].title : 'Explorer Data' }}</h2>
     <button class="toggle-btn" (click)="togglePanel()">
@@ -8,7 +19,161 @@
   
   <div class="panel-content" [@panelState]="isExpanded ? 'expanded' : 'collapsed'" *ngIf="activeType">
     <div class="content-wrapper">
-      {{ dummyData[activeType].content }}
+      <div [ngSwitch]="activeType">
+        
+        <!-- Event Info -->
+        <div *ngSwitchCase="'event'" class="event-info">
+          <div class="event-content">
+            <div class="event-header">
+              <div class="event-title">Neon Nights Festival 2025</div>
+              <div class="event-date">June 15-17, 2025</div>
+            </div>
+            <div class="event-description">
+              {{ dummyData[activeType].content }}
+            </div>
+            <div class="event-highlights">
+              <div class="highlight-item">
+                <i class="fas fa-music"></i>
+                <span>3 Days</span>
+              </div>
+              <div class="highlight-item">
+                <i class="fas fa-volume-up"></i>
+                <span>4 Stages</span>
+              </div>
+              <div class="highlight-item">
+                <i class="fas fa-users"></i>
+                <span>50+ Artists</span>
+              </div>
+              <div class="highlight-item">
+                <i class="fas fa-star"></i>
+                <span>VIP Access</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div *ngSwitchCase="'map'" class="map-view content-section">
+          <div class="map-placeholder">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Interactive Map Loading...</span>
+          </div>
+          <div class="map-legend">
+            <div class="legend-item">
+              <span class="dot main-stage"></span>
+              <span>Main Stage</span>
+            </div>
+            <div class="legend-item">
+              <span class="dot cyber-stage"></span>
+              <span>Cyber Stage</span>
+            </div>
+            <div class="legend-item">
+              <span class="dot facilities"></span>
+              <span>Facilities</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Directions -->
+        <div *ngSwitchCase="'directions'" class="directions content-section">
+          <div class="transport-options">
+            <div class="transport-option">
+              <i class="fas fa-subway"></i>
+              <div class="option-details">
+                <h4>By Metro</h4>
+                <p>Cyber Line to TechPark Station</p>
+              </div>
+            </div>
+            <div class="transport-option">
+              <i class="fas fa-car"></i>
+              <div class="option-details">
+                <h4>By Car</h4>
+                <p>Parking available at North & South lots</p>
+              </div>
+            </div>
+            <div class="transport-option">
+              <i class="fas fa-bus"></i>
+              <div class="option-details">
+                <h4>Shuttle Service</h4>
+                <p>Free from Downtown Hub</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lineup -->
+        <div *ngSwitchCase="'setlist'" class="lineup">
+          <div class="day-selector">
+            <button class="day-btn active">Day 1</button>
+            <button class="day-btn">Day 2</button>
+            <button class="day-btn">Day 3</button>
+          </div>
+          <div class="stage-schedule">
+            <div class="time-slot">
+              <span class="time">20:00</span>
+              <div class="artist">
+                <span class="name">ByteBeats</span>
+                <span class="stage">Main Stage</span>
+              </div>
+            </div>
+            <div class="time-slot">
+              <span class="time">22:30</span>
+              <div class="artist">
+                <span class="name">Quantum Collective</span>
+                <span class="stage">Cyber Stage</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Streams -->
+        <div *ngSwitchCase="'stream'" class="streams">
+          <div class="stream-grid">
+            <div class="stream-card">
+              <div class="stream-preview">
+                <i class="fas fa-play-circle"></i>
+                <span class="live-badge">LIVE</span>
+              </div>
+              <div class="stream-info">
+                <span class="stage-name">Main Stage</span>
+                <span class="viewers">2.5k watching</span>
+              </div>
+            </div>
+            <div class="stream-card">
+              <div class="stream-preview">
+                <i class="fas fa-play-circle"></i>
+                <span class="live-badge">LIVE</span>
+              </div>
+              <div class="stream-info">
+                <span class="stage-name">Cyber Stage</span>
+                <span class="viewers">1.8k watching</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div *ngSwitchCase="'photos'" class="gallery">
+          <div class="gallery-grid">
+            <div class="gallery-item" *ngFor="let i of [1,2,3,4,5,6]">
+              <div class="photo-placeholder">
+                <i class="fas fa-image"></i>
+              </div>
+            </div>
+          </div>
+          <div class="gallery-tags">
+            <span class="tag">#NeonNights2024</span>
+            <span class="tag">#CyberStage</span>
+            <span class="tag">#FestivalLife</span>
+          </div>
+        </div>
+
+        <!-- Default Content -->
+        <div *ngSwitchDefault class="default-content">
+          {{ dummyData[activeType].content }}
+        </div>
+
+      </div>
     </div>
   </div>
 </div> 

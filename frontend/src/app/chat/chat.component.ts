@@ -27,7 +27,7 @@ import { ExplorerType } from './components/data-display/data-display.component';
   standalone: true
 })
 export class ChatComponent {
-  activeExplorerType: ExplorerType | null = null;
+  activeExplorerType: ExplorerType = 'event';
 
   constructor(private websocketService: WebsocketService) {}
 

@@ -1,13 +1,21 @@
 <div class="explorer">
   <h3 class="gradient-text">Explorer</h3>
   
-  <div class="explorer-grid">
+  <div class="explorer-list">
     <div *ngFor="let item of explorerItems" 
          class="explorer-item" 
          [class.new]="item.isNew"
          (click)="onItemClick(item.type)">
-      <div class="icon">{{item.icon}}</div>
-      <span class="label">{{item.label}}</span>
+      <div class="item-main">
+        <div class="icon">{{item.icon}}</div>
+        <div class="item-info">
+          <span class="label">{{item.label}}</span>
+          <span class="description">{{item.description}}</span>
+        </div>
+      </div>
+      <div class="item-action">
+        <i class="fas fa-chevron-right"></i>
+      </div>
       <div class="hover-effect"></div>
     </div>
   </div>
