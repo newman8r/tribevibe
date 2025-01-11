@@ -128,12 +128,18 @@
   <!-- Editor Section -->
   <div class="message-editor">
     <div class="editor-toolbar">
-      <button class="toolbar-btn emoji-trigger" (click)="openEmojiPicker()" title="Add emoji">
-        <i class="far fa-smile"></i>
-      </button>
-      <button class="toolbar-btn" (click)="toggleFileUploadPanel()" title="Upload file">
-        <i class="fas fa-paperclip"></i>
-      </button>
+      <div class="toolbar-actions">
+        <button class="toolbar-btn emoji-trigger" (click)="openEmojiPicker()" title="Add emoji">
+          <i class="far fa-smile"></i>
+        </button>
+        <button class="toolbar-btn" (click)="toggleFileUploadPanel()" title="Upload file">
+          <i class="fas fa-paperclip"></i>
+        </button>
+        <div class="welcome-message" *ngIf="!currentUser">
+          <i class="fas fa-hand-sparkles"></i>
+          <span>Welcome anonymous user, start chatting with our AI now! <a routerLink="/auth/login" class="login-link">Login here</a></span>
+        </div>
+      </div>
       
       <!-- Add the emoji picker -->
       <app-emoji-picker
