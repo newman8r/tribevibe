@@ -38,4 +38,16 @@
       <span>Explorer</span>
     </button>
   </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" [class.fade-out]="stylesLoaded">
+    <div class="loading-content">
+      <div class="cyber-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <h2 class="loading-text">Initializing Chat</h2>
+    </div>
+  </div>
 </div> 

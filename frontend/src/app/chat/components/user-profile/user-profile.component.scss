@@ -93,4 +93,62 @@
       color: var(--accent-1);
     }
   }
+
+  .hint-text {
+    font-size: 0.8rem;
+    color: var(--primary-light);
+    opacity: 0.6;
+    margin: 0;
+    text-align: center;
+  }
+
+  .register-btn {
+    background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+    border: none;
+    color: var(--primary-light);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: 0.5s;
+    }
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 15px rgba(var(--accent-1-rgb), 0.3);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+  }
+
+  @media (max-width: 992px) {
+    .hint-text {
+      font-size: 0.75rem;
+      margin: 0;
+    }
+
+    .register-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+  }
 } 

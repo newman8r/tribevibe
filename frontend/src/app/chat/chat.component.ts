@@ -37,10 +37,16 @@ export class ChatComponent implements OnInit {
   hideNavOnScroll = false;
   isScrolling = false;
   scrollTimeout: any;
+  stylesLoaded = false;
 
   constructor(private websocketService: WebsocketService) {}
 
   ngOnInit() {
+    // Short delay to ensure styles are loaded
+    setTimeout(() => {
+      this.stylesLoaded = true;
+    }, 1000);
+
     // Set initial state based on screen size
     if (this.isMobile && this.dataDisplay) {
       this.dataDisplay.isExpanded = false;
