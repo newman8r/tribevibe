@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 
 interface UserWithStatus extends User {
   status: UserStatus;
+  unreadCount?: number;
 }
 
 @Component({

@@ -85,6 +85,9 @@
         .user-info {
           flex: 1;
           min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
           
           .username {
             font-size: 0.85rem;
@@ -92,6 +95,39 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+          }
+
+          .notification-badge {
+            background: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            position: relative;
+            box-shadow: 0 0 10px rgba(117, 151, 222, 0.5);
+            
+            // Cyberpunk border effect
+            &::after {
+              content: '';
+              position: absolute;
+              inset: -1px;
+              background: linear-gradient(45deg, #2b1055, #7597de, #2b1055);
+              border-radius: 13px;
+              z-index: -1;
+              animation: borderGlow 2s ease-in-out infinite;
+            }
+            
+            &::before {
+              content: '💬';
+              font-size: 0.8rem;
+            }
           }
         }
       }
@@ -123,5 +159,14 @@
   
   &:hover {
     opacity: 0.8;
+  }
+} 
+
+@keyframes borderGlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 } 
