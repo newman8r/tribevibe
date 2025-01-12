@@ -10,10 +10,59 @@
   @media (max-width: 992px) {
     padding: 0.75rem;
     gap: 0.5rem;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
     
+    // Special handling for iOS/mobile devices
+    @supports (-webkit-touch-callout: none) {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      .username-container {
+        width: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .register-btn {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.4rem;
+        text-align: center;
+        font-size: 0.8rem;
+        background: var(--accent-1);
+      }
+    }
+    
+    // Non-iOS mobile styles
+    @supports not (-webkit-touch-callout: none) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      
+      .username-container {
+        flex: 1;
+        margin: 0 0.5rem;
+      }
+
+      .register-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        margin-left: auto;
+        background: var(--accent-1);
+      }
+    }
+
+    // Common mobile styles
+    .hint-text {
+      display: none;
+    }
+
+    &::before {
+      display: none;
+    }
+
     .avatar-wrapper {
       .avatar {
         width: 40px !important;
@@ -26,12 +75,6 @@
         bottom: 2px !important;
         right: 2px !important;
       }
-    }
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
     }
 
     .username {

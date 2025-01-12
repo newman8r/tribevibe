@@ -23,14 +23,12 @@
   </div>
 
   <ng-container *ngIf="currentUser; else registerButton">
-    <a class="logout-link" (click)="logout()">
-      Logout
-    </a>
+    <a class="logout-link" (click)="logout()">Logout</a>
   </ng-container>
   
   <ng-template #registerButton>
     <button class="register-btn" (click)="navigateToRegister()">
-      Register Account
+      Register
     </button>
   </ng-template>
 </div> 
