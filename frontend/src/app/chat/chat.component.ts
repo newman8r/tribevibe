@@ -38,6 +38,8 @@ export class ChatComponent implements OnInit {
   isScrolling = false;
   scrollTimeout: any;
   stylesLoaded = false;
+  private isClickFromMenu = false;
+  private isClickFromToggle = false;
 
   constructor(private websocketService: WebsocketService) {}
 
@@ -127,6 +129,23 @@ export class ChatComponent implements OnInit {
       if (this.dataDisplay) {
         this.dataDisplay.isExpanded = true;
       }
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Skip if we're not on mobile or if the left panel isn't shown
+    if (!this.isMobile || !this.showLeftPanel) return;
+
+    // Get the click target as an Element
+    const target = event.target as Element;
+
+    // Check if the click is outside the left panel and not on the toggle button
+    const isLeftPanel = target.closest('.left-panel');
+    const isToggleButton = target.closest('.menu-button');
+    
+    if (!isLeftPanel && !isToggleButton) {
+      this.showLeftPanel = false;
     }
   }
 } 

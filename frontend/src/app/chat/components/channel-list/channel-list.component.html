@@ -1,43 +1,47 @@
 <div class="channel-list">
-  <div class="channel-header-container">
-    <h3>Channels</h3>
-    <button class="create-channel-btn" (click)="openCreateChannelModal()">+</button>
-  </div>
-  
-  <div class="channels-grid">
-    <div *ngFor="let channel of channels" 
-         class="channel-card" 
-         [class.active]="channel.id === selectedChannel?.id"
-         (click)="selectChannel(channel)">
-      <div class="channel-placeholder">
-        <span class="channel-initial">#</span>
-      </div>
-      <span class="channel-name">{{channel.name}}</span>
+  <div class="channel-content">
+    <div class="channel-header-container">
+      <h3>Channels</h3>
+      <button class="create-channel-btn" (click)="openCreateChannelModal()">+</button>
     </div>
-  </div>
-
-  <!-- SoundCloud Player Section -->
-  <div class="music-card">
-    <h3 class="gradient-text">Playlist Vibes</h3>
     
-    <div class="player-wrapper">
-      <iframe
-        *ngIf="soundcloudPlayerUrl"
-        [src]="soundcloudPlayerUrl"
-        frameborder="0"
-        allow="autoplay"
-        class="soundcloud-player">
-      </iframe>
+    <div class="channels-grid">
+      <div *ngFor="let channel of channels" 
+           class="channel-card" 
+           [class.active]="channel.id === selectedChannel?.id"
+           (click)="selectChannel(channel)">
+        <div class="channel-placeholder">
+          <span class="channel-initial">#</span>
+        </div>
+        <span class="channel-name">{{channel.name}}</span>
+      </div>
     </div>
 
-    <div class="playlist-info">
-      <span class="playlist-label">🎵 Full Playlist:</span>
-      <a [href]="playlistUrl" 
-         target="_blank" 
-         class="playlist-link">
-        View on SoundCloud
-      </a>
+    <!-- SoundCloud Player Section -->
+    <div class="music-card">
+      <h3 class="gradient-text">Playlist Vibes</h3>
+      
+      <div class="player-wrapper">
+        <iframe
+          *ngIf="soundcloudPlayerUrl"
+          [src]="soundcloudPlayerUrl"
+          frameborder="0"
+          allow="autoplay"
+          class="soundcloud-player">
+        </iframe>
+      </div>
+
+      <div class="playlist-info">
+        <span class="playlist-label">🎵 Full Playlist:</span>
+        <a [href]="playlistUrl" 
+           target="_blank" 
+           class="playlist-link">
+          View on SoundCloud
+        </a>
+      </div>
     </div>
+    <!-- Add invisible spacer for mobile -->
+    <div class="mobile-bottom-spacer"></div>
   </div>
 </div>
 

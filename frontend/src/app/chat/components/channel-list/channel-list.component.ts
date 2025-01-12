@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
@@ -18,6 +18,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   standalone: true
 })
 export class ChannelListComponent implements OnInit, OnDestroy {
+  @Output() channelSelected = new EventEmitter<void>();
+
   channels: Channel[] = [];
   selectedChannel: Channel | null = null;
   isLoggedIn = false;
@@ -77,6 +79,7 @@ export class ChannelListComponent implements OnInit, OnDestroy {
 
   selectChannel(channel: Channel) {
     this.channelStateService.setSelectedChannel(channel);
+    this.channelSelected.emit();
   }
 
   openCreateChannelModal() {

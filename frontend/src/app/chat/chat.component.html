@@ -2,7 +2,9 @@
   <!-- Left Section -->
   <div class="left-panel" [class.show]="showLeftPanel">
     <app-user-profile></app-user-profile>
-    <app-channel-list></app-channel-list>
+    <app-channel-list
+      (channelSelected)="isMobile && (showLeftPanel = false)">
+    </app-channel-list>
   </div>
 
   <!-- Center Section -->
