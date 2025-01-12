@@ -23,14 +23,13 @@
       margin-bottom: env(safe-area-inset-bottom);
       z-index: 1000;
       isolation: isolate;
+      // Add backdrop blur for better visibility
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       
       @media (max-width: 768px) {
         z-index: 1400;
       }
-      
-      // Add backdrop blur for better visibility
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
     }
 
     .messages-container {
