@@ -6,6 +6,8 @@ export interface DirectMessageConversation {
   user1: User;
   user2: User;
   messages: Message[];
+  user1UnreadCount: number;
+  user2UnreadCount: number;
   createdAt: Date;
   lastMessageAt: Date;
 } 

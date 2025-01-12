@@ -347,6 +347,49 @@ export class ChatGateway {
       const dmRoom = `dm:${data.conversationId}`;
       this.server.to(dmRoom).emit('newDirectMessage', savedMessage);
 
+      // Get the conversation to determine the recipient
+      const conversation = await this.directMessageService.findConversation(data.conversationId);
+      const recipientId = conversation.user1.id === data.userId 
+        ? conversation.user2.id 
+        : conversation.user1.id;
+
+      // Emit unread count update to the recipient
+      const recipientUnreadCounts = await this.directMessageService.getUserUnreadCounts(recipientId);
+      this.server.to(`user:${recipientId}`).emit('unreadCountsUpdate', recipientUnreadCounts);
+
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('resetUnreadCount')
+  async handleResetUnreadCount(
+    @MessageBody() data: { 
+      userId: string;
+      conversationId: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      await this.directMessageService.resetUnreadCount(data.conversationId, data.userId);
+      
+      // Send updated unread counts back to the user
+      const unreadCounts = await this.directMessageService.getUserUnreadCounts(data.userId);
+      client.emit('unreadCountsUpdate', unreadCounts);
+
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('getUnreadCounts')
+  async handleGetUnreadCounts(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const unreadCounts = await this.directMessageService.getUserUnreadCounts(data.userId);
+      client.emit('unreadCountsUpdate', unreadCounts);
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -359,6 +402,7 @@ export class ChatGateway {
   ) {
     try {
       const conversations = await this.directMessageService.getUserConversations(data.userId);
+      const unreadCounts = await this.directMessageService.getUserUnreadCounts(data.userId);
       
       // Get statuses for all users in conversations
       const userStatuses: { [key: string]: string } = {};
@@ -369,7 +413,8 @@ export class ChatGateway {
 
       client.emit('userConversations', {
         conversations,
-        userStatuses
+        userStatuses,
+        unreadCounts
       });
 
     } catch (error) {
