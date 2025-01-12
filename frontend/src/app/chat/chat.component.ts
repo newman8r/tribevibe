@@ -40,6 +40,9 @@ export class ChatComponent implements OnInit {
   stylesLoaded = false;
   private isClickFromMenu = false;
   private isClickFromToggle = false;
+  private touchStartX: number = 0;
+  private touchStartY: number = 0;
+  private touchStartedInsidePanel: boolean = false;
 
   constructor(private websocketService: WebsocketService) {}
 
@@ -79,6 +82,11 @@ export class ChatComponent implements OnInit {
   onScroll(event: any) {
     if (!this.isMobile) return;
 
+    // If left panel is open, close it on any scroll
+    if (this.showLeftPanel) {
+      this.closeLeftPanel();
+    }
+
     // Clear existing timeout
     if (this.scrollTimeout) {
       clearTimeout(this.scrollTimeout);
@@ -109,9 +117,13 @@ export class ChatComponent implements OnInit {
   }
 
   toggleLeftPanel() {
-    this.showLeftPanel = !this.showLeftPanel;
-    if (this.showLeftPanel && this.isMobile) {
-      this.showRightPanel = false;
+    if (this.showLeftPanel) {
+      this.closeLeftPanel();
+    } else {
+      this.showLeftPanel = true;
+      if (this.isMobile) {
+        this.showRightPanel = false;
+      }
     }
   }
 
@@ -134,18 +146,67 @@ export class ChatComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
-    // Skip if we're not on mobile or if the left panel isn't shown
     if (!this.isMobile || !this.showLeftPanel) return;
 
-    // Get the click target as an Element
     const target = event.target as Element;
+    const isInsideLeftPanel = target.closest('.left-panel');
+    const isMenuButton = target.closest('.menu-button');
 
-    // Check if the click is outside the left panel and not on the toggle button
-    const isLeftPanel = target.closest('.left-panel');
-    const isToggleButton = target.closest('.menu-button');
-    
-    if (!isLeftPanel && !isToggleButton) {
-      this.showLeftPanel = false;
+    // Only close if click is outside panel and menu button
+    if (!isInsideLeftPanel && !isMenuButton) {
+      this.closeLeftPanel();
     }
+  }
+
+  @HostListener('document:touchstart', ['$event'])
+  onTouchStart(event: TouchEvent) {
+    if (!this.isMobile || !this.showLeftPanel) return;
+    
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+    
+    const target = event.target as Element;
+    this.touchStartedInsidePanel = !!target.closest('.left-panel');
+    const isMenuButton = target.closest('.menu-button');
+
+    // Only close if touch starts outside panel and menu button
+    if (!this.touchStartedInsidePanel && !isMenuButton) {
+      this.closeLeftPanel();
+    }
+  }
+
+  @HostListener('document:touchmove', ['$event'])
+  onTouchMove(event: TouchEvent) {
+    if (!this.isMobile || !this.showLeftPanel || this.touchStartedInsidePanel) return;
+
+    const touchX = event.touches[0].clientX;
+    const touchY = event.touches[0].clientY;
+    const deltaX = touchX - this.touchStartX;
+    const deltaY = touchY - this.touchStartY;
+    
+    // Only close if touch started outside panel and moved significantly
+    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+      this.closeLeftPanel();
+    }
+  }
+
+  @HostListener('document:touchend', ['$event'])
+  onTouchEnd(event: TouchEvent) {
+    if (!this.isMobile || !this.showLeftPanel || this.touchStartedInsidePanel) return;
+    
+    const target = event.target as Element;
+    const isInsideLeftPanel = target.closest('.left-panel');
+    const isMenuButton = target.closest('.menu-button');
+
+    // Only close if touch ends outside panel and menu button
+    if (!isInsideLeftPanel && !isMenuButton) {
+      this.closeLeftPanel();
+    }
+  }
+
+  private closeLeftPanel() {
+    this.showLeftPanel = false;
+    this.isClickFromMenu = false;
+    this.isClickFromToggle = false;
   }
 } 

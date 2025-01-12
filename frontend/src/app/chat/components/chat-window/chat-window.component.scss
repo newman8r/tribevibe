@@ -22,6 +22,11 @@
       padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
       margin-bottom: env(safe-area-inset-bottom);
       z-index: 1000;
+      isolation: isolate;
+      
+      @media (max-width: 768px) {
+        z-index: 1400;
+      }
       
       // Add backdrop blur for better visibility
       backdrop-filter: blur(10px);
