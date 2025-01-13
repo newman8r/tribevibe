@@ -9,41 +9,17 @@ async function bootstrap() {
     : 'http://23.23.150.233';
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-
-      if (process.env.NODE_ENV === 'production') {
-        if (origin === corsOrigin) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      } else {
-        // Development environment - check against array of allowed origins
-        const isAllowed = [
-          'http://localhost:4200',
-          /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/,
-          /^http:\/\/172\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/,
-          /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/
-        ].some(allowedOrigin => {
-          if (allowedOrigin instanceof RegExp) {
-            return allowedOrigin.test(origin);
-          }
-          return allowedOrigin === origin;
-        });
-        
-        callback(null, isAllowed);
-      }
-    },
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    exposedHeaders: ['Access-Control-Allow-Origin'],
-    maxAge: 3600
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    exposedHeaders: ['Access-Control-Allow-Origin']
   });
+
+  // Add global prefix if you're using one
+  // app.setGlobalPrefix('api');
 
   await app.listen(3000);
 }
