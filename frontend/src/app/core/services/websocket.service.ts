@@ -36,6 +36,11 @@ export class WebsocketService {
 
     this.socket.on('connect', () => {
       console.log('WebSocket connected');
+      // Join user's personal room for notifications
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser) {
+        this.socket.emit('joinUserRoom', { userId: currentUser.id });
+      }
     });
 
     this.socket.on('error', (error) => {

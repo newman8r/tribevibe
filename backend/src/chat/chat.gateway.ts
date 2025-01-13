@@ -464,6 +464,15 @@ export class ChatGateway {
     }
   }
 
+  @SubscribeMessage('joinUserRoom')
+  async handleJoinUserRoom(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = `user:${data.userId}`;
+    client.join(room);
+  }
+
   private async broadcastUserStatus(userId: string) {
     const status = await this.presenceService.getUserStatus(userId);
     this.server.emit('userStatusUpdate', { userId, status });

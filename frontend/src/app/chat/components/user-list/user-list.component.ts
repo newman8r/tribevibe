@@ -51,6 +51,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Existing user list subscription
     this.websocketService.getUserList();
 
     this.subscriptions.push(
@@ -73,39 +74,36 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Subscribe to user conversations with better error handling
+    // Subscribe to user conversations
     this.subscriptions.push(
       this.websocketService.onUserConversations().subscribe({
         next: ({ conversations }) => {
           console.log('Received conversations:', conversations);
           this.conversations = conversations;
-          
-          // Debug each conversation
-          conversations.forEach(conv => {
-            console.log(`Conversation ${conv.id}:`);
-            console.log(`- User1: ${conv.user1.id} (${conv.user1.username})`);
-            console.log(`- User2: ${conv.user2.id} (${conv.user2.username})`);
-          });
-          
           this.updateUserUnreadCounts();
+          
+          // After receiving conversations, request initial unread counts
+          this.websocketService.getUnreadCounts(this.currentUserId);
         },
         error: (error) => console.error('Conversation subscription error:', error)
       })
     );
 
-    // Add subscription for new direct messages
+    // Subscribe to new direct messages immediately
     this.subscriptions.push(
       this.websocketService.onNewDirectMessage().subscribe({
         next: (message) => {
-          console.log('Processing new DM for unread counts:', message);
+          console.log('New DM received:', message);
           // Request updated unread counts when new message arrives
           this.websocketService.getUnreadCounts(this.currentUserId);
+          // Also request updated conversations to ensure we have the latest state
+          this.websocketService.getUserConversations(this.currentUserId);
         },
         error: (error) => console.error('New DM subscription error:', error)
       })
     );
 
-    // Modify existing unread counts subscription to show more debug info
+    // Subscribe to unread counts updates
     this.subscriptions.push(
       this.websocketService.onUnreadCountsUpdate().subscribe({
         next: (counts) => {
@@ -117,12 +115,10 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Request initial data
+    // Request initial data in sequence
     this.websocketService.getUserList();
-    this.websocketService.getUnreadCounts(this.currentUserId);
-
-    // Make sure we're requesting conversations
     this.websocketService.getUserConversations(this.currentUserId);
+    // Initial unread counts will be requested after conversations are received
   }
 
   private groupUsers() {
