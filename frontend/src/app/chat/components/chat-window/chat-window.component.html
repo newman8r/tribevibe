@@ -291,6 +291,19 @@
         <i class="fas fa-paper-plane"></i>
       </button>
     </div>
+    <div class="dm-profile" *ngIf="activeDMUser">
+      <div class="profile-avatar">
+        <img [src]="getDMAvatarUrl(activeDMUser)" [alt]="activeDMUser.username">
+        <span class="status-dot" [class]="getDMUserStatus()"></span>
+      </div>
+      <div class="profile-info">
+        <h3 class="profile-name">{{ activeDMUser.username }}</h3>
+        <p class="profile-status">{{ getDMUserStatus() }}</p>
+        <div class="profile-meta">
+          <!-- Placeholder for additional profile info -->
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Add the search panel component -->
