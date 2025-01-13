@@ -4,24 +4,22 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  const corsOrigin = process.env.NODE_ENV !== 'production'
-    ? ['http://localhost:4200', /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/, /^http:\/\/172\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/, /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/]
-    : 'http://23.23.150.233';
-
+  // Explicitly set production mode based on environment
+  const isProd = process.env.NODE_ENV === 'production';
+  console.log('Environment:', process.env.NODE_ENV);
+  
   app.enableCors({
-    origin: corsOrigin,
+    origin: isProd ? 'http://23.23.150.233' : true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     preflightContinue: false,
-    optionsSuccessStatus: 204,
-    exposedHeaders: ['Access-Control-Allow-Origin']
+    optionsSuccessStatus: 204
   });
 
-  // Add global prefix if you're using one
-  // app.setGlobalPrefix('api');
-
-  await app.listen(3000);
+  await app.listen(3000, () => {
+    console.log(`Application is running with CORS origin: ${isProd ? 'http://23.23.150.233' : 'all'}`);
+  });
 }
 bootstrap();
 
