@@ -83,11 +83,11 @@
         }
         
         .user-info {
-          flex: 1;
-          min-width: 0;
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          justify-content: space-between;
+          padding-right: 30px;
           
           .username {
             font-size: 0.85rem;
@@ -98,36 +98,16 @@
           }
 
           .notification-badge {
-            background: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
-            color: #fff;
+            display: inline-block;
+            background-color: #ff4444;
+            color: white;
             border-radius: 12px;
-            padding: 0.1rem 0.4rem;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 2px 6px;
+            font-size: 12px;
             min-width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            position: relative;
-            box-shadow: 0 0 10px rgba(117, 151, 222, 0.5);
-            
-            // Cyberpunk border effect
-            &::after {
-              content: '';
-              position: absolute;
-              inset: -1px;
-              background: linear-gradient(45deg, #2b1055, #7597de, #2b1055);
-              border-radius: 13px;
-              z-index: -1;
-              animation: borderGlow 2s ease-in-out infinite;
-            }
-            
-            &::before {
-              content: '💬';
-              font-size: 0.8rem;
-            }
+            text-align: center;
+            margin-left: 8px;
+            z-index: 1;
           }
         }
       }
@@ -169,4 +149,42 @@
   50% {
     opacity: 0.5;
   }
+} 
+
+// Debug styles
+.user-item {
+  &:hover {
+    .debug-info {
+      display: block;
+    }
+  }
+} 
+
+// Add these new debug styles
+.debug-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 1000;
+  max-width: 300px;
+  font-size: 12px;
+  background: transparent;
+}
+
+.debug-toggle {
+  background: #333;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-top-left-radius: 4px;
+  display: inline-block;
+}
+
+.debug-content {
+  background: rgba(51, 51, 51, 0.9);
+  color: white;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  border-top-left-radius: 4px;
 } 

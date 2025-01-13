@@ -177,11 +177,31 @@ export class WebsocketService {
 
   onUserConversations(): Observable<{
     conversations: DirectMessageConversation[];
-    userStatuses: { [key: string]: string };
   }> {
     return new Observable(observer => {
-      this.socket.on('userConversations', data => observer.next(data));
+      this.socket.on('userConversations', data => {
+        console.log('Received conversations:', data);
+        observer.next(data);
+      });
     });
+  }
+
+  onUnreadCountsUpdate(): Observable<{ [conversationId: string]: number }> {
+    return new Observable(observer => {
+      this.socket.on('unreadCountsUpdate', data => {
+        console.log('Received unread counts:', data);
+        observer.next(data);
+      });
+    });
+  }
+
+  resetUnreadCount(userId: string, conversationId: string): void {
+    this.socket.emit('resetUnreadCount', { userId, conversationId });
+  }
+
+  getUnreadCounts(userId: string): void {
+    console.log('Requesting unread counts for:', userId);
+    this.socket.emit('getUnreadCounts', { userId });
   }
 
   onChannelCreated(): Observable<Channel> {

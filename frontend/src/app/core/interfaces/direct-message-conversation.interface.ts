@@ -3,11 +3,15 @@ import { Message } from './message.interface';
 
 export interface DirectMessageConversation {
   id: string;
-  user1: User;
-  user2: User;
-  messages: Message[];
+  user1: {
+    id: string;
+    username: string;
+  };
+  user2: {
+    id: string;
+    username: string;
+  };
   user1UnreadCount: number;
   user2UnreadCount: number;
-  createdAt: Date;
-  lastMessageAt: Date;
+  lastMessageAt?: Date;
 } 
