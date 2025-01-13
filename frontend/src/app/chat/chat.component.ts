@@ -6,7 +6,6 @@ import { ChannelListComponent } from './components/channel-list/channel-list.com
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { UserListComponent } from './components/user-list/user-list.component';
-import { PromoSpaceComponent } from './components/promo-space/promo-space.component';
 import { DataDisplayComponent } from './components/data-display/data-display.component';
 import { ExplorerType } from './components/data-display/data-display.component';
 
@@ -21,7 +20,6 @@ import { ExplorerType } from './components/data-display/data-display.component';
     ChatWindowComponent,
     UserProfileComponent,
     UserListComponent,
-    PromoSpaceComponent,
     DataDisplayComponent
   ],
   standalone: true

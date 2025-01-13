@@ -5,9 +5,13 @@ import { DirectMessageService } from '../../../core/services/direct-message.serv
 import { User } from '../../../core/interfaces/user.interface';
 import { UserStatus } from '../../../core/interfaces/user-status.enum';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
+import { DirectMessageConversation } from '../../../core/interfaces/direct-message-conversation.interface';
 
+// Define interface for user with status and unread count
 interface UserWithStatus extends User {
   status: UserStatus;
+  unreadCount?: number;
 }
 
 @Component({
@@ -29,13 +33,25 @@ export class UserListComponent implements OnInit, OnDestroy {
   };
   
   private subscriptions: Subscription[] = [];
+  private unreadCounts: { [conversationId: string]: number } = {};
+  private currentUserId: string;
+  private conversations: DirectMessageConversation[] = [];
+  showDebug = false;
 
   constructor(
     private websocketService: WebsocketService,
-    private directMessageService: DirectMessageService
-  ) {}
+    private directMessageService: DirectMessageService,
+    private authService: AuthService
+  ) {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error('No authenticated user found');
+    }
+    this.currentUserId = currentUser.id;
+  }
 
   ngOnInit() {
+    // Existing user list subscription
     this.websocketService.getUserList();
 
     this.subscriptions.push(
@@ -57,33 +73,166 @@ export class UserListComponent implements OnInit, OnDestroy {
         this.groupUsers();
       })
     );
+
+    // Subscribe to user conversations
+    this.subscriptions.push(
+      this.websocketService.onUserConversations().subscribe({
+        next: ({ conversations }) => {
+          console.log('Received conversations:', conversations);
+          this.conversations = conversations;
+          this.updateUserUnreadCounts();
+          
+          // After receiving conversations, request initial unread counts
+          this.websocketService.getUnreadCounts(this.currentUserId);
+        },
+        error: (error) => console.error('Conversation subscription error:', error)
+      })
+    );
+
+    // Subscribe to new direct messages immediately
+    this.subscriptions.push(
+      this.websocketService.onNewDirectMessage().subscribe({
+        next: (message) => {
+          console.log('New DM received:', message);
+          // Request updated unread counts when new message arrives
+          this.websocketService.getUnreadCounts(this.currentUserId);
+          // Also request updated conversations to ensure we have the latest state
+          this.websocketService.getUserConversations(this.currentUserId);
+        },
+        error: (error) => console.error('New DM subscription error:', error)
+      })
+    );
+
+    // Subscribe to unread counts updates
+    this.subscriptions.push(
+      this.websocketService.onUnreadCountsUpdate().subscribe({
+        next: (counts) => {
+          console.log('Received unread counts update:', counts);
+          this.unreadCounts = counts;
+          this.updateUserUnreadCounts();
+        },
+        error: (error) => console.error('Unread counts subscription error:', error)
+      })
+    );
+
+    // Request initial data in sequence
+    this.websocketService.getUserList();
+    this.websocketService.getUserConversations(this.currentUserId);
+    // Initial unread counts will be requested after conversations are received
   }
 
   private groupUsers() {
-    // Reset groups
-    this.groupedUsers = {
+    // Create new object to force change detection
+    const newGroupedUsers: { [key in UserStatus]: UserWithStatus[] } = {
       [UserStatus.ONLINE]: [],
       [UserStatus.AWAY]: [],
       [UserStatus.BUSY]: [],
       [UserStatus.OFFLINE]: []
     };
 
-    // Sort users by username within each status group
+    // Group users while preserving unread counts
     this.users.forEach(user => {
-      this.groupedUsers[user.status].push(user);
+      // Create a new user object with the unread count
+      const userWithCount: UserWithStatus = {
+        ...user,
+        unreadCount: user.unreadCount || 0
+      };
+      newGroupedUsers[user.status].push(userWithCount);
     });
 
-    // Sort each group by username
-    Object.values(this.groupedUsers).forEach(group => {
+    // Sort each group
+    Object.values(newGroupedUsers).forEach(group => {
       group.sort((a, b) => a.username.localeCompare(b.username));
+    });
+
+    // Update the grouped users
+    this.groupedUsers = newGroupedUsers;
+  }
+
+  private updateUserUnreadCounts() {
+    console.log('=== Starting updateUserUnreadCounts ===');
+    console.log('Conversations map:');
+    this.conversations.forEach(conv => {
+      console.log(`Conversation ${conv.id}:`);
+      console.log(`- User1: ${conv.user1.id} (${conv.user1.username})`);
+      console.log(`- User2: ${conv.user2.id} (${conv.user2.username})`);
+    });
+    console.log('Current unread counts:', this.unreadCounts);
+    
+    // Reset all unread counts first
+    this.users = this.users.map(user => ({ ...user, unreadCount: 0 }));
+
+    // Map conversation IDs to the other user's ID
+    const conversationToUserMap = new Map<string, string>();
+    this.conversations.forEach(conv => {
+      // For each conversation, map it to the user that isn't the current user
+      const otherUserId = conv.user1.id === this.currentUserId ? conv.user2.id : conv.user1.id;
+      conversationToUserMap.set(conv.id, otherUserId);
+      console.log(`Mapped conversation ${conv.id} to user ${otherUserId}`);
+    });
+
+    // Update unread counts for each conversation
+    Object.entries(this.unreadCounts).forEach(([conversationId, count]) => {
+      if (count > 0) {
+        const otherUserId = conversationToUserMap.get(conversationId);
+        if (otherUserId) {
+          console.log(`Setting unread count ${count} for user ${otherUserId}`);
+          this.users = this.users.map(user => 
+            user.id === otherUserId 
+              ? { ...user, unreadCount: (user.unreadCount || 0) + count }
+              : user
+          );
+        }
+      }
+    });
+
+    // Log the results
+    const usersWithUnread = this.users.filter(u => u.unreadCount && u.unreadCount > 0);
+    console.log('Users with unread messages:', usersWithUnread);
+
+    // Update grouped users
+    this.groupUsers();
+
+    // Verify the grouped users
+    Object.entries(this.groupedUsers).forEach(([status, users]) => {
+      const withUnread = users.filter(u => u.unreadCount && u.unreadCount > 0);
+      if (withUnread.length > 0) {
+        console.log(`Users with unread in ${status} status:`, withUnread);
+      }
     });
   }
 
-  openDirectMessage(userId: string) {
+  async openDirectMessage(userId: string) {
     this.directMessageService.openDirectMessage(userId);
+    // Reset unread count when opening conversation
+    const conversations = await this.findConversationByUserId(userId);
+    if (conversations) {
+      this.websocketService.resetUnreadCount(this.currentUserId, conversations.id);
+    }
+  }
+
+  private findConversationByUserId(userId: string): Promise<DirectMessageConversation | null> {
+    return Promise.resolve(
+      this.conversations.find(conv => 
+        conv.user1.id === userId || conv.user2.id === userId
+      ) || null
+    );
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  get debugInfo() {
+    return {
+      groupedUsers: this.groupedUsers,
+      unreadCounts: this.unreadCounts,
+      currentUserId: this.currentUserId,
+      usersWithCounts: this.users.filter(u => u.unreadCount && u.unreadCount > 0)
+    };
+  }
+
+  toggleDebug() {
+    this.showDebug = !this.showDebug;
   }
 } 

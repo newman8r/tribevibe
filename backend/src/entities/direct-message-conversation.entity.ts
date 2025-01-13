@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, Column } from 'typeorm';
 import { User } from './user.entity';
 import { Message } from './message.entity';
 
@@ -15,6 +15,12 @@ export class DirectMessageConversation {
 
   @OneToMany(() => Message, message => message.directMessageConversation)
   messages: Message[];
+
+  @Column({ default: 0 })
+  user1UnreadCount: number;
+
+  @Column({ default: 0 })
+  user2UnreadCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

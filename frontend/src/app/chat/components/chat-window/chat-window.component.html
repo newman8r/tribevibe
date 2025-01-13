@@ -35,7 +35,7 @@
         </div>
         <div class="message-content">
           <div class="message-header">
-            <span class="username" (click)="message.user?.id && openDirectMessage(message.user?.id)">
+            <span class="username" (click)="openDirectMessage(message.user?.id)">
               <span class="status-dot" [class]="getUserStatus(message)"></span>
               <span class="anon-badge" *ngIf="message.anonymousId">
                 <span class="anon-text">anon</span>
@@ -192,7 +192,7 @@
         </div>
         <div class="message-content">
           <div class="message-header">
-            <span class="username" (click)="activeThread.user?.id && openDirectMessage(activeThread.user?.id)">
+            <span class="username" (click)="openDirectMessage(activeThread.user?.id)">
               <span class="status-dot" [class]="getUserStatus(activeThread)"></span>
               <span class="anon-badge" *ngIf="activeThread.anonymousId">
                 <span class="anon-text">anon</span>
@@ -211,7 +211,7 @@
           </div>
           <div class="message-content">
             <div class="message-header">
-              <span class="username" (click)="reply.user?.id && openDirectMessage(reply.user?.id)">
+              <span class="username" (click)="openDirectMessage(reply.user?.id)">
                 <span class="status-dot" [class]="getUserStatus(reply)"></span>
                 <span class="anon-badge" *ngIf="reply.anonymousId">
                   <span class="anon-text">anon</span>
@@ -266,7 +266,7 @@
           </div>
           <div class="message-content">
             <div class="message-header">
-              <span class="username">
+              <span class="username" (click)="openDirectMessage(message.user?.id)">
                 <span class="status-dot" [class]="getUserStatus(message)"></span>
                 {{ message.user?.username || message.username }}
               </span>
@@ -290,6 +290,19 @@
         (click)="sendDirectMessage()">
         <i class="fas fa-paper-plane"></i>
       </button>
+    </div>
+    <div class="dm-profile" *ngIf="activeDMUser">
+      <div class="profile-avatar">
+        <img [src]="getDMAvatarUrl(activeDMUser)" [alt]="activeDMUser.username">
+        <span class="status-dot" [class]="getDMUserStatus()"></span>
+      </div>
+      <div class="profile-info">
+        <h3 class="profile-name">{{ activeDMUser.username }}</h3>
+        <p class="profile-status">{{ getDMUserStatus() }}</p>
+        <div class="profile-meta">
+          <!-- Placeholder for additional profile info -->
+        </div>
+      </div>
     </div>
   </div>
 

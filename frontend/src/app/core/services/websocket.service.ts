@@ -36,6 +36,11 @@ export class WebsocketService {
 
     this.socket.on('connect', () => {
       console.log('WebSocket connected');
+      // Join user's personal room for notifications
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser) {
+        this.socket.emit('joinUserRoom', { userId: currentUser.id });
+      }
     });
 
     this.socket.on('error', (error) => {
@@ -163,7 +168,10 @@ export class WebsocketService {
 
   onNewDirectMessage(): Observable<Message> {
     return new Observable(observer => {
-      this.socket.on('newDirectMessage', message => observer.next(message));
+      this.socket.on('newDirectMessage', message => {
+        console.log('New direct message received:', message);
+        observer.next(message);
+      });
     });
   }
 
@@ -177,11 +185,31 @@ export class WebsocketService {
 
   onUserConversations(): Observable<{
     conversations: DirectMessageConversation[];
-    userStatuses: { [key: string]: string };
   }> {
     return new Observable(observer => {
-      this.socket.on('userConversations', data => observer.next(data));
+      this.socket.on('userConversations', data => {
+        console.log('Received conversations:', data);
+        observer.next(data);
+      });
     });
+  }
+
+  onUnreadCountsUpdate(): Observable<{ [conversationId: string]: number }> {
+    return new Observable(observer => {
+      this.socket.on('unreadCountsUpdate', (data: { [conversationId: string]: number }) => {
+        console.log('Received unread counts update in service:', data);
+        observer.next(data);
+      });
+    });
+  }
+
+  resetUnreadCount(userId: string, conversationId: string): void {
+    this.socket.emit('resetUnreadCount', { userId, conversationId });
+  }
+
+  getUnreadCounts(userId: string): void {
+    console.log('Requesting unread counts for user:', userId);
+    this.socket.emit('getUnreadCounts', { userId });
   }
 
   onChannelCreated(): Observable<Channel> {

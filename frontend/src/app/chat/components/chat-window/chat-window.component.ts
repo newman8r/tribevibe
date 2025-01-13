@@ -90,6 +90,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   // Add new property for iOS Safari detection
   isSafariIOS = false;
 
+  private currentUserId: string;
+
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
@@ -106,6 +108,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
                        !('MSStream' in window) &&
                        /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error('No authenticated user found');
+    }
+    this.currentUserId = currentUser.id;
   }
 
   ngOnInit() {
@@ -494,9 +502,11 @@ setInterval(() => {
     }
   }
 
-  openDirectMessage(userId: string | undefined) {
+  async openDirectMessage(userId: string | undefined) {
+    if (!userId) return;
+    
     if (!this.checkAuthAndPrompt('Direct messages')) return;
-    if (!userId || userId.startsWith('anonymous-')) return;
+    if (userId.startsWith('anonymous-')) return;
     
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
@@ -522,13 +532,14 @@ setInterval(() => {
         }
       });
     }
+
+    // Reset unread count when opening DM panel
+    if (this.currentDMConversationId) {
+      this.websocketService.resetUnreadCount(currentUser.id, this.currentDMConversationId);
+    }
   }
 
   closeDirectMessage() {
-    if (this.currentDMConversationId) {
-      this.websocketService.leaveDirectMessage(this.currentDMConversationId);
-    }
-
     const dmPanel = document.querySelector('.direct-message-panel');
     if (dmPanel) {
       dmPanel.classList.add('closing');
@@ -537,7 +548,6 @@ setInterval(() => {
         this.activeDMUser = null;
         this.directMessages = [];
         this.currentDMConversationId = null;
-        this.dmMessageText = '';
         dmPanel.classList.remove('closing', 'animating');
       }, 300); // Match this with CSS animation duration
     }
