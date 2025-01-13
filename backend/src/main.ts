@@ -26,22 +26,28 @@ async function bootstrap() {
           /^http:\/\/172\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/,
           /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/
         ]
-      : ['http://23.23.150.233', 'http://23.23.150.233:4200'],
+      : [
+          'http://23.23.150.233',
+          'http://23.23.150.233:4200',
+          'http://23.23.150.233:3000'
+        ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
     preflightContinue: false,
     optionsSuccessStatus: 204
   });
   
-  const port = 3000;
-  const host = isDevelopment ? '0.0.0.0' : 'localhost';
+  const port = configService.get('PORT') || 3000;
+  await app.listen(port, '0.0.0.0');
   
-  await app.listen(port, host);
   if (isDevelopment) {
     console.log(`Server running in development mode`);
     console.log(`Local access: http://localhost:${port}`);
     console.log(`Network access: http://${localIP}:${port}`);
+  } else {
+    console.log(`Server running in production mode on port ${port}`);
   }
 }
 bootstrap();

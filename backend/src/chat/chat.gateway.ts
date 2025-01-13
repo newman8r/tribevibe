@@ -23,7 +23,11 @@ import { DirectMessageService } from '../direct-message/direct-message.service';
           /^http:\/\/172\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/,
           /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/
         ]
-      : ['http://23.23.150.233', 'http://23.23.150.233:4200'],
+      : [
+          'http://23.23.150.233',
+          'http://23.23.150.233:4200',
+          'http://23.23.150.233:3000'
+        ],
     methods: ['GET', 'POST'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
