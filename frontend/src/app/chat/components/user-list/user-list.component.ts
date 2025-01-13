@@ -93,11 +93,23 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Subscribe to unread count updates with better error handling
+    // Add subscription for new direct messages
+    this.subscriptions.push(
+      this.websocketService.onNewDirectMessage().subscribe({
+        next: (message) => {
+          console.log('Processing new DM for unread counts:', message);
+          // Request updated unread counts when new message arrives
+          this.websocketService.getUnreadCounts(this.currentUserId);
+        },
+        error: (error) => console.error('New DM subscription error:', error)
+      })
+    );
+
+    // Modify existing unread counts subscription to show more debug info
     this.subscriptions.push(
       this.websocketService.onUnreadCountsUpdate().subscribe({
         next: (counts) => {
-          console.log('Processing unread counts:', counts); // Add debugging
+          console.log('Received unread counts update:', counts);
           this.unreadCounts = counts;
           this.updateUserUnreadCounts();
         },
@@ -142,12 +154,15 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   private updateUserUnreadCounts() {
-    console.log('Starting updateUserUnreadCounts');
-    console.log('Current users:', this.users);
-    console.log('Current conversations:', this.conversations);
-    console.log('Unread counts:', this.unreadCounts);
-    console.log('Current user ID:', this.currentUserId);
-
+    console.log('=== Starting updateUserUnreadCounts ===');
+    console.log('Conversations map:');
+    this.conversations.forEach(conv => {
+      console.log(`Conversation ${conv.id}:`);
+      console.log(`- User1: ${conv.user1.id} (${conv.user1.username})`);
+      console.log(`- User2: ${conv.user2.id} (${conv.user2.username})`);
+    });
+    console.log('Current unread counts:', this.unreadCounts);
+    
     // Reset all unread counts first
     this.users = this.users.map(user => ({ ...user, unreadCount: 0 }));
 

@@ -163,7 +163,10 @@ export class WebsocketService {
 
   onNewDirectMessage(): Observable<Message> {
     return new Observable(observer => {
-      this.socket.on('newDirectMessage', message => observer.next(message));
+      this.socket.on('newDirectMessage', message => {
+        console.log('New direct message received:', message);
+        observer.next(message);
+      });
     });
   }
 
@@ -188,8 +191,8 @@ export class WebsocketService {
 
   onUnreadCountsUpdate(): Observable<{ [conversationId: string]: number }> {
     return new Observable(observer => {
-      this.socket.on('unreadCountsUpdate', data => {
-        console.log('Received unread counts:', data);
+      this.socket.on('unreadCountsUpdate', (data: { [conversationId: string]: number }) => {
+        console.log('Received unread counts update in service:', data);
         observer.next(data);
       });
     });
@@ -200,7 +203,7 @@ export class WebsocketService {
   }
 
   getUnreadCounts(userId: string): void {
-    console.log('Requesting unread counts for:', userId);
+    console.log('Requesting unread counts for user:', userId);
     this.socket.emit('getUnreadCounts', { userId });
   }
 
