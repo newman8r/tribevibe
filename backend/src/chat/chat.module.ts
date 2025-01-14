@@ -3,24 +3,22 @@ import { ChatGateway } from './chat.gateway';
 import { UserModule } from '../user/user.module';
 import { ChannelModule } from '../channel/channel.module';
 import { MessageModule } from '../message/message.module';
-import { AuthModule } from '../auth/auth.module';
 import { PresenceModule } from '../presence/presence.module';
-import { WsGuard } from './ws.guard';
-import { NameGenerator } from '../utils/name-generator';
 import { DirectMessageModule } from '../direct-message/direct-message.module';
+import { AutonomousAgentModule } from '../autonomous-agent/autonomous-agent.module';
+import { NameGenerator } from '../utils/name-generator';
 
 @Module({
   imports: [
-    forwardRef(() => UserModule),
+    UserModule,
     forwardRef(() => ChannelModule),
-    forwardRef(() => MessageModule),
-    forwardRef(() => AuthModule),
-    forwardRef(() => PresenceModule),
-    forwardRef(() => DirectMessageModule)
+    MessageModule,
+    PresenceModule,
+    DirectMessageModule,
+    AutonomousAgentModule
   ],
   providers: [
     ChatGateway,
-    WsGuard,
     NameGenerator
   ],
   exports: [ChatGateway]
