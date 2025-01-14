@@ -26,7 +26,10 @@
           <span class="status-dot online"></span>
         </div>
         <div class="user-info">
-          <span class="username">{{ user.username }}</span>
+          <span class="username">
+            {{ user.username }}
+            <span class="ai-badge" *ngIf="user.isAiAgent">🤖 AI</span>
+          </span>
           <span class="notification-badge" *ngIf="user.unreadCount && user.unreadCount > 0">
             {{ user.unreadCount }}
           </span>

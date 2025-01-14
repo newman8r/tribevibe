@@ -13,6 +13,7 @@ import { NameGenerator } from '../utils/name-generator';
 import { PresenceService } from '../presence/presence.service';
 import { UserStatus } from '../core/interfaces/user-status.enum';
 import { DirectMessageService } from '../direct-message/direct-message.service';
+import { AutonomousAgentService } from '../autonomous-agent/autonomous-agent.service';
 
 @WebSocketGateway({
   cors: {
@@ -43,6 +44,7 @@ export class ChatGateway {
     private nameGenerator: NameGenerator,
     private presenceService: PresenceService,
     private directMessageService: DirectMessageService,
+    private autonomousAgentService: AutonomousAgentService,
   ) {}
 
   @SubscribeMessage('joinChannel')
@@ -111,6 +113,22 @@ export class ChatGateway {
       this.server.to(data.channelId).emit('newMessage', messageWithFiles);
     } else {
       this.server.to(data.channelId).emit('newMessage', savedMessage);
+    }
+
+    // Process AI agent responses
+    const aiResponse = await this.autonomousAgentService.processChannelMessage(savedMessage);
+    if (aiResponse) {
+      const aiAgent = await this.autonomousAgentService.getChannelAgent(channel.id);
+      if (aiAgent) {  // Only create message if we have an agent
+        const aiMessageData = {
+          content: aiResponse,
+          channel,
+          user: aiAgent,
+          username: aiAgent.username
+        };
+        const aiMessage = await this.messageService.create(aiMessageData);
+        this.server.to(data.channelId).emit('newMessage', aiMessage);
+      }
     }
   }
 

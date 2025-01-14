@@ -40,6 +40,7 @@
               <span class="anon-badge" *ngIf="message.anonymousId">
                 <span class="anon-text">anon</span>
               </span>
+              <span class="ai-badge" *ngIf="message.user?.isAiAgent">🤖 AI</span>
               {{ message.user?.username || message.username }}
             </span>
             <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>
@@ -53,13 +54,12 @@
                   <i class="far fa-face-smile"></i>
                 </button>
                 <div class="reaction-menu">
-                  <button 
-                    *ngFor="let emoji of availableEmojis"
-                    class="emoji-button"
-                    [class.active]="hasUserReacted(message, emoji)"
-                    (click)="addReaction(message, emoji)">
+                  <div class="reaction" 
+                       *ngFor="let emoji of availableEmojis" 
+                       [class.active]="hasUserReacted(message, emoji)"
+                       (click)="handleReaction(message, emoji)">
                     {{ emoji }}
-                  </button>
+                  </div>
                 </div>
               </div>
               <button class="reply-trigger"
@@ -135,7 +135,7 @@
         <button class="toolbar-btn" (click)="toggleFileUploadPanel()" title="Upload file">
           <i class="fas fa-paperclip"></i>
         </button>
-        <div class="welcome-message" *ngIf="!currentUser">
+        <div class="welcome-message" *ngIf="!(currentUser$ | async)">
           <i class="fas fa-hand-sparkles"></i>
           <span>Welcome anonymous user, start chatting with our AI now! <a routerLink="/auth/register" class="login-link">Register here</a></span>
         </div>
@@ -197,6 +197,7 @@
               <span class="anon-badge" *ngIf="activeThread.anonymousId">
                 <span class="anon-text">anon</span>
               </span>
+              <span class="ai-badge" *ngIf="activeThread.user?.isAiAgent">🤖 AI</span>
               {{ activeThread.user?.username || activeThread.username }}
             </span>
             <span class="timestamp">{{ activeThread.createdAt | date:'shortTime' }}</span>
@@ -216,6 +217,7 @@
                 <span class="anon-badge" *ngIf="reply.anonymousId">
                   <span class="anon-text">anon</span>
                 </span>
+                <span class="ai-badge" *ngIf="reply.user?.isAiAgent">🤖 AI</span>
                 {{ reply.user?.username || reply.username }}
               </span>
               <span class="timestamp">{{ reply.createdAt | date:'shortTime' }}</span>
@@ -268,6 +270,7 @@
             <div class="message-header">
               <span class="username" (click)="openDirectMessage(message.user?.id)">
                 <span class="status-dot" [class]="getUserStatus(message)"></span>
+                <span class="ai-badge" *ngIf="message.user?.isAiAgent">🤖 AI</span>
                 {{ message.user?.username || message.username }}
               </span>
               <span class="timestamp">{{ message.createdAt | date:'shortTime' }}</span>

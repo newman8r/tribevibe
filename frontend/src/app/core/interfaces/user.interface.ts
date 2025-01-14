@@ -6,4 +6,5 @@ export interface User {
   username: string;
   avatarUrl: string;
   status?: string;
+  isAiAgent?: boolean;
 } 

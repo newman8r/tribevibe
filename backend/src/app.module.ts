@@ -18,6 +18,8 @@ import { DirectMessageModule } from './direct-message/direct-message.module';
 import { DirectMessageConversation } from './entities/direct-message-conversation.entity';
 import { SearchModule } from './search/search.module';
 import { FileModule } from './file/file.module';
+import { AutonomousAgentModule } from './autonomous-agent/autonomous-agent.module';
+import { DocumentEmbedding } from './entities/document-embedding.entity';
 
 @Module({
   imports: [
@@ -33,7 +35,7 @@ import { FileModule } from './file/file.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [__dirname + '/**/*.entity{.ts,.js}', DocumentEmbedding],
         synchronize: configService.get('NODE_ENV') !== 'production',
         ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
@@ -49,6 +51,7 @@ import { FileModule } from './file/file.module';
     ChatModule,
     SearchModule,
     FileModule,
+    AutonomousAgentModule
   ],
 })
 export class AppModule {}
