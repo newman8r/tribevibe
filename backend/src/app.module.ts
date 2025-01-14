@@ -19,6 +19,7 @@ import { DirectMessageConversation } from './entities/direct-message-conversatio
 import { SearchModule } from './search/search.module';
 import { FileModule } from './file/file.module';
 import { AutonomousAgentModule } from './autonomous-agent/autonomous-agent.module';
+import { DocumentEmbedding } from './entities/document-embedding.entity';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { AutonomousAgentModule } from './autonomous-agent/autonomous-agent.modul
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [__dirname + '/**/*.entity{.ts,.js}', DocumentEmbedding],
         synchronize: configService.get('NODE_ENV') !== 'production',
         ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
