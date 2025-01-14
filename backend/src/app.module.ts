@@ -18,6 +18,7 @@ import { DirectMessageModule } from './direct-message/direct-message.module';
 import { DirectMessageConversation } from './entities/direct-message-conversation.entity';
 import { SearchModule } from './search/search.module';
 import { FileModule } from './file/file.module';
+import { AutonomousAgentModule } from './autonomous-agent/autonomous-agent.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { FileModule } from './file/file.module';
     ChatModule,
     SearchModule,
     FileModule,
+    AutonomousAgentModule
   ],
 })
 export class AppModule {}

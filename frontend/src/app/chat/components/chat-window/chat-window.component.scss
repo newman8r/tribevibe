@@ -1566,3 +1566,20 @@
     bottom: env(safe-area-inset-bottom, 0);
   }
 } 
+
+.ai-badge {
+  background: rgba(var(--accent-1-rgb), 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  margin-right: 4px;
+  border: 1px solid rgba(var(--accent-1-rgb), 0.2);
+  color: var(--accent-1);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  
+  // Add a subtle glow effect
+  box-shadow: 0 0 8px rgba(var(--accent-1-rgb), 0.1);
+} 

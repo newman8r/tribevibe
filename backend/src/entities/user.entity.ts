@@ -18,6 +18,9 @@ export class User {
   @Column()
   avatarUrl: string;
 
+  @Column({ default: false })
+  isAiAgent: boolean;
+
   @ManyToMany(() => Channel, channel => channel.users)
   @JoinTable()
   channels: Channel[];
