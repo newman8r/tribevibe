@@ -25,20 +25,47 @@ export class VectorGptStrategy implements BaseStrategy {
 
   async processMessage(message: Message): Promise<string | null> {
     try {
-      // First, search for relevant content using vector search
-      const vectorResults = await this.vectorSearchService.searchSimilarDocuments(message.content, 1);
+      // First, use GPT-4 to reformulate the question for better vector search.
+      const reformulationResponse = await this.openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert at reformulating questions to be more detailed and specific. 
+                     Your task is to rewrite the user's question in a way that would help find the most relevant information.
+                     Include relevant context and details that might be implicit in the original question.
+                     Do not answer the question, just reformulate it more verbosely.
+                     Output only the reformulated question, nothing else.`
+          },
+          {
+            role: 'user',
+            content: message.content
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 150
+      });
+
+      const reformulatedQuestion = reformulationResponse.choices[0]?.message?.content || message.content;
+      
+      // Perform vector search with both original and reformulated questions - RAG fusion strategy
+      const [originalResults, reformulatedResults] = await Promise.all([
+        this.vectorSearchService.searchSimilarDocuments(message.content, 1),
+        this.vectorSearchService.searchSimilarDocuments(reformulatedQuestion, 1)
+      ]);
+
+      // Combine contextual information from both searches
       let contextualInfo = '';
       
-      if (vectorResults.length > 0) {
-        const topResult = vectorResults[0];
-        this.logger.log('Found relevant context:');
-        this.logger.log(`Source: ${topResult.source}`);
-        this.logger.log(`Similarity: ${topResult.similarity}`);
-        this.logger.log(`Content: ${topResult.content}`);
-        contextualInfo = topResult.content;
+      if (originalResults.length > 0) {
+        contextualInfo += `Context from original query:\n${originalResults[0].content}\n\n`;
+      }
+      
+      if (reformulatedResults.length > 0) {
+        contextualInfo += `Additional context from expanded query:\n${reformulatedResults[0].content}`;
       }
 
-      // Get previous messages for conversation context
+      // Get previous messages in the channel for conversation context (limited to 20 here)
       const previousMessages = await this.messageService.getChannelMessages(
         message.channel.id,
         this.contextSize
@@ -56,14 +83,15 @@ export class VectorGptStrategy implements BaseStrategy {
         content: message.content // Remove username prefix
       });
 
-      // System prompt with contextual information
+      // System prompt with contextual information, personality and instructions
       const systemPrompt: ChatCompletionMessageParam = {
         role: 'system',
         content: `You are a helpful and friendly community manager, with the personality of a festival veteran to electronic music festivals and other events.
                  You have a good sense of humor, especially related to the festival and the music.
                  You have access to relevant contextual information that you can use to provide more informed responses.
                  You are here to help people have an amazing time at the festival and to discuss anything music related, healing related, with a general good vibe
-                 
+                 Try to add relevant emojis whenever possible to create great vibes, but dont go overboard
+
                  Relevant Context:
                  ${contextualInfo}
                  
