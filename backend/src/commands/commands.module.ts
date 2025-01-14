@@ -4,8 +4,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CreateVectorIndexCommand } from './create-vector-index.command';
 import { ProcessDocumentCommand } from './process-document.command';
 import { InspectEmbeddingsCommand } from './inspect-embeddings.command';
+import { SearchDocumentsCommand } from './search-documents.command';
 import { DocumentProcessingService } from '../services/document-processing.service';
+import { VectorSearchService } from '../services/vector-search.service';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
+import { InspectTableCommand } from './inspect-table.command';
+import { DropTableCommand } from './drop-table.command';
 
 @Module({
   imports: [
@@ -30,7 +34,11 @@ import { DocumentEmbedding } from '../entities/document-embedding.entity';
     CreateVectorIndexCommand,
     ProcessDocumentCommand,
     InspectEmbeddingsCommand,
+    SearchDocumentsCommand,
     DocumentProcessingService,
+    VectorSearchService,
+    InspectTableCommand,
+    DropTableCommand,
   ],
 })
 export class CommandsModule {} 

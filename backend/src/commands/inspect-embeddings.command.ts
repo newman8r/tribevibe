@@ -34,7 +34,7 @@ export class InspectEmbeddingsCommand extends CommandRunner {
         console.log('Content:', entry.content.substring(0, 150) + '...');
         console.log('Source:', entry.source);
         console.log('SourceId:', entry.sourceId);
-        console.log('Embedding Vector Length:', entry.embedding.length);
+        console.log('Embedding Vector Length:', entry.embedding?.length ?? 'No embedding');
         console.log('Created At:', entry.createdAt);
       });
     } catch (error) {

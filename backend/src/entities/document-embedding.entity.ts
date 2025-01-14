@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class DocumentEmbedding {
@@ -9,17 +9,17 @@ export class DocumentEmbedding {
   content: string;
 
   @Column('text')
-  source: string;  // e.g., 'message', 'document', etc.
+  source: string;
 
   @Column('text')
-  sourceId: string;  // reference to original content (e.g., message ID)
+  sourceId: string;
 
-  @Column('float', { array: true, nullable: true })
-  embedding: number[];
+  @Column('float8', { 
+    array: true,
+    nullable: true 
+  })
+  embedding: number[] | null;
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 } 

@@ -1,36 +1,15 @@
-export function VectorColumnType(dimension: number) {
-  return {
-    type: 'vector',
-    
-    toSql(): string {
-      return `vector(${dimension})`;
-    },
+import { ValueTransformer } from 'typeorm';
 
-    parse(value: any): number[] | null {
-      if (value === null) return null;
-      return value;
-    },
+export class VectorTransformer implements ValueTransformer {
+  to(value: number[] | null): number[] | null {
+    if (value === null) return null;
+    if (Array.isArray(value)) return value;
+    return null;
+  }
 
-    create(): void {},
-    
-    prepare(value: any): any {
-      return value;
-    },
-
-    normalize(value: any): number[] | null {
-      return value;
-    },
-
-    compare(): boolean {
-      return false;
-    },
-
-    convertToJSValue(value: any): number[] | null {
-      return this.parse(value);
-    },
-
-    convertToDatabaseValue(value: any): any {
-      return value;
-    }
-  };
+  from(value: number[] | null): number[] | null {
+    if (value === null) return null;
+    if (Array.isArray(value)) return value;
+    return null;
+  }
 } 

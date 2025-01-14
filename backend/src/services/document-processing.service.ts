@@ -4,19 +4,13 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
 import { OpenAIEmbeddings } from "@langchain/openai";
-import * as path from 'path';
-import * as fs from 'fs';
-import * as pdf from 'pdf-parse';
-import * as EPub from 'epub';
 
 @Injectable()
 export class DocumentProcessingService {
   private readonly logger = new Logger(DocumentProcessingService.name);
-  private embeddings: OpenAIEmbeddings;
-  private readonly batchSize = 5;
+  private readonly embeddings: OpenAIEmbeddings;
+  private readonly batchSize = 10;
   private readonly delayBetweenBatches = 1000;
-  private readonly chunkSize = 1000;
-  private readonly chunkOverlap = 200;
 
   constructor(
     @InjectRepository(DocumentEmbedding)
@@ -29,114 +23,78 @@ export class DocumentProcessingService {
     });
   }
 
-  private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  private chunkText(text: string): string[] {
-    const chunks: string[] = [];
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    let currentChunk = '';
-
-    for (const sentence of sentences) {
-      if ((currentChunk + sentence).length > this.chunkSize) {
-        if (currentChunk) {
-          chunks.push(currentChunk.trim());
-          // Keep last part for overlap
-          currentChunk = currentChunk.slice(-this.chunkOverlap) + sentence;
-        } else {
-          chunks.push(sentence.trim());
-          currentChunk = '';
-        }
-      } else {
-        currentChunk += sentence;
-      }
-    }
-
-    if (currentChunk) {
-      chunks.push(currentChunk.trim());
-    }
-
-    return chunks;
-  }
-
-  async extractTextFromFile(filePath: string): Promise<string> {
-    const extension = path.extname(filePath).toLowerCase();
-    const fileSize = (await fs.promises.stat(filePath)).size;
-    this.logger.log(`Processing ${filePath} (${(fileSize / 1024 / 1024).toFixed(2)} MB)`);
-    
-    switch (extension) {
-      case '.pdf':
-        const dataBuffer = await fs.promises.readFile(filePath);
-        const pdfData = await pdf(dataBuffer);
-        return pdfData.text;
-
-      case '.epub':
-      case '.mobi':
-        return new Promise((resolve, reject) => {
-          const epub = new EPub(filePath);
-          let text = '';
-
-          epub.on('end', () => {
-            epub.flow.forEach((chapter) => {
-              epub.getChapter(chapter.id, (error: Error | null, content: string) => {
-                if (!error && content) {
-                  // Remove HTML tags
-                  text += content.replace(/<[^>]*>/g, '') + '\n\n';
-                }
-              });
-            });
-            
-            // Give time for all chapters to be processed
-            setTimeout(() => resolve(text), 1000);
-          });
-
-          epub.on('error', reject);
-          epub.parse();
-        });
-
-      case '.txt':
-        return fs.promises.readFile(filePath, 'utf-8');
-
-      default:
-        throw new Error(`Unsupported file type: ${extension}`);
-    }
-  }
-
   async processContent(content: string, source: string, sourceId: string): Promise<void> {
-    const text = await this.extractTextFromFile(sourceId);
-    const chunks = this.chunkText(text);
-    const totalChunks = chunks.length;
-    this.logger.log(`Processing ${totalChunks} chunks in batches of ${this.batchSize}`);
+    try {
+      // First, check if we have the OpenAI API key
+      const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+      if (!apiKey) {
+        throw new Error('OpenAI API key is not configured');
+      }
 
-    for (let i = 0; i < chunks.length; i += this.batchSize) {
-      const batch = chunks.slice(i, i + this.batchSize);
-      const progress = Math.round((i / totalChunks) * 100);
-      this.logger.log(`Progress: ${progress}% (${i}/${totalChunks} chunks)`);
+      const chunks = this.chunkText(content);
+      const totalChunks = chunks.length;
+      this.logger.log(`Processing ${totalChunks} chunks in batches of ${this.batchSize}`);
 
-      try {
-        const embeddings = await this.embeddings.embedDocuments(batch);
+      for (let i = 0; i < chunks.length; i += this.batchSize) {
+        const batch = chunks.slice(i, i + this.batchSize);
+        const progress = Math.round((i / totalChunks) * 100);
+        this.logger.log(`Progress: ${progress}% (${i}/${totalChunks} chunks)`);
 
-        await Promise.all(
-          batch.map((chunk, index) =>
-            this.documentEmbeddingRepository.save({
-              content: chunk,
+        try {
+          const embeddings = await this.embeddings.embedDocuments(batch);
+          this.logger.log(`Generated embeddings for batch ${i}-${i + batch.length}. First embedding length: ${embeddings[0]?.length}`);
+
+          for (let j = 0; j < batch.length; j++) {
+            const embedding = embeddings[j];
+            if (!embedding) {
+              this.logger.error(`No embedding generated for chunk ${i + j}`);
+              continue;
+            }
+
+            await this.documentEmbeddingRepository.save({
+              content: batch[j],
               source,
               sourceId,
-              embedding: embeddings[index],
-            })
-          )
-        );
+              embedding: embedding,
+            });
+            this.logger.log(`Saved document ${i + j} with embedding length ${embedding.length}`);
+          }
+        } catch (error) {
+          this.logger.error(`Error processing batch ${i}-${i + batch.length}:`, error);
+          throw error;
+        }
 
         if (i + this.batchSize < chunks.length) {
           await this.delay(this.delayBetweenBatches);
         }
-      } catch (error) {
-        this.logger.error(`Error processing batch ${i}-${i + this.batchSize}: ${error.message}`);
-        throw error;
+      }
+
+      this.logger.log('Processing completed successfully');
+    } catch (error) {
+      this.logger.error('Error in processContent:', error);
+      throw error;
+    }
+  }
+
+  private chunkText(text: string, maxLength: number = 1000): string[] {
+    const chunks: string[] = [];
+    const sentences = text.split(/[.!?]+/);
+    let currentChunk = '';
+
+    for (const sentence of sentences) {
+      if ((currentChunk + sentence).length > maxLength) {
+        if (currentChunk) chunks.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + sentence;
       }
     }
 
-    this.logger.log('Processing completed successfully');
+    if (currentChunk) chunks.push(currentChunk.trim());
+    return chunks;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 } 
