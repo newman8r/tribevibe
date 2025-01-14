@@ -10,6 +10,7 @@ import { VectorSearchService } from '../services/vector-search.service';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
 import { InspectTableCommand } from './inspect-table.command';
 import { DropTableCommand } from './drop-table.command';
+import { ClearVectorDBCommand } from './clear-vectordb.command';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { DropTableCommand } from './drop-table.command';
     VectorSearchService,
     InspectTableCommand,
     DropTableCommand,
+    ClearVectorDBCommand,
   ],
 })
 export class CommandsModule {} 

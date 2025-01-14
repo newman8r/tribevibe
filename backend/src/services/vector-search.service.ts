@@ -4,11 +4,14 @@ import { Repository } from 'typeorm';
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { ConfigService } from '@nestjs/config';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
+import { HNSWLib } from '@langchain/community/vectorstores/hnswlib';
 
 @Injectable()
 export class VectorSearchService {
   private readonly logger = new Logger(VectorSearchService.name);
   private readonly embeddings: OpenAIEmbeddings;
+  private vectorStore: HNSWLib;
+  private vectorStorePath: string;
 
   constructor(
     @InjectRepository(DocumentEmbedding)
@@ -19,6 +22,7 @@ export class VectorSearchService {
       openAIApiKey: this.configService.get<string>('OPENAI_API_KEY'),
       modelName: 'text-embedding-3-small',
     });
+    this.vectorStorePath = this.configService.get<string>('VECTOR_STORE_PATH') || './.vectorstore';
   }
 
   async searchSimilarDocuments(query: string, limit: number = 5): Promise<Array<{ content: string; similarity: number; source: string; sourceId: string }>> {
@@ -86,5 +90,27 @@ export class VectorSearchService {
     `, [queryEmbedding, sourceId, limit]);
 
     return results;
+  }
+
+  async clearAll(): Promise<void> {
+    try {
+      if (this.vectorStore) {
+        await this.vectorStore.delete({
+          directory: this.vectorStorePath
+        });
+      }
+      
+      // Use fs promises to remove the directory and its contents
+      const fs = require('fs').promises;
+      await fs.rm(this.vectorStorePath, { recursive: true, force: true });
+      
+      // Recreate empty directory
+      await fs.mkdir(this.vectorStorePath, { recursive: true });
+      
+      console.log(`Vector store at ${this.vectorStorePath} has been cleared`);
+    } catch (error) {
+      console.error('Error clearing vector store:', error);
+      throw error;
+    }
   }
 } 
