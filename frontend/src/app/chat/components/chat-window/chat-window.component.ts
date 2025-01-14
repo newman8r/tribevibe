@@ -16,6 +16,8 @@ import { SearchResult } from '../../../core/services/search.service';
 import { FileUploadPanelComponent } from '../file-upload-panel/file-upload-panel.component';
 import { AuthPromptModalComponent } from '../../../shared/components/auth-prompt-modal/auth-prompt-modal.component';
 import { EmojiPickerComponent } from '../../../shared/components/emoji-picker/emoji-picker.component';
+import { BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
 
 interface AttachedFile {
   id: string;
@@ -42,9 +44,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   messages: Message[] = [];
   messageText = '';
   currentChannel: Channel | null = null;
-  currentUser: User | null = null;
+  currentUser$ = new BehaviorSubject<User | null>(null);
+  anonymousId: string;
   private subscriptions: Subscription[] = [];
-  private anonymousId: string;
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   private isUserScrolled = false;
   private lastScrollHeight = 0;
@@ -90,16 +92,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   // Add new property for iOS Safari detection
   isSafariIOS = false;
 
-  private currentUserId: string;
-
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
     private authService: AuthService,
     private directMessageService: DirectMessageService,
-    private fileService: FileService
+    private fileService: FileService,
+    private router: Router
   ) {
-    // Get or create anonymous ID
+    // Get or generate anonymous ID
     this.anonymousId = localStorage.getItem('anonymousId') || 
       'anonymous-' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('anonymousId', this.anonymousId);
@@ -108,19 +109,21 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
                        !('MSStream' in window) &&
                        /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      throw new Error('No authenticated user found');
-    }
-    this.currentUserId = currentUser.id;
   }
 
   ngOnInit() {
+    // Subscribe to auth state changes
+    this.subscriptions.push(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser$.next(user);
+        // Remove the navigation logic - allow anonymous users
+      })
+    );
+
     // Subscribe to auth changes
     this.subscriptions.push(
       this.authService.currentUser$.subscribe(user => {
-        this.currentUser = user;
+        this.currentUser$ = new BehaviorSubject<User | null>(user);
       })
     );
 
@@ -280,8 +283,7 @@ setInterval(() => {
   }
 
   private joinChannel(channelId: string) {
-    const currentUser = this.authService.getCurrentUser();
-    const userId = currentUser?.id || this.anonymousId;
+    const userId = this.getUserIdentifier();
     this.websocketService.joinChannel(userId, channelId);
   }
 
@@ -422,13 +424,11 @@ setInterval(() => {
   }
 
   hasUserReacted(message: Message, emoji: string): boolean {
-    const currentUser = this.authService.getCurrentUser();
-    const userId = currentUser?.id || this.anonymousId;
-    
+    const userId = this.getUserIdentifier();
     return message.reactions?.some(r => 
-      r.emoji === emoji && 
       ((userId.startsWith('anonymous-') && r.anonymousId === userId) ||
-       (!userId.startsWith('anonymous-') && r.user?.id === userId))
+       (!userId.startsWith('anonymous-') && r.user?.id === userId)) &&
+      r.emoji === emoji
     ) || false;
   }
 
@@ -710,5 +710,27 @@ setInterval(() => {
     }
     // Generate an avatar using the user's ID
     return `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`;
+  }
+
+  private getUserIdentifier(): string {
+    return this.currentUser$.value?.id || this.anonymousId;
+  }
+
+  updatePresence(userId: string = this.getUserIdentifier()) {
+    this.websocketService.updatePresence(userId);
+  }
+
+  handleReaction(message: Message, emoji: string) {
+    const userId = this.getUserIdentifier();
+    const hasReacted = message.reactions?.some(r => 
+      (userId.startsWith('anonymous-') && r.anonymousId === userId) ||
+      (!userId.startsWith('anonymous-') && r.user?.id === userId)
+    );
+
+    if (hasReacted) {
+      this.websocketService.removeReaction(message.id, emoji, userId);
+    } else {
+      this.websocketService.addReaction(message.id, emoji, userId);
+    }
   }
 } 

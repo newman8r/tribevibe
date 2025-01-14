@@ -54,13 +54,12 @@
                   <i class="far fa-face-smile"></i>
                 </button>
                 <div class="reaction-menu">
-                  <button 
-                    *ngFor="let emoji of availableEmojis"
-                    class="emoji-button"
-                    [class.active]="hasUserReacted(message, emoji)"
-                    (click)="addReaction(message, emoji)">
+                  <div class="reaction" 
+                       *ngFor="let emoji of availableEmojis" 
+                       [class.active]="hasUserReacted(message, emoji)"
+                       (click)="handleReaction(message, emoji)">
                     {{ emoji }}
-                  </button>
+                  </div>
                 </div>
               </div>
               <button class="reply-trigger"
@@ -136,7 +135,7 @@
         <button class="toolbar-btn" (click)="toggleFileUploadPanel()" title="Upload file">
           <i class="fas fa-paperclip"></i>
         </button>
-        <div class="welcome-message" *ngIf="!currentUser">
+        <div class="welcome-message" *ngIf="!(currentUser$ | async)">
           <i class="fas fa-hand-sparkles"></i>
           <span>Welcome anonymous user, start chatting with our AI now! <a routerLink="/auth/register" class="login-link">Register here</a></span>
         </div>

@@ -43,11 +43,17 @@ export class UserListComponent implements OnInit, OnDestroy {
     private directMessageService: DirectMessageService,
     private authService: AuthService
   ) {
+    // Get either authenticated user ID or anonymous ID
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      throw new Error('No authenticated user found');
+    this.currentUserId = currentUser?.id || 
+      localStorage.getItem('anonymousId') || 
+      'anonymous-' + Math.random().toString(36).substr(2, 9);
+    
+    if (!this.currentUserId) {
+      console.warn('No user ID found, generating anonymous ID');
+      this.currentUserId = 'anonymous-' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('anonymousId', this.currentUserId);
     }
-    this.currentUserId = currentUser.id;
   }
 
   ngOnInit() {
