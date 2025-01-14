@@ -94,20 +94,24 @@ export class VectorSearchService {
 
   async clearAll(): Promise<void> {
     try {
+      // Clear the file-based vector store
       if (this.vectorStore) {
         await this.vectorStore.delete({
           directory: this.vectorStorePath
         });
       }
       
-      // Use fs promises to remove the directory and its contents
+      // Clear the filesystem storage
       const fs = require('fs').promises;
       await fs.rm(this.vectorStorePath, { recursive: true, force: true });
-      
-      // Recreate empty directory
       await fs.mkdir(this.vectorStorePath, { recursive: true });
       
-      console.log(`Vector store at ${this.vectorStorePath} has been cleared`);
+      // Clear the database table
+      await this.documentEmbeddingRepository.clear();
+      
+      console.log(`Vector store cleared: 
+        - File store at ${this.vectorStorePath}
+        - Database table document_embedding`);
     } catch (error) {
       console.error('Error clearing vector store:', error);
       throw error;
