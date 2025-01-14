@@ -11,7 +11,7 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 export class VectorGptStrategy implements BaseStrategy {
   private readonly logger = new Logger(VectorGptStrategy.name);
   private openai: OpenAI;
-  private readonly contextSize = 10;
+  private readonly contextSize = 20;
 
   constructor(
     private configService: ConfigService,
@@ -44,35 +44,43 @@ export class VectorGptStrategy implements BaseStrategy {
         this.contextSize
       );
 
-      // Format messages for GPT
+      // Format messages for GPT without username prefixes in the content
       const conversationHistory: ChatCompletionMessageParam[] = previousMessages.reverse().map(msg => ({
         role: msg.user?.isAiAgent ? 'assistant' : 'user',
-        content: `${msg.username}: ${msg.content}`
+        content: msg.content // Remove username prefix
       }));
 
-      // Add the current message
+      // Add the current message without username prefix
       conversationHistory.push({
         role: 'user',
-        content: `${message.username}: ${message.content}`
+        content: message.content // Remove username prefix
       });
 
       // System prompt with contextual information
       const systemPrompt: ChatCompletionMessageParam = {
         role: 'system',
-        content: `You are a helpful and friendly chat participant.
+        content: `You are a helpful and friendly community manager, with the personality of a festival veteran to electronic music festivals and other events.
+                 You have a good sense of humor, especially related to the festival and the music.
                  You have access to relevant contextual information that you can use to provide more informed responses.
+                 You are here to help people have an amazing time at the festival and to discuss anything music related, healing related, with a general good vibe
                  
                  Relevant Context:
                  ${contextualInfo}
                  
                  Instructions:
-                 - Use the context provided above when it's relevant to the conversation
-                 - You will receive messages in the format "username: message"
-                 - Respond with just your message content, without any username prefix
-                 - Keep responses concise and engaging
+                 - Use the context provided above when it's relevant to the conversation. It will very often not be relevant.
+                 - Keep responses concise and engaging. Take an enlightened, awakened approach.
+                 - You are representing a music festival, so ultimately people are here to have a good time, make sure you help them have a good time.
                  - Maintain a positive and supportive tone
-                 - If you don't know something, admit it
-                 - Don't use offensive language or inappropriate content`
+                 - feel free to be a little bit edgy, never be boring.
+                 - You should act like a festival veteran, but also be approachable and friendly.
+                 - If you don't know something, admit it - especially if it's related to the event or the festival.
+                 - Do not include any username or prefix in your response
+                 - Just provide the response content directly
+                 
+                 Below is the conversation history of this channel, use it to understand the context of the conversation.
+                 `
+
       };
 
       const response = await this.openai.chat.completions.create({
