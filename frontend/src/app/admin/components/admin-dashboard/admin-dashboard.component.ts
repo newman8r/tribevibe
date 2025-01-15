@@ -163,7 +163,6 @@ interface AIAgent {
                 <div class="col-channels">
                   <span *ngFor="let channel of agent.channels" class="channel-tag">
                     {{ channel }}
-                    <button class="remove-channel-btn" (click)="removeChannel(agent, channel)">×</button>
                   </span>
                 </div>
                 <div class="col-actions">
@@ -195,7 +194,6 @@ interface AIAgent {
                       <div class="current-channels">
                         <span *ngFor="let channel of agent.channels" class="channel-tag">
                           {{ channel }}
-                          <button class="remove-channel-btn" (click)="removeChannel(agent, channel)">×</button>
                         </span>
                       </div>
                       <div class="add-channel">
@@ -431,25 +429,87 @@ interface AIAgent {
       overflow: hidden;
     }
 
-    .table-header {
+    .table-header, .agent-main-row {
       display: grid;
-      grid-template-columns: 2fr 1fr 2fr 100px;
+      grid-template-columns: 3fr 1fr 1fr 100px;
       padding: 15px;
+      align-items: center;
+    }
+
+    .table-header {
       background: rgba(255, 20, 147, 0.1);
       font-weight: bold;
       border-bottom: 1px solid rgba(255, 20, 147, 0.2);
     }
 
-    .agent-row {
-      border-bottom: 1px solid rgba(255, 20, 147, 0.1);
+    .table-header .col-channels {
+      padding-left: 20px;
     }
 
-    .agent-main-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 2fr 100px;
-      padding: 15px;
+    .col-agent {
+      display: flex;
       align-items: center;
-      transition: background-color 0.3s ease;
+      gap: 10px;
+    }
+
+    .col-strategy {
+      white-space: nowrap;
+    }
+
+    .col-channels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .table-header > div {
+      padding: 0 15px;
+      text-align: left;
+    }
+
+    .col-agent {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 15px;
+      width: 300px;
+      min-width: 0;
+    }
+
+    .table-header .col-agent,
+    .agent-main-row .col-agent {
+      width: 300px;
+      min-width: 0;
+    }
+
+    .col-strategy {
+      padding: 0 15px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .col-channels {
+      padding: 0 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .col-actions {
+      padding: 0 15px;
+      text-align: right;
+    }
+
+    .agent-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .agent-row {
+      border-bottom: 1px solid rgba(255, 20, 147, 0.1);
     }
 
     .agent-main-row:hover {
@@ -466,15 +526,6 @@ interface AIAgent {
       border-radius: 50%;
       margin-right: 10px;
       vertical-align: middle;
-    }
-
-    .channel-tag {
-      display: inline-block;
-      padding: 4px 8px;
-      background: rgba(255, 20, 147, 0.2);
-      border-radius: 4px;
-      margin: 2px;
-      font-size: 0.9em;
     }
 
     .manage-btn {
@@ -687,6 +738,18 @@ interface AIAgent {
       background: rgba(255, 20, 147, 0.1);
       font-weight: bold;
       border-bottom: 1px solid rgba(255, 20, 147, 0.2);
+      align-items: center;
+    }
+
+    .agent-main-row {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr 100px;
+      padding: 15px;
+      align-items: center;
+    }
+
+    .table-header .col-channels {
+      padding-left: 20px;
     }
 
     .vector-row {
@@ -955,6 +1018,7 @@ interface AIAgent {
       border-radius: 4px;
       font-size: 0.9em;
       transition: all 0.3s ease;
+      white-space: nowrap;
     }
 
     .channel-tag:hover {
@@ -1029,6 +1093,10 @@ interface AIAgent {
     .return-arrow {
       font-size: 1.4em;
       line-height: 1;
+    }
+
+    .table-header .col-channels {
+      padding-left: 20px;
     }
   `],
   standalone: true,
