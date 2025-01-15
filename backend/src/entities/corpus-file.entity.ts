@@ -18,6 +18,9 @@ export class CorpusFile {
   @Column()
   size: number;
 
+  @Column({ default: false })
+  processed: boolean;
+
   @ManyToOne(() => VectorKnowledgeBase, kb => kb.corpusFiles)
   knowledgeBase: VectorKnowledgeBase;
 

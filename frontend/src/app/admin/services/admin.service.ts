@@ -49,6 +49,7 @@ export interface CorpusFile {
   s3Key: string;
   mimeType: string;
   size: number;
+  processed: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
