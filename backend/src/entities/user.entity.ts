@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable, OneToOne } from 'typeorm';
 import { Channel } from './channel.entity';
 import { AiAgentChannel } from './ai-agent-channel.entity';
+import { AiAgentPersonality } from './ai-agent-personality.entity';
 
 @Entity()
 export class User {
@@ -31,6 +32,9 @@ export class User {
 
   @OneToMany(() => AiAgentChannel, aiAgentChannel => aiAgentChannel.agent)
   aiAgentChannels: AiAgentChannel[];
+
+  @OneToOne(() => AiAgentPersonality, personality => personality.agent)
+  personality: AiAgentPersonality;
 
   @CreateDateColumn()
   createdAt: Date;

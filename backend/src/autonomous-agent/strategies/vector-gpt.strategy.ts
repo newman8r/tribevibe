@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { AiAgentKnowledgeBase } from '../../entities/ai-agent-knowledge-base.entity';
 import { VectorKnowledgeBase } from '../../entities/vector-knowledge-base.entity';
 import { User } from '../../entities/user.entity';
+import { AiAgentPersonality } from '../../entities/ai-agent-personality.entity';
 
 interface SearchResult {
   content: string;
@@ -52,6 +53,7 @@ export class VectorGptStrategy implements BaseStrategy {
         .createQueryBuilder('user')
         .innerJoin('user.aiAgentChannels', 'agentChannel')
         .innerJoin('agentChannel.channel', 'channel')
+        .leftJoinAndSelect('user.personality', 'personality')
         .where('channel.id = :channelId', { channelId: message.channel.id })
         .andWhere('user.isAiAgent = :isAiAgent', { isAiAgent: true })
         .andWhere('agentChannel.isActive = :isActive', { isActive: true })
@@ -61,6 +63,14 @@ export class VectorGptStrategy implements BaseStrategy {
         this.logger.error('No AI agent found for channel');
         return 'I apologize, but I encountered an error processing your message.';
       }
+
+      // Get current date for context
+      const currentDate = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
 
       // Get all knowledge bases associated with this AI agent
       const agentKnowledgeBases = await this.aiAgentKnowledgeBaseRepository.find({
@@ -151,11 +161,14 @@ export class VectorGptStrategy implements BaseStrategy {
 
       const systemPrompt: ChatCompletionMessageParam = {
         role: 'system',
-        content: `You are a helpful and friendly community manager, with the personality of a festival veteran to electronic music festivals and other events.
-                 You have a good sense of humor, especially related to the festival and the music.
-                 You have access to relevant contextual information that you can use to provide more informed responses.
-                 You are here to help people have an amazing time at the festival and to discuss anything music related, healing related, with a general good vibe
-                 Try to add relevant emojis whenever possible to create great vibes, but dont go overboard
+        content: `${agent.personality?.generalPersonality || 'You are a helpful and friendly community manager.'}
+
+                 Personal Details:
+                 - Agent's real Name: ${agent.personality?.displayName || agent.username}
+                 - Personality Type: ${agent.personality?.meyersBriggs || 'INTP'}
+                 - Writing Style: ${agent.personality?.writingStyle || 'Professional and concise'}
+                 - Contact: ${agent.personality?.contactEmail || 'No contact provided'}
+                 - Current Date: ${currentDate}
 
                  Relevant Context:
                  ${contextualInfo}
