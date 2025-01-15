@@ -1,0 +1,291 @@
+<div class="admin-dashboard">
+  <div class="return-bar">
+    <a routerLink="/chat" class="return-button">
+      <span class="return-arrow">←</span>
+      Return to App
+    </a>
+  </div>
+
+  <div class="tab-container">
+    <div class="tabs">
+      <button 
+        *ngFor="let tab of tabs" 
+        class="tab-button" 
+        [class.active]="activeTab === tab.id"
+        (click)="setActiveTab(tab.id)">
+        <i class="tab-icon" [innerHTML]="tab.icon"></i>
+        {{ tab.label }}
+        <div class="tab-glow"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-content" [ngSwitch]="activeTab">
+    <div *ngSwitchCase="'info'" class="system-info">
+      <div *ngIf="systemInfo" class="info-grid">
+        <div class="info-card system">
+          <h3>♪ System Info</h3>
+          <div class="info-item">
+            <span>Platform:</span>
+            <span>{{ systemInfo.system.platform }}</span>
+          </div>
+          <div class="info-item">
+            <span>CPUs:</span>
+            <span>{{ systemInfo.system.cpus }}</span>
+          </div>
+          <div class="info-item">
+            <span>Total Memory:</span>
+            <span>{{ formatBytes(systemInfo.system.totalMemory) }}</span>
+          </div>
+          <div class="info-item">
+            <span>Free Memory:</span>
+            <span>{{ formatBytes(systemInfo.system.freeMemory) }}</span>
+          </div>
+          <div class="info-item">
+            <span>Uptime:</span>
+            <span>{{ formatUptime(systemInfo.system.uptime) }}</span>
+          </div>
+        </div>
+
+        <div class="info-card application">
+          <h3>♫ Application Info</h3>
+          <div class="info-item">
+            <span>Users:</span>
+            <span>{{ systemInfo.application.userCount }}</span>
+          </div>
+          <div class="info-item">
+            <span>Database Size:</span>
+            <span>{{ systemInfo.application.databaseSize }}</span>
+          </div>
+          <div class="info-item">
+            <span>Node Version:</span>
+            <span>{{ systemInfo.application.nodeVersion }}</span>
+          </div>
+          <div class="info-item">
+            <span>Process Uptime:</span>
+            <span>{{ formatUptime(systemInfo.application.processUptime) }}</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+    </div>
+    
+    <div *ngSwitchCase="'users'" class="users-tab">
+      <h2>♬ User Management</h2>
+      <p>User management features coming soon...</p>
+    </div>
+
+    <div *ngSwitchCase="'logs'" class="logs-tab">
+      <h2>♩ System Logs</h2>
+      <p>System logs features coming soon...</p>
+    </div>
+
+    <div *ngSwitchCase="'agents'" class="agents-tab">
+      <div class="header-actions">
+        <h2>🤖 AI Agents</h2>
+        <button class="add-agent-btn">+ New Agent</button>
+      </div>
+      
+      <div class="agents-table">
+        <div class="table-header">
+          <div class="col-agent">Agent</div>
+          <div class="col-strategy">Strategy</div>
+          <div class="col-channels">Channels</div>
+          <div class="col-actions">Actions</div>
+        </div>
+        
+        <div *ngFor="let agent of aiAgents" class="agent-row">
+          <div class="agent-main-row" [class.expanded]="agent.isExpanded">
+            <div class="col-agent">
+              <img [src]="agent.avatarUrl" [alt]="agent.name" class="agent-avatar">
+              {{ agent.name }}
+            </div>
+            <div class="col-strategy">{{ agent.strategy }}</div>
+            <div class="col-channels">
+              <span *ngFor="let channel of agent.channels" class="channel-tag">
+                {{ channel }}
+              </span>
+            </div>
+            <div class="col-actions">
+              <button class="manage-btn" (click)="toggleAgentExpand(agent)">
+                {{ agent.isExpanded ? 'Close' : 'Manage' }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="agent-expanded-panel" *ngIf="agent.isExpanded">
+            <div class="panel-content">
+              <div class="panel-section">
+                <h4>Strategy</h4>
+                <div class="strategy-selector">
+                  <select [(ngModel)]="agent.strategy" class="setting-input">
+                    <option *ngFor="let strategy of strategies" [value]="strategy.name">
+                      {{ strategy.name }}
+                    </option>
+                  </select>
+                  <div class="strategy-description" *ngIf="getStrategyDescription(agent.strategy)">
+                    {{ getStrategyDescription(agent.strategy) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-section">
+                <h4>Channels</h4>
+                <div class="channels-manager">
+                  <div class="current-channels">
+                    <span *ngFor="let channel of agent.channels" class="channel-tag">
+                      {{ channel }}
+                    </span>
+                  </div>
+                  <div class="add-channel">
+                    <select [(ngModel)]="agent.newChannel" class="setting-input">
+                      <option value="">Select a channel...</option>
+                      <option *ngFor="let channel of getAvailableChannels(agent)" [value]="channel">
+                        {{ channel }}
+                      </option>
+                    </select>
+                    <button 
+                      class="add-channel-btn" 
+                      [disabled]="!agent.newChannel"
+                      (click)="addChannel(agent)">
+                      Add Channel
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-section">
+                <h4>Personality</h4>
+                <textarea class="personality-input" [(ngModel)]="agent.personality"></textarea>
+              </div>
+              
+              <div class="panel-section">
+                <h4>Knowledge Bases</h4>
+                <div class="knowledge-bases-list">
+                  <div *ngFor="let kb of agent.knowledgeBases" class="knowledge-base-item">
+                    <span class="kb-name">{{ kb }}</span>
+                    <button class="remove-kb-btn">×</button>
+                  </div>
+                  <button class="add-kb-btn">+ Add Knowledge Base</button>
+                </div>
+              </div>
+              
+              <div class="panel-section">
+                <h4>Avatar</h4>
+                <div class="avatar-preview">
+                  <img [src]="agent.avatarUrl" [alt]="agent.name">
+                  <button class="change-avatar-btn">Change Avatar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="'vectors'" class="vectors-tab">
+      <div class="header-actions">
+        <h2>🧬 Vector Knowledge Bases</h2>
+        <button class="add-kb-btn">+ New Knowledge Base</button>
+      </div>
+      
+      <div class="vectors-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-files">Files</div>
+          <div class="col-updated">Last Updated</div>
+          <div class="col-actions">Actions</div>
+        </div>
+        
+        <div *ngFor="let kb of vectorKBs" class="vector-row">
+          <div class="vector-main-row" [class.expanded]="kb.isExpanded">
+            <div class="col-title">
+              <span class="kb-title">{{ kb.title }}</span>
+              <span class="kb-description">{{ kb.description }}</span>
+            </div>
+            <div class="col-files">{{ kb.files.length }} files</div>
+            <div class="col-updated">{{ kb.lastUpdated | date:'short' }}</div>
+            <div class="col-actions">
+              <button class="manage-btn" (click)="toggleVectorKBExpand(kb)">
+                {{ kb.isExpanded ? 'Close' : 'Manage' }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="vector-expanded-panel" *ngIf="kb.isExpanded">
+            <div class="panel-content">
+              <div class="panel-section files-section">
+                <h4>Files</h4>
+                <div class="files-list">
+                  <div *ngFor="let file of kb.files" class="file-item">
+                    <div class="file-info">
+                      <span class="file-name">{{ file.name }}</span>
+                      <span class="file-meta">
+                        {{ formatBytes(file.size) }} • 
+                        {{ file.uploadDate | date:'short' }}
+                      </span>
+                    </div>
+                    <div class="file-status" [class]="file.status">
+                      {{ file.status }}
+                    </div>
+                    <button class="remove-file-btn">×</button>
+                  </div>
+                  <div class="file-upload">
+                    <button class="upload-btn">
+                      <span>+ Add Files</span>
+                      <input type="file" multiple class="file-input" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="panel-section settings-section">
+                <h4>Settings</h4>
+                <div class="settings-grid">
+                  <div class="setting-item">
+                    <label>Chunk Size</label>
+                    <input type="number" [(ngModel)]="kb.settings.chunkSize" class="setting-input" />
+                  </div>
+                  <div class="setting-item">
+                    <label>Chunk Overlap</label>
+                    <input type="number" [(ngModel)]="kb.settings.chunkOverlap" class="setting-input" />
+                  </div>
+                  <div class="setting-item">
+                    <label>Embedding Model</label>
+                    <select [(ngModel)]="kb.settings.embeddingModel" class="setting-input">
+                      <option value="openai">OpenAI</option>
+                      <option value="huggingface">HuggingFace</option>
+                      <option value="cohere">Cohere</option>
+                    </select>
+                  </div>
+                  <div class="setting-item">
+                    <label>Similarity Threshold</label>
+                    <input 
+                      type="range" 
+                      [(ngModel)]="kb.settings.similarityThreshold" 
+                      min="0" 
+                      max="1" 
+                      step="0.1" 
+                      class="setting-input range" />
+                    <span class="range-value">{{ kb.settings.similarityThreshold }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="panel-actions">
+              <button class="action-btn rebuild">
+                🔄 Rebuild Vectors
+              </button>
+              <button class="action-btn save">
+                💾 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
