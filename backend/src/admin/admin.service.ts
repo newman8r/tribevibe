@@ -116,7 +116,7 @@ export class AdminService {
 
   async getAllChannels() {
     const channels = await this.channelRepository.find({
-      relations: ['users'],
+      select: ['id', 'name', 'visible'],
       order: {
         name: 'ASC'
       }
@@ -126,7 +126,7 @@ export class AdminService {
       id: channel.id,
       name: channel.name,
       visible: channel.visible,
-      userCount: channel.users.length
+      userCount: 0 // We'll add this feature back once we get the basic query working
     }));
   }
 
