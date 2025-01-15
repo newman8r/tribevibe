@@ -8,6 +8,7 @@ import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-perso
 import { Channel } from '../entities/channel.entity';
 import { UpdateAiAgentPersonalityDto } from './admin.controller';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
+import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 
 export interface AiAgentDetails {
   id: string;
@@ -44,6 +45,8 @@ export class AdminService {
     private channelRepository: Repository<Channel>,
     @InjectRepository(AiAgentChannel)
     private aiAgentChannelRepository: Repository<AiAgentChannel>,
+    @InjectRepository(VectorKnowledgeBase)
+    private vectorKnowledgeBaseRepository: Repository<VectorKnowledgeBase>,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -230,5 +233,14 @@ export class AdminService {
     // Soft delete by marking as inactive
     association.isActive = false;
     return this.aiAgentChannelRepository.save(association);
+  }
+
+  async getAllVectorKnowledgeBases() {
+    return this.vectorKnowledgeBaseRepository.find({
+      relations: ['embeddings'],
+      order: {
+        createdAt: 'DESC'
+      }
+    });
   }
 } 

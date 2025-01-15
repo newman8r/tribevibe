@@ -9,6 +9,7 @@ import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { Channel } from '../entities/channel.entity';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
+import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
       AiAgentStrategy,
       AiAgentPersonality,
       Channel,
-      AiAgentChannel
+      AiAgentChannel,
+      VectorKnowledgeBase
     ]),
     UserModule,
     AuthModule

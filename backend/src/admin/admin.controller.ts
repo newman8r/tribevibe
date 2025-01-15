@@ -58,4 +58,9 @@ export class AdminController {
   ) {
     return this.adminService.removeAgentChannel(agentId, channelId);
   }
+
+  @Get('vector-knowledge-bases')
+  async getAllVectorKnowledgeBases() {
+    return this.adminService.getAllVectorKnowledgeBases();
+  }
 } 
