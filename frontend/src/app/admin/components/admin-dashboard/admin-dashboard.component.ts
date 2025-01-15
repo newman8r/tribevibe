@@ -322,9 +322,22 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAiAgents().subscribe({
       next: (agents) => {
         console.log('AI Agents loaded:', agents);
+        // Map the API response to our AIAgent interface
+        this.aiAgents = agents.map(agent => ({
+          id: agent.id,
+          name: agent.username, // Using username as name for now
+          strategy: agent.strategy?.name || 'No Strategy',
+          channels: agent.channels.map(ch => ch.name), // Map channel objects to channel names
+          personality: 'Default personality description', // Placeholder
+          knowledgeBases: ['General Knowledge'], // Placeholder
+          avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
+          isExpanded: false,
+          newChannel: ''
+        }));
       },
       error: (err) => {
         console.error('Error loading AI agents:', err);
+        // Keep the dummy data if the API call fails
       }
     });
   }
