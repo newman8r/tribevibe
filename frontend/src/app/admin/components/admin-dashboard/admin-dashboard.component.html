@@ -160,7 +160,7 @@
                     <textarea 
                       class="personality-input" 
                       [(ngModel)]="agent.personality.generalPersonality"
-                      (blur)="updateAgentPersonality(agent)">
+                      (ngModelChange)="markAsUnsaved(agent)">
                     </textarea>
                   </div>
                 </div>
@@ -174,7 +174,7 @@
                     <select 
                       class="personality-input select-input"
                       [(ngModel)]="agent.personality.meyersBriggs"
-                      (change)="updateAgentPersonality(agent)">
+                      (ngModelChange)="markAsUnsaved(agent)">
                       <option *ngFor="let type of Object.values(MeyersBriggsType)" [value]="type">
                         {{type}}
                       </option>
@@ -186,7 +186,7 @@
                     <textarea 
                       class="personality-input"
                       [(ngModel)]="agent.personality.writingStyle"
-                      (blur)="updateAgentPersonality(agent)">
+                      (ngModelChange)="markAsUnsaved(agent)">
                     </textarea>
                   </div>
 
@@ -196,7 +196,7 @@
                       type="text"
                       class="personality-input"
                       [(ngModel)]="agent.personality.displayName"
-                      (blur)="updateAgentPersonality(agent)">
+                      (ngModelChange)="markAsUnsaved(agent)">
                   </div>
 
                   <div class="field-group">
@@ -205,9 +205,21 @@
                       type="email"
                       class="personality-input"
                       [(ngModel)]="agent.personality.contactEmail"
-                      (blur)="updateAgentPersonality(agent)">
+                      (ngModelChange)="markAsUnsaved(agent)">
                   </div>
                 </div>
+              </div>
+              
+              <div class="panel-section save-section" *ngIf="hasUnsavedChanges(agent) || getSaveNotification(agent)">
+                <div class="save-notification" *ngIf="getSaveNotification(agent) as notification" [class]="notification.type">
+                  {{ notification.message }}
+                </div>
+                <button 
+                  class="save-personality-btn" 
+                  (click)="saveAgentPersonality(agent)"
+                  *ngIf="hasUnsavedChanges(agent)">
+                  Save Agent Changes
+                </button>
               </div>
               
               <div class="panel-section">

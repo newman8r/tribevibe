@@ -784,3 +784,70 @@
       border-radius: 4px;
       margin-bottom: 8px;
     }
+
+    .save-section {
+      margin-top: 20px;
+      text-align: center;
+      background: rgba(255, 20, 147, 0.1);
+      border: 1px solid rgba(255, 20, 147, 0.3);
+      padding: 20px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .save-notification {
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      animation: fadeIn 0.3s ease;
+
+      &.success {
+        background: rgba(46, 213, 115, 0.2);
+        color: #2ed573;
+        border: 1px solid rgba(46, 213, 115, 0.4);
+      }
+
+      &.error {
+        background: rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.4);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .save-personality-btn {
+      background: deeppink;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(255, 20, 147, 0.3);
+
+      &:hover {
+        background: #ff1493;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 20, 147, 0.4);
+      }
+
+      &:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 4px rgba(255, 20, 147, 0.2);
+      }
+    }

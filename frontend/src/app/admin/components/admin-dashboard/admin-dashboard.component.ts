@@ -41,6 +41,11 @@ interface VectorFile {
   status: 'processed' | 'processing' | 'failed';
 }
 
+interface SaveNotification {
+  type: 'success' | 'error';
+  message: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
@@ -194,6 +199,12 @@ export class AdminDashboardComponent implements OnInit {
   MeyersBriggsType = MeyersBriggsType;
   Object = Object;
 
+  // Track unsaved changes for each agent
+  unsavedChanges: { [agentId: string]: boolean } = {};
+
+  // Track save notifications for each agent
+  saveNotifications: { [agentId: string]: SaveNotification | null } = {};
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
@@ -320,19 +331,50 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  updateAgentPersonality(agent: AIAgent) {
+  markAsUnsaved(agent: AIAgent) {
+    this.unsavedChanges[agent.id] = true;
+  }
+
+  hasUnsavedChanges(agent: AIAgent): boolean {
+    return this.unsavedChanges[agent.id] || false;
+  }
+
+  saveAgentPersonality(agent: AIAgent) {
     if (!agent.personality) return;
+
+    // Clear any existing notification
+    this.saveNotifications[agent.id] = null;
 
     this.adminService.updateAiAgentPersonality(agent.id, agent.personality).subscribe({
       next: (updatedPersonality) => {
         console.log('Personality updated successfully:', updatedPersonality);
         // Update the local agent data with the response
         agent.personality = updatedPersonality;
+        // Clear unsaved changes flag
+        this.unsavedChanges[agent.id] = false;
+        // Show success notification
+        this.saveNotifications[agent.id] = {
+          type: 'success',
+          message: 'Changes saved successfully!'
+        };
+        // Clear notification after 3 seconds
+        setTimeout(() => {
+          this.saveNotifications[agent.id] = null;
+        }, 3000);
       },
       error: (err) => {
         console.error('Error updating personality:', err);
-        // You might want to show an error message to the user here
+        // Show error notification
+        this.saveNotifications[agent.id] = {
+          type: 'error',
+          message: 'Failed to save changes. Please try again.'
+        };
       }
     });
+  }
+
+  // Helper method to get notification for an agent
+  getSaveNotification(agent: AIAgent): SaveNotification | null {
+    return this.saveNotifications[agent.id] || null;
   }
 } 
