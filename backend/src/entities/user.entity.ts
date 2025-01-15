@@ -21,6 +21,9 @@ export class User {
   @Column({ default: false })
   isAiAgent: boolean;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
   @ManyToMany(() => Channel, channel => channel.users)
   @JoinTable()
   channels: Channel[];

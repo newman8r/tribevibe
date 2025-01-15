@@ -20,6 +20,7 @@ import { SearchModule } from './search/search.module';
 import { FileModule } from './file/file.module';
 import { AutonomousAgentModule } from './autonomous-agent/autonomous-agent.module';
 import { DocumentEmbedding } from './entities/document-embedding.entity';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { DocumentEmbedding } from './entities/document-embedding.entity';
     ChatModule,
     SearchModule,
     FileModule,
-    AutonomousAgentModule
+    AutonomousAgentModule,
+    AdminModule
   ],
 })
 export class AppModule {}

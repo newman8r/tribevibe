@@ -11,6 +11,8 @@ import { DocumentEmbedding } from '../entities/document-embedding.entity';
 import { InspectTableCommand } from './inspect-table.command';
 import { DropTableCommand } from './drop-table.command';
 import { ClearVectorDBCommand } from './clear-vectordb.command';
+import { SetAdminCommand } from './set-admin.command';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { ClearVectorDBCommand } from './clear-vectordb.command';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([DocumentEmbedding]),
+    UserModule
   ],
   providers: [
     CreateVectorIndexCommand,
@@ -41,6 +44,7 @@ import { ClearVectorDBCommand } from './clear-vectordb.command';
     InspectTableCommand,
     DropTableCommand,
     ClearVectorDBCommand,
+    SetAdminCommand
   ],
 })
 export class CommandsModule {} 
