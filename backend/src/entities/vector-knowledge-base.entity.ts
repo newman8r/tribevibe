@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { DocumentEmbedding } from './document-embedding.entity';
+import { CorpusFile } from './corpus-file.entity';
 
 export enum ChunkingStrategy {
   FIXED_SIZE = 'fixed_size',
@@ -32,8 +33,8 @@ export class VectorKnowledgeBase {
     separators?: string[];
   };
 
-  @Column('text', { array: true, default: [] })
-  associatedFiles: string[];  // Array of file paths or S3 keys
+  @OneToMany(() => CorpusFile, file => file.knowledgeBase)
+  corpusFiles: CorpusFile[];
 
   @OneToMany(() => DocumentEmbedding, embedding => embedding.knowledgeBase)
   embeddings: DocumentEmbedding[];

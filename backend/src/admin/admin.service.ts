@@ -237,7 +237,7 @@ export class AdminService {
 
   async getAllVectorKnowledgeBases() {
     return this.vectorKnowledgeBaseRepository.find({
-      relations: ['embeddings'],
+      relations: ['embeddings', 'corpusFiles'],
       order: {
         createdAt: 'DESC'
       }

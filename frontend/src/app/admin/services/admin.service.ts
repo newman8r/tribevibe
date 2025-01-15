@@ -43,17 +43,28 @@ export interface AiAgentDetails {
   personality?: AiAgentPersonality;
 }
 
+export interface CorpusFile {
+  id: string;
+  filename: string;
+  s3Key: string;
+  mimeType: string;
+  size: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface VectorKnowledgeBase {
   id: string;
   name: string;
-  description: string;
-  chunkingStrategy: string;
-  chunkingSettings: {
+  description?: string;
+  chunkingStrategy: 'fixed_size' | 'semantic' | 'paragraph';
+  chunkingSettings?: {
     chunkSize?: number;
     chunkOverlap?: number;
     separators?: string[];
   };
-  associatedFiles: string[];
+  corpusFiles: CorpusFile[];
+  embeddings?: any[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -144,5 +155,64 @@ export class AdminService {
     return this.http.get<VectorKnowledgeBase[]>(`${this.apiUrl}/vector-knowledge-bases`, {
       headers: this.getAuthHeaders()
     });
+  }
+
+  getUploadUrl(knowledgeBaseId: string, file: File): Observable<{ uploadUrl: string; file: CorpusFile }> {
+    return this.http.post<{ uploadUrl: string; file: CorpusFile }>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/files`,
+      {
+        filename: file.name,
+        mimeType: file.type || 'text/plain',
+        size: file.size
+      },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  uploadFileToS3(uploadUrl: string, file: File): Observable<any> {
+    // Create a clean HttpClient request without any interceptors
+    const xhr = new XMLHttpRequest();
+    
+    return new Observable(observer => {
+      xhr.open('PUT', uploadUrl, true);
+      xhr.setRequestHeader('Content-Type', file.type || 'text/plain');
+      xhr.setRequestHeader('x-amz-server-side-encryption', 'AES256');
+      
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          observer.next(xhr.response);
+          observer.complete();
+        } else {
+          observer.error(new Error(`Upload failed with status: ${xhr.status}`));
+        }
+      };
+      
+      xhr.onerror = () => {
+        observer.error(new Error('Upload failed'));
+      };
+      
+      xhr.send(file);
+      
+      // Cleanup on unsubscribe
+      return () => {
+        if (xhr.readyState !== 4) {
+          xhr.abort();
+        }
+      };
+    });
+  }
+
+  getCorpusFiles(knowledgeBaseId: string): Observable<CorpusFile[]> {
+    return this.http.get<CorpusFile[]>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/files`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  removeCorpusFile(knowledgeBaseId: string, fileId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/files/${fileId}`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 } 

@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AdminService, SystemInfo, AiAgentDetails, Channel, VectorKnowledgeBase } from '../../services/admin.service';
+import { AdminService, SystemInfo, AiAgentDetails, Channel, VectorKnowledgeBase, CorpusFile } from '../../services/admin.service';
 import { AIAgent, MeyersBriggsType, AiAgentPersonality } from '../../interfaces/ai-agent.interface';
+import { firstValueFrom } from 'rxjs';
 
 interface AdminTab {
   id: string;
@@ -105,6 +106,9 @@ export class AdminDashboardComponent implements OnInit {
   // Track channel changes for each agent
   channelChanges: { [agentId: string]: ChannelChanges } = {};
 
+  uploadingFiles: { [kbId: string]: boolean } = {};
+  fileUploadError: { [kbId: string]: string | null } = {};
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
@@ -167,7 +171,17 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   toggleVectorKBExpand(kb: VectorKnowledgeBase) {
+    console.log('Toggling KB expansion for:', kb);
+    console.log('Current corpus files:', kb.corpusFiles);
     this.expandedKBs[kb.id] = !this.expandedKBs[kb.id];
+    
+    // Initialize settings if they don't exist
+    if (this.expandedKBs[kb.id] && !kb.chunkingSettings) {
+      kb.chunkingSettings = {
+        chunkSize: 1000,
+        chunkOverlap: 200
+      };
+    }
   }
 
   isVectorKBExpanded(kb: VectorKnowledgeBase): boolean {
@@ -273,6 +287,8 @@ export class AdminDashboardComponent implements OnInit {
   private loadVectorKnowledgeBases() {
     this.adminService.getAllVectorKnowledgeBases().subscribe({
       next: (kbs) => {
+        console.log('Loaded vector knowledge bases:', kbs);
+        console.log('First KB corpus files:', kbs[0]?.corpusFiles);
         this.vectorKBs = kbs;
       },
       error: (err) => {
@@ -334,5 +350,76 @@ export class AdminDashboardComponent implements OnInit {
   // Helper method to get notification for an agent
   getSaveNotification(agent: AIAgent): SaveNotification | null {
     return this.saveNotifications[agent.id] || null;
+  }
+
+  async onFileSelected(event: Event, kb: VectorKnowledgeBase) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    if (!file.type.includes('text/')) {
+      this.fileUploadError[kb.id] = 'Only text files are allowed';
+      return;
+    }
+
+    this.uploadingFiles[kb.id] = true;
+    this.fileUploadError[kb.id] = null;
+
+    try {
+      // Get presigned URL
+      const { uploadUrl, file: fileMetadata } = await firstValueFrom(
+        this.adminService.getUploadUrl(kb.id, file)
+      );
+      
+      // Upload to S3
+      await firstValueFrom(this.adminService.uploadFileToS3(uploadUrl, file));
+      
+      // Initialize corpusFiles array if needed
+      if (!kb.corpusFiles) {
+        kb.corpusFiles = [];
+      }
+      
+      // Add file to the list
+      kb.corpusFiles.push(fileMetadata);
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      this.fileUploadError[kb.id] = 'Failed to upload file. Please try again.';
+    } finally {
+      this.uploadingFiles[kb.id] = false;
+      // Clear the input
+      input.value = '';
+    }
+  }
+
+  isUploading(kb: VectorKnowledgeBase): boolean {
+    return this.uploadingFiles[kb.id] || false;
+  }
+
+  getUploadError(kb: VectorKnowledgeBase): string | null {
+    return this.fileUploadError[kb.id] || null;
+  }
+
+  clearUploadError(kb: VectorKnowledgeBase) {
+    this.fileUploadError[kb.id] = null;
+  }
+
+  triggerFileInput(kb: VectorKnowledgeBase) {
+    this.clearUploadError(kb);
+    const fileInput = document.getElementById(`file-upload-${kb.id}`) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  async removeCorpusFile(kb: VectorKnowledgeBase, file: CorpusFile) {
+    try {
+      await firstValueFrom(this.adminService.removeCorpusFile(kb.id, file.id));
+      // Remove the file from the list
+      kb.corpusFiles = kb.corpusFiles.filter(f => f.id !== file.id);
+    } catch (error) {
+      console.error('Error removing file:', error);
+      // You might want to show an error message to the user here
+    }
   }
 } 

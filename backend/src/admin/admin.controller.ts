@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards, Patch, Param, Body, Post, Delete } from '@n
 import { AdminService, AiAgentDetails } from './admin.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { MeyersBriggsType } from '../entities/ai-agent-personality.entity';
+import { CorpusFileService } from '../services/corpus-file.service';
 
 export class UpdateAiAgentPersonalityDto {
   generalPersonality: string;
@@ -15,10 +16,19 @@ export class AddAgentChannelDto {
   channelId: string;
 }
 
+export class UploadCorpusFileDto {
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly corpusFileService: CorpusFileService
+  ) {}
 
   @Get('ai-agents')
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -62,5 +72,31 @@ export class AdminController {
   @Get('vector-knowledge-bases')
   async getAllVectorKnowledgeBases() {
     return this.adminService.getAllVectorKnowledgeBases();
+  }
+
+  @Post('vector-knowledge-bases/:id/files')
+  async getCorpusFileUploadUrl(
+    @Param('id') knowledgeBaseId: string,
+    @Body() uploadDto: UploadCorpusFileDto
+  ) {
+    return this.corpusFileService.createPresignedUploadUrl(
+      uploadDto.filename,
+      uploadDto.mimeType,
+      uploadDto.size,
+      knowledgeBaseId
+    );
+  }
+
+  @Delete('vector-knowledge-bases/:kbId/files/:fileId')
+  async removeCorpusFile(
+    @Param('kbId') knowledgeBaseId: string,
+    @Param('fileId') fileId: string
+  ) {
+    await this.corpusFileService.removeFromKnowledgeBase(fileId);
+  }
+
+  @Get('vector-knowledge-bases/:id/files')
+  async getCorpusFiles(@Param('id') knowledgeBaseId: string) {
+    return this.corpusFileService.findByKnowledgeBase(knowledgeBaseId);
   }
 } 

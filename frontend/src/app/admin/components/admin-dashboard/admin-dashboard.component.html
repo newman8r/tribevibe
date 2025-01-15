@@ -267,7 +267,19 @@
           <div class="vector-main-row" [class.expanded]="isVectorKBExpanded(kb)">
             <div class="col-name">{{ kb.name }}</div>
             <div class="col-description">{{ kb.description }}</div>
-            <div class="col-files">{{ kb.associatedFiles.length }} files</div>
+            <div class="col-files">
+              <ng-container *ngIf="kb.corpusFiles?.length; else noFiles">
+                {{ kb.corpusFiles.length }} files:
+                <div class="file-list-preview">
+                  <span *ngFor="let file of kb.corpusFiles" class="file-preview-item">
+                    {{ file.filename }}
+                  </span>
+                </div>
+              </ng-container>
+              <ng-template #noFiles>
+                No files
+              </ng-template>
+            </div>
             <div class="col-updated">{{ kb.updatedAt | date:'short' }}</div>
             <div class="col-actions">
               <button class="manage-btn" (click)="toggleVectorKBExpand(kb)">
@@ -281,10 +293,34 @@
               <div class="panel-section">
                 <h4>Files</h4>
                 <div class="files-list">
-                  <div *ngFor="let file of kb.associatedFiles" class="file-item">
-                    {{ file }}
+                  <div *ngFor="let file of kb.corpusFiles" class="file-item">
+                    <div class="file-info">
+                      <span class="file-name">{{ file.filename }}</span>
+                      <span class="file-meta">
+                        {{ file.size | number }} bytes • {{ file.createdAt | date:'short' }}
+                      </span>
+                    </div>
+                    <button class="remove-file-btn" (click)="removeCorpusFile(kb, file)">×</button>
                   </div>
-                  <button class="add-file-btn">+ Add File</button>
+                  <input
+                    type="file"
+                    [id]="'file-upload-' + kb.id"
+                    (change)="onFileSelected($event, kb)"
+                    accept=".txt"
+                    style="display: none"
+                  >
+                  <button 
+                    class="add-file-btn" 
+                    [class.uploading]="isUploading(kb)"
+                    [disabled]="isUploading(kb)"
+                    (click)="triggerFileInput(kb)"
+                  >
+                    <span *ngIf="!isUploading(kb)">+ Add File</span>
+                    <span *ngIf="isUploading(kb)">Uploading...</span>
+                  </button>
+                  <div *ngIf="getUploadError(kb)" class="upload-error">
+                    {{ getUploadError(kb) }}
+                  </div>
                 </div>
               </div>
 
@@ -302,12 +338,12 @@
 
                   <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
                     <label>Chunk Size</label>
-                    <input type="number" [(ngModel)]="kb.chunkingSettings.chunkSize" class="setting-input">
+                    <input type="number" [(ngModel)]="kb.chunkingSettings!.chunkSize" class="setting-input">
                   </div>
 
                   <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
                     <label>Chunk Overlap</label>
-                    <input type="number" [(ngModel)]="kb.chunkingSettings.chunkOverlap" class="setting-input">
+                    <input type="number" [(ngModel)]="kb.chunkingSettings!.chunkOverlap" class="setting-input">
                   </div>
                 </div>
               </div>
