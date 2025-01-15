@@ -530,24 +530,49 @@
     }
 
     .file-status {
-      padding: 4px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
+      font-size: 0.8em;
+      margin-left: 8px;
+
+      &.processed {
+        background: rgba(0, 255, 0, 0.2);
+        color: #90EE90;
+      }
+
+      &.unprocessed {
+        background: rgba(255, 165, 0, 0.2);
+        color: #FFB347;
+      }
+    }
+
+    .file-preview-item {
       font-size: 0.9em;
-    }
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
 
-    .file-status.processed {
-      background: rgba(0, 255, 0, 0.2);
-      color: #90EE90;
-    }
+      &.processed .status-dot {
+        background-color: #90EE90;
+      }
 
-    .file-status.processing {
-      background: rgba(255, 165, 0, 0.2);
-      color: #FFB347;
-    }
+      &.unprocessed .status-dot {
+        background-color: #FFB347;
+      }
 
-    .file-status.failed {
-      background: rgba(255, 0, 0, 0.2);
-      color: #FF6B6B;
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
     }
 
     .remove-file-btn {

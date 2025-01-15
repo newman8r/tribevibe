@@ -271,8 +271,9 @@
               <ng-container *ngIf="kb.corpusFiles?.length; else noFiles">
                 {{ kb.corpusFiles.length }} files:
                 <div class="file-list-preview">
-                  <span *ngFor="let file of kb.corpusFiles" class="file-preview-item">
+                  <span *ngFor="let file of kb.corpusFiles" class="file-preview-item" [class.processed]="file.processed" [class.unprocessed]="!file.processed">
                     {{ file.filename }}
+                    <span class="status-dot"></span>
                   </span>
                 </div>
               </ng-container>
@@ -298,6 +299,9 @@
                       <span class="file-name">{{ file.filename }}</span>
                       <span class="file-meta">
                         {{ file.size | number }} bytes • {{ file.createdAt | date:'short' }}
+                        <span class="file-status" [class.processed]="file.processed" [class.unprocessed]="!file.processed">
+                          {{ file.processed ? 'Processed' : 'Unprocessed' }}
+                        </span>
                       </span>
                     </div>
                     <button class="remove-file-btn" (click)="removeCorpusFile(kb, file)">×</button>
