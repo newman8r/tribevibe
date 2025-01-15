@@ -319,4 +319,20 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
+  updateAgentPersonality(agent: AIAgent) {
+    if (!agent.personality) return;
+
+    this.adminService.updateAiAgentPersonality(agent.id, agent.personality).subscribe({
+      next: (updatedPersonality) => {
+        console.log('Personality updated successfully:', updatedPersonality);
+        // Update the local agent data with the response
+        agent.personality = updatedPersonality;
+      },
+      error: (err) => {
+        console.error('Error updating personality:', err);
+        // You might want to show an error message to the user here
+      }
+    });
+  }
 } 

@@ -159,11 +159,10 @@
                     <label>General Personality</label>
                     <textarea 
                       class="personality-input" 
-                      [(ngModel)]="agent.personality.generalPersonality">
+                      [(ngModel)]="agent.personality.generalPersonality"
+                      (blur)="updateAgentPersonality(agent)">
                     </textarea>
                   </div>
-
- 
                 </div>
               </div>
 
@@ -174,7 +173,8 @@
                     <label>Myers-Briggs Type</label>
                     <select 
                       class="personality-input select-input"
-                      [(ngModel)]="agent.personality.meyersBriggs">
+                      [(ngModel)]="agent.personality.meyersBriggs"
+                      (change)="updateAgentPersonality(agent)">
                       <option *ngFor="let type of Object.values(MeyersBriggsType)" [value]="type">
                         {{type}}
                       </option>
@@ -185,7 +185,8 @@
                     <label>Writing Style</label>
                     <textarea 
                       class="personality-input"
-                      [(ngModel)]="agent.personality.writingStyle">
+                      [(ngModel)]="agent.personality.writingStyle"
+                      (blur)="updateAgentPersonality(agent)">
                     </textarea>
                   </div>
 
@@ -194,7 +195,8 @@
                     <input 
                       type="text"
                       class="personality-input"
-                      [(ngModel)]="agent.personality.displayName">
+                      [(ngModel)]="agent.personality.displayName"
+                      (blur)="updateAgentPersonality(agent)">
                   </div>
 
                   <div class="field-group">
@@ -202,7 +204,8 @@
                     <input 
                       type="email"
                       class="personality-input"
-                      [(ngModel)]="agent.personality.contactEmail">
+                      [(ngModel)]="agent.personality.contactEmail"
+                      (blur)="updateAgentPersonality(agent)">
                   </div>
                 </div>
               </div>

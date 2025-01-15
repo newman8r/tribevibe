@@ -1,6 +1,15 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Patch, Param, Body } from '@nestjs/common';
 import { AdminService, AiAgentDetails } from './admin.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { MeyersBriggsType } from '../entities/ai-agent-personality.entity';
+
+export class UpdateAiAgentPersonalityDto {
+  generalPersonality: string;
+  meyersBriggs: MeyersBriggsType;
+  writingStyle: string;
+  displayName: string;
+  contactEmail: string;
+}
 
 @Controller('admin')
 @UseGuards(AdminGuard)
@@ -20,5 +29,13 @@ export class AdminController {
   @Get('info')
   async getSystemInfo() {
     return this.adminService.getSystemInfo();
+  }
+
+  @Patch('ai-agents/:id/personality')
+  async updateAiAgentPersonality(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateAiAgentPersonalityDto
+  ) {
+    return this.adminService.updateAiAgentPersonality(id, updateDto);
   }
 } 

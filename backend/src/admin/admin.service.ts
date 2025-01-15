@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -6,6 +6,7 @@ import { AiAgentStrategy } from '../entities/ai-agent-strategy.entity';
 import * as os from 'os';
 import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-personality.entity';
 import { Channel } from '../entities/channel.entity';
+import { UpdateAiAgentPersonalityDto } from './admin.controller';
 
 export interface AiAgentDetails {
   id: string;
@@ -119,5 +120,38 @@ export class AdminService {
       visible: channel.visible,
       userCount: channel.users.length
     }));
+  }
+
+  async updateAiAgentPersonality(
+    agentId: string,
+    updateDto: UpdateAiAgentPersonalityDto
+  ) {
+    // First check if the agent exists and is an AI agent
+    const agent = await this.userRepository.findOne({
+      where: { id: agentId, isAiAgent: true }
+    });
+
+    if (!agent) {
+      throw new NotFoundException('AI agent not found');
+    }
+
+    // Find existing personality or create new one
+    let personality = await this.aiAgentPersonalityRepository.findOne({
+      where: { agent: { id: agentId } }
+    });
+
+    if (!personality) {
+      personality = this.aiAgentPersonalityRepository.create({
+        agent: agent
+      });
+    }
+
+    // Update the personality fields
+    Object.assign(personality, updateDto);
+
+    // Save the updated personality
+    await this.aiAgentPersonalityRepository.save(personality);
+
+    return personality;
   }
 } 

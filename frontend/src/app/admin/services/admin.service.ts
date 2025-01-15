@@ -78,4 +78,12 @@ export class AdminService {
       headers: this.getAuthHeaders()
     });
   }
+
+  updateAiAgentPersonality(agentId: string, personality: AiAgentPersonality): Observable<AiAgentPersonality> {
+    return this.http.patch<AiAgentPersonality>(
+      `${this.apiUrl}/ai-agents/${agentId}/personality`,
+      personality,
+      { headers: this.getAuthHeaders() }
+    );
+  }
 } 
