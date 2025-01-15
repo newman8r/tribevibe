@@ -8,10 +8,12 @@ import { SearchDocumentsCommand } from './search-documents.command';
 import { DocumentProcessingService } from '../services/document-processing.service';
 import { VectorSearchService } from '../services/vector-search.service';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
+import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 import { InspectTableCommand } from './inspect-table.command';
 import { DropTableCommand } from './drop-table.command';
 import { ClearVectorDBCommand } from './clear-vectordb.command';
 import { SetAdminCommand } from './set-admin.command';
+import { ManageKnowledgeBaseCommand } from './manage-knowledge-base.command';
 import { UserModule } from '../user/user.module';
 
 @Module({
@@ -31,7 +33,7 @@ import { UserModule } from '../user/user.module';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([DocumentEmbedding]),
+    TypeOrmModule.forFeature([DocumentEmbedding, VectorKnowledgeBase]),
     UserModule
   ],
   providers: [
@@ -44,7 +46,8 @@ import { UserModule } from '../user/user.module';
     InspectTableCommand,
     DropTableCommand,
     ClearVectorDBCommand,
-    SetAdminCommand
+    SetAdminCommand,
+    ManageKnowledgeBaseCommand
   ],
 })
 export class CommandsModule {} 

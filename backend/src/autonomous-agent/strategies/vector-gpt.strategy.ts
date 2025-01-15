@@ -12,6 +12,7 @@ export class VectorGptStrategy implements BaseStrategy {
   private readonly logger = new Logger(VectorGptStrategy.name);
   private openai: OpenAI;
   private readonly contextSize = 20;
+  private readonly defaultKnowledgeBaseId: string | undefined;
 
   constructor(
     private configService: ConfigService,
@@ -21,6 +22,7 @@ export class VectorGptStrategy implements BaseStrategy {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY')
     });
+    this.defaultKnowledgeBaseId = this.configService.get<string>('DEFAULT_KNOWLEDGE_BASE_ID') || undefined;
   }
 
   async processMessage(message: Message): Promise<string | null> {
@@ -50,8 +52,8 @@ export class VectorGptStrategy implements BaseStrategy {
       
       // Perform vector search with both original and reformulated questions - RAG fusion strategy
       const [originalResults, reformulatedResults] = await Promise.all([
-        this.vectorSearchService.searchSimilarDocuments(message.content, 1),
-        this.vectorSearchService.searchSimilarDocuments(reformulatedQuestion, 1)
+        this.vectorSearchService.searchSimilarDocuments(message.content, this.defaultKnowledgeBaseId, 1),
+        this.vectorSearchService.searchSimilarDocuments(reformulatedQuestion, this.defaultKnowledgeBaseId, 1)
       ]);
 
       // Combine contextual information from both searches

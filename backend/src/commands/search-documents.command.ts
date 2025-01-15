@@ -14,13 +14,17 @@ export class SearchDocumentsCommand extends CommandRunner {
   async run(passedParams: string[], options?: Record<string, any>): Promise<void> {
     const query = options?.query || passedParams[0];
     const limit = options?.limit || 5;
+    const knowledgeBaseId = options?.knowledgeBaseId;
 
     this.logger.log(`Searching for: ${query}`);
     this.logger.log(`Limit: ${limit}`);
+    if (knowledgeBaseId) {
+      this.logger.log(`Knowledge Base ID: ${knowledgeBaseId}`);
+    }
     this.logger.log('-------------------');
 
     try {
-      const results = await this.vectorSearchService.searchSimilarDocuments(query, limit);
+      const results = await this.vectorSearchService.searchSimilarDocuments(query, knowledgeBaseId, limit);
       
       if (results.length === 0) {
         this.logger.log('No results found');
@@ -51,5 +55,13 @@ export class SearchDocumentsCommand extends CommandRunner {
   })
   parseLimit(val: string): number {
     return parseInt(val, 10);
+  }
+
+  @Option({
+    flags: '-k, --knowledge-base-id [string]',
+    description: 'ID of the knowledge base to search in',
+  })
+  parseKnowledgeBaseId(val: string): string {
+    return val;
   }
 } 

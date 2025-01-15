@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
+import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 @Injectable()
@@ -15,6 +16,8 @@ export class DocumentProcessingService {
   constructor(
     @InjectRepository(DocumentEmbedding)
     private documentEmbeddingRepository: Repository<DocumentEmbedding>,
+    @InjectRepository(VectorKnowledgeBase)
+    private knowledgeBaseRepository: Repository<VectorKnowledgeBase>,
     private configService: ConfigService,
   ) {
     this.embeddings = new OpenAIEmbeddings({
@@ -23,12 +26,28 @@ export class DocumentProcessingService {
     });
   }
 
-  async processContent(content: string, source: string, sourceId: string): Promise<void> {
+  async processContent(
+    content: string, 
+    source: string, 
+    sourceId: string,
+    knowledgeBaseId?: string
+  ): Promise<void> {
     try {
       // First, check if we have the OpenAI API key
       const apiKey = this.configService.get<string>('OPENAI_API_KEY');
       if (!apiKey) {
         throw new Error('OpenAI API key is not configured');
+      }
+
+      // If knowledgeBaseId is provided, verify it exists
+      let knowledgeBase: VectorKnowledgeBase | null = null;
+      if (knowledgeBaseId) {
+        knowledgeBase = await this.knowledgeBaseRepository.findOne({
+          where: { id: knowledgeBaseId }
+        });
+        if (!knowledgeBase) {
+          throw new Error(`Knowledge base with ID ${knowledgeBaseId} not found`);
+        }
       }
 
       const chunks = this.chunkText(content);
@@ -56,6 +75,7 @@ export class DocumentProcessingService {
               source,
               sourceId,
               embedding: embedding,
+              knowledgeBase: knowledgeBase
             });
             this.logger.log(`Saved document ${i + j} with embedding length ${embedding.length}`);
           }
