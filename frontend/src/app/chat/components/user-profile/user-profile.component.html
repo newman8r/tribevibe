@@ -23,6 +23,7 @@
   </div>
 
   <ng-container *ngIf="currentUser; else registerButton">
+    <a *ngIf="currentUser.isAdmin" class="admin-link" routerLink="/admin">Admin Dashboard</a>
     <a class="logout-link" (click)="logout()">Logout</a>
   </ng-container>
   

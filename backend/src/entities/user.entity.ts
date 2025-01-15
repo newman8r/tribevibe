@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Channel } from './channel.entity';
+import { AiAgentChannel } from './ai-agent-channel.entity';
 
 @Entity()
 export class User {
@@ -7,22 +8,34 @@ export class User {
   id: string;
 
   @Column({ unique: true })
-  email: string;
-
-  @Column({ unique: true })
   username: string;
 
-  @Column()
-  ticketId: string;
+  @Column({ unique: true })
+  email: string;
 
-  @Column()
-  avatarUrl: string;
+  @Column({ nullable: true })
+  avatarUrl?: string;
+
+  @Column({ nullable: true })
+  ticketId?: string;
 
   @Column({ default: false })
   isAiAgent: boolean;
 
-  @ManyToMany(() => Channel, channel => channel.users)
+  @Column({ default: false })
+  isAdmin: boolean;
+
+  @ManyToMany(() => Channel)
   @JoinTable()
   channels: Channel[];
+
+  @OneToMany(() => AiAgentChannel, aiAgentChannel => aiAgentChannel.agent)
+  aiAgentChannels: AiAgentChannel[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
 

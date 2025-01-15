@@ -20,6 +20,8 @@ import { SearchModule } from './search/search.module';
 import { FileModule } from './file/file.module';
 import { AutonomousAgentModule } from './autonomous-agent/autonomous-agent.module';
 import { DocumentEmbedding } from './entities/document-embedding.entity';
+import { AdminModule } from './admin/admin.module';
+import { AiAgentPersonality } from './entities/ai-agent-personality.entity';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { DocumentEmbedding } from './entities/document-embedding.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}', DocumentEmbedding],
+        entities: [__dirname + '/**/*.entity{.ts,.js}', DocumentEmbedding, AiAgentPersonality],
         synchronize: configService.get('NODE_ENV') !== 'production',
         ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
@@ -51,7 +53,8 @@ import { DocumentEmbedding } from './entities/document-embedding.entity';
     ChatModule,
     SearchModule,
     FileModule,
-    AutonomousAgentModule
+    AutonomousAgentModule,
+    AdminModule
   ],
 })
 export class AppModule {}

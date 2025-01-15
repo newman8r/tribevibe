@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { io, Socket } from 'socket.io-client';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Message } from '../interfaces/message.interface';
 import { AuthService } from './auth.service';
 import { User } from '../interfaces/user.interface';
 import { DirectMessageConversation } from '../interfaces/direct-message-conversation.interface';
 import { Channel } from '../interfaces/channel.interface';
+import { UserStatus } from '../interfaces/user-status.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,11 @@ import { Channel } from '../interfaces/channel.interface';
 export class WebsocketService {
   private socket: Socket;
   private readonly WS_URL = environment.apiBaseUrl; // Socket.IO will automatically convert http:// to ws://
+  private userStatusSubject = new BehaviorSubject<UserStatus>(UserStatus.OFFLINE);
+  private anonymousUsernameSubject = new BehaviorSubject<string | null>(null);
+
+  userStatus$ = this.userStatusSubject.asObservable();
+  anonymousUsername$ = this.anonymousUsernameSubject.asObservable();
 
   constructor(private authService: AuthService) {
     this.socket = io(this.WS_URL, {
@@ -45,6 +51,19 @@ export class WebsocketService {
 
     this.socket.on('error', (error) => {
       console.error('WebSocket error:', error);
+    });
+
+    // Listen for status updates and update the BehaviorSubject
+    this.socket.on('userStatusUpdate', ({ userId, status }) => {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser?.id === userId || (!currentUser && userId === localStorage.getItem('anonymousId'))) {
+        this.userStatusSubject.next(status as UserStatus);
+      }
+    });
+
+    // Listen for anonymous username updates
+    this.socket.on('anonymousUsernameUpdate', (username: string) => {
+      this.anonymousUsernameSubject.next(username);
     });
   }
 

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
@@ -11,36 +12,22 @@ import { UserStatus } from '../../../core/interfaces/user-status.enum';
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule]
 })
 export class UserProfileComponent implements OnInit {
   currentUser: User | null = null;
+  currentUserStatus: UserStatus = UserStatus.OFFLINE;
+  anonymousUsername: string | null = null;
   anonymousId: string;
   anonymousAvatar: string;
-  anonymousUsername: string | null = null;
-  currentUserStatus: string = 'offline';
-
-  private statusCycle = [
-    UserStatus.ONLINE,
-    UserStatus.AWAY,
-    UserStatus.BUSY,
-    UserStatus.OFFLINE
-  ];
+  private statusCycle = [UserStatus.ONLINE, UserStatus.AWAY, UserStatus.BUSY, UserStatus.OFFLINE];
 
   constructor(
     private authService: AuthService,
-    private websocketService: WebsocketService,
-    private router: Router
+    private router: Router,
+    private websocketService: WebsocketService
   ) {
-    // Get or generate anonymous ID
-    this.anonymousId = localStorage.getItem('anonymousId') || 
-      'anonymous-' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('anonymousId', this.anonymousId);
-    
-    // Get stored anonymous username if available
-    this.anonymousUsername = localStorage.getItem('anonymousUsername');
-    
-    // Generate avatar URL for anonymous users
+    this.anonymousId = localStorage.getItem('anonymousId') || '';
     this.anonymousAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${this.anonymousId}`;
   }
 
@@ -49,21 +36,14 @@ export class UserProfileComponent implements OnInit {
       this.currentUser = user;
     });
 
-    // Subscribe to new messages to capture the anonymous username
-    if (!this.currentUser && !this.anonymousUsername) {
-      this.websocketService.onNewMessage().subscribe(message => {
-        if (message.anonymousId === this.anonymousId && message.username) {
-          this.anonymousUsername = message.username;
-          localStorage.setItem('anonymousUsername', message.username);
-        }
-      });
-    }
-
-    // Subscribe to status updates
-    this.websocketService.onUserStatusUpdate().subscribe(({userId, status}) => {
-      if (userId === (this.currentUser?.id || this.anonymousId)) {
+    this.websocketService.userStatus$.subscribe((status: UserStatus) => {
+      if (status) {
         this.currentUserStatus = status;
       }
+    });
+
+    this.websocketService.anonymousUsername$.subscribe((username: string | null) => {
+      this.anonymousUsername = username;
     });
   }
 
@@ -78,7 +58,7 @@ export class UserProfileComponent implements OnInit {
 
   cycleStatus(event: Event) {
     event.stopPropagation();
-    const currentIndex = this.statusCycle.indexOf(this.currentUserStatus as UserStatus);
+    const currentIndex = this.statusCycle.indexOf(this.currentUserStatus);
     const nextIndex = (currentIndex + 1) % this.statusCycle.length;
     const newStatus = this.statusCycle[nextIndex];
     
