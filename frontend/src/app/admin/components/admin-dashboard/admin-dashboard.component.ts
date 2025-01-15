@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AdminService, SystemInfo, AiAgentDetails, Channel } from '../../services/admin.service';
+import { AdminService, SystemInfo, AiAgentDetails, Channel, VectorKnowledgeBase } from '../../services/admin.service';
 import { AIAgent, MeyersBriggsType, AiAgentPersonality } from '../../interfaces/ai-agent.interface';
 
 interface AdminTab {
@@ -15,21 +15,6 @@ interface Strategy {
   id: string;
   name: string;
   description: string;
-}
-
-interface VectorKnowledgeBase {
-  id: string;
-  title: string;
-  description: string;
-  files: VectorFile[];
-  settings: {
-    chunkSize: number;
-    chunkOverlap: number;
-    embeddingModel: string;
-    similarityThreshold: number;
-  };
-  lastUpdated: Date;
-  isExpanded?: boolean;
 }
 
 interface VectorFile {
@@ -63,6 +48,7 @@ export class AdminDashboardComponent implements OnInit {
   error: string | null = null;
   activeTab: string = 'info';
   channels: Channel[] = [];
+  expandedKBs: { [id: string]: boolean } = {};
 
   tabs: AdminTab[] = [
     { id: 'info', label: 'System Info', icon: '♪' },
@@ -76,101 +62,7 @@ export class AdminDashboardComponent implements OnInit {
   aiAgents: AIAgent[] = [];
 
   // Dummy vector knowledge bases data
-  vectorKBs: VectorKnowledgeBase[] = [
-    {
-      id: '1',
-      title: 'Product Documentation',
-      description: 'Complete product documentation including user guides and API references',
-      files: [
-        {
-          id: 'f1',
-          name: 'user-guide-v1.pdf',
-          size: 2500000,
-          type: 'application/pdf',
-          uploadDate: new Date('2024-01-15'),
-          status: 'processed'
-        },
-        {
-          id: 'f2',
-          name: 'api-documentation.md',
-          size: 150000,
-          type: 'text/markdown',
-          uploadDate: new Date('2024-01-16'),
-          status: 'processed'
-        }
-      ],
-      settings: {
-        chunkSize: 1000,
-        chunkOverlap: 200,
-        embeddingModel: 'openai',
-        similarityThreshold: 0.7
-      },
-      lastUpdated: new Date('2024-01-16'),
-      isExpanded: false
-    },
-    {
-      id: '2',
-      title: 'Support Knowledge Base',
-      description: 'Common issues, troubleshooting guides, and FAQs',
-      files: [
-        {
-          id: 'f3',
-          name: 'troubleshooting-guide.pdf',
-          size: 1800000,
-          type: 'application/pdf',
-          uploadDate: new Date('2024-01-14'),
-          status: 'processed'
-        },
-        {
-          id: 'f4',
-          name: 'faq.md',
-          size: 75000,
-          type: 'text/markdown',
-          uploadDate: new Date('2024-01-14'),
-          status: 'processing'
-        }
-      ],
-      settings: {
-        chunkSize: 800,
-        chunkOverlap: 150,
-        embeddingModel: 'huggingface',
-        similarityThreshold: 0.8
-      },
-      lastUpdated: new Date('2024-01-14'),
-      isExpanded: false
-    },
-    {
-      id: '3',
-      title: 'Community Guidelines',
-      description: 'Community rules, best practices, and moderation guidelines',
-      files: [
-        {
-          id: 'f5',
-          name: 'community-guidelines.md',
-          size: 120000,
-          type: 'text/markdown',
-          uploadDate: new Date('2024-01-10'),
-          status: 'processed'
-        },
-        {
-          id: 'f6',
-          name: 'moderation-handbook.pdf',
-          size: 3200000,
-          type: 'application/pdf',
-          uploadDate: new Date('2024-01-12'),
-          status: 'failed'
-        }
-      ],
-      settings: {
-        chunkSize: 500,
-        chunkOverlap: 100,
-        embeddingModel: 'cohere',
-        similarityThreshold: 0.6
-      },
-      lastUpdated: new Date('2024-01-12'),
-      isExpanded: false
-    }
-  ];
+  vectorKBs: VectorKnowledgeBase[] = [];
 
   // Predefined strategies
   strategies: Strategy[] = [
@@ -219,6 +111,7 @@ export class AdminDashboardComponent implements OnInit {
     this.loadSystemInfo();
     this.loadAiAgents();
     this.loadChannels();
+    this.loadVectorKnowledgeBases();
   }
 
   setActiveTab(tabId: string) {
@@ -274,7 +167,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   toggleVectorKBExpand(kb: VectorKnowledgeBase) {
-    kb.isExpanded = !kb.isExpanded;
+    this.expandedKBs[kb.id] = !this.expandedKBs[kb.id];
+  }
+
+  isVectorKBExpanded(kb: VectorKnowledgeBase): boolean {
+    return this.expandedKBs[kb.id] || false;
   }
 
   getStrategyDescription(strategyName: string): string {
@@ -369,6 +266,17 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading channels:', err);
+      }
+    });
+  }
+
+  private loadVectorKnowledgeBases() {
+    this.adminService.getAllVectorKnowledgeBases().subscribe({
+      next: (kbs) => {
+        this.vectorKBs = kbs;
+      },
+      error: (err) => {
+        console.error('Error loading vector knowledge bases:', err);
       }
     });
   }

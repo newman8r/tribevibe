@@ -43,6 +43,21 @@ export interface AiAgentDetails {
   personality?: AiAgentPersonality;
 }
 
+export interface VectorKnowledgeBase {
+  id: string;
+  name: string;
+  description: string;
+  chunkingStrategy: string;
+  chunkingSettings: {
+    chunkSize?: number;
+    chunkOverlap?: number;
+    separators?: string[];
+  };
+  associatedFiles: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -123,5 +138,11 @@ export class AdminService {
     });
 
     return forkJoin(requests);
+  }
+
+  getAllVectorKnowledgeBases(): Observable<VectorKnowledgeBase[]> {
+    return this.http.get<VectorKnowledgeBase[]>(`${this.apiUrl}/vector-knowledge-bases`, {
+      headers: this.getAuthHeaders()
+    });
   }
 } 

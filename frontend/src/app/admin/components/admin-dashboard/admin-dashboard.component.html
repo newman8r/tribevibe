@@ -256,95 +256,61 @@
       
       <div class="vectors-table">
         <div class="table-header">
-          <div class="col-title">Title</div>
+          <div class="col-name">Name</div>
+          <div class="col-description">Description</div>
           <div class="col-files">Files</div>
-          <div class="col-updated">Last Updated</div>
+          <div class="col-updated">Updated</div>
           <div class="col-actions">Actions</div>
         </div>
         
         <div *ngFor="let kb of vectorKBs" class="vector-row">
-          <div class="vector-main-row" [class.expanded]="kb.isExpanded">
-            <div class="col-title">
-              <span class="kb-title">{{ kb.title }}</span>
-              <span class="kb-description">{{ kb.description }}</span>
-            </div>
-            <div class="col-files">{{ kb.files.length }} files</div>
-            <div class="col-updated">{{ kb.lastUpdated | date:'short' }}</div>
+          <div class="vector-main-row" [class.expanded]="isVectorKBExpanded(kb)">
+            <div class="col-name">{{ kb.name }}</div>
+            <div class="col-description">{{ kb.description }}</div>
+            <div class="col-files">{{ kb.associatedFiles.length }} files</div>
+            <div class="col-updated">{{ kb.updatedAt | date:'short' }}</div>
             <div class="col-actions">
               <button class="manage-btn" (click)="toggleVectorKBExpand(kb)">
-                {{ kb.isExpanded ? 'Close' : 'Manage' }}
+                {{ isVectorKBExpanded(kb) ? 'Close' : 'Manage' }}
               </button>
             </div>
           </div>
           
-          <div class="vector-expanded-panel" *ngIf="kb.isExpanded">
+          <div class="vector-expanded-panel" *ngIf="isVectorKBExpanded(kb)">
             <div class="panel-content">
-              <div class="panel-section files-section">
+              <div class="panel-section">
                 <h4>Files</h4>
                 <div class="files-list">
-                  <div *ngFor="let file of kb.files" class="file-item">
-                    <div class="file-info">
-                      <span class="file-name">{{ file.name }}</span>
-                      <span class="file-meta">
-                        {{ formatBytes(file.size) }} • 
-                        {{ file.uploadDate | date:'short' }}
-                      </span>
-                    </div>
-                    <div class="file-status" [class]="file.status">
-                      {{ file.status }}
-                    </div>
-                    <button class="remove-file-btn">×</button>
+                  <div *ngFor="let file of kb.associatedFiles" class="file-item">
+                    {{ file }}
                   </div>
-                  <div class="file-upload">
-                    <button class="upload-btn">
-                      <span>+ Add Files</span>
-                      <input type="file" multiple class="file-input" />
-                    </button>
-                  </div>
+                  <button class="add-file-btn">+ Add File</button>
                 </div>
               </div>
-              
-              <div class="panel-section settings-section">
-                <h4>Settings</h4>
+
+              <div class="panel-section">
+                <h4>Chunking Settings</h4>
                 <div class="settings-grid">
-                  <div class="setting-item">
-                    <label>Chunk Size</label>
-                    <input type="number" [(ngModel)]="kb.settings.chunkSize" class="setting-input" />
-                  </div>
-                  <div class="setting-item">
-                    <label>Chunk Overlap</label>
-                    <input type="number" [(ngModel)]="kb.settings.chunkOverlap" class="setting-input" />
-                  </div>
-                  <div class="setting-item">
-                    <label>Embedding Model</label>
-                    <select [(ngModel)]="kb.settings.embeddingModel" class="setting-input">
-                      <option value="openai">OpenAI</option>
-                      <option value="huggingface">HuggingFace</option>
-                      <option value="cohere">Cohere</option>
+                  <div class="setting-group">
+                    <label>Strategy</label>
+                    <select [(ngModel)]="kb.chunkingStrategy" class="setting-input">
+                      <option value="fixed_size">Fixed Size</option>
+                      <option value="semantic">Semantic</option>
+                      <option value="paragraph">Paragraph</option>
                     </select>
                   </div>
-                  <div class="setting-item">
-                    <label>Similarity Threshold</label>
-                    <input 
-                      type="range" 
-                      [(ngModel)]="kb.settings.similarityThreshold" 
-                      min="0" 
-                      max="1" 
-                      step="0.1" 
-                      class="setting-input range" />
-                    <span class="range-value">{{ kb.settings.similarityThreshold }}</span>
+
+                  <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
+                    <label>Chunk Size</label>
+                    <input type="number" [(ngModel)]="kb.chunkingSettings.chunkSize" class="setting-input">
+                  </div>
+
+                  <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
+                    <label>Chunk Overlap</label>
+                    <input type="number" [(ngModel)]="kb.chunkingSettings.chunkOverlap" class="setting-input">
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="panel-actions">
-              <button class="action-btn rebuild">
-                🔄 Rebuild Vectors
-              </button>
-              <button class="action-btn save">
-                💾 Save Changes
-              </button>
             </div>
           </div>
         </div>
