@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { AiAgentStrategy } from '../entities/ai-agent-strategy.entity';
 import * as os from 'os';
+import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-personality.entity';
 
 export interface AiAgentDetails {
   id: string;
@@ -18,6 +19,13 @@ export interface AiAgentDetails {
     name: string;
     settings: Record<string, any>;
   };
+  personality?: {
+    generalPersonality: string;
+    meyersBriggs: MeyersBriggsType;
+    writingStyle: string;
+    displayName: string;
+    contactEmail: string;
+  };
 }
 
 @Injectable()
@@ -27,6 +35,8 @@ export class AdminService {
     private userRepository: Repository<User>,
     @InjectRepository(AiAgentStrategy)
     private aiAgentStrategyRepository: Repository<AiAgentStrategy>,
+    @InjectRepository(AiAgentPersonality)
+    private aiAgentPersonalityRepository: Repository<AiAgentPersonality>,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -42,6 +52,10 @@ export class AdminService {
         where: { agent: { id: agent.id } },
       });
 
+      const personality = await this.aiAgentPersonalityRepository.findOne({
+        where: { agent: { id: agent.id } },
+      });
+
       agentDetails.push({
         id: agent.id,
         username: agent.username,
@@ -54,6 +68,13 @@ export class AdminService {
         strategy: strategy ? {
           name: strategy.strategyName,
           settings: strategy.settings,
+        } : undefined,
+        personality: personality ? {
+          generalPersonality: personality.generalPersonality,
+          meyersBriggs: personality.meyersBriggs,
+          writingStyle: personality.writingStyle,
+          displayName: personality.displayName,
+          contactEmail: personality.contactEmail,
         } : undefined,
       });
     }

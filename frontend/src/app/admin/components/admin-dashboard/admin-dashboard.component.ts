@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminService, SystemInfo, AiAgentDetails } from '../../services/admin.service';
+import { AIAgent, MeyersBriggsType, AiAgentPersonality } from '../../interfaces/ai-agent.interface';
 
 interface AdminTab {
   id: string;
@@ -40,18 +41,6 @@ interface VectorFile {
   status: 'processed' | 'processing' | 'failed';
 }
 
-interface AIAgent {
-  id: string;
-  name: string;
-  strategy: string;
-  channels: string[];
-  personality: string;
-  knowledgeBases: string[];
-  avatarUrl: string;
-  isExpanded?: boolean;
-  newChannel?: string;
-}
-
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
@@ -73,38 +62,7 @@ export class AdminDashboardComponent implements OnInit {
   ];
 
   // Dummy AI agents data
-  aiAgents: AIAgent[] = [
-    {
-      id: '1',
-      name: 'Support Agent',
-      strategy: 'Customer Support',
-      channels: ['#support', '#general'],
-      personality: 'Friendly and helpful customer support agent with extensive knowledge of our products and services.',
-      knowledgeBases: ['Product Documentation', 'FAQs', 'Troubleshooting Guide'],
-      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=support',
-      isExpanded: false
-    },
-    {
-      id: '2',
-      name: 'Code Assistant',
-      strategy: 'Programming Helper',
-      channels: ['#development', '#code-review'],
-      personality: 'Technical and precise programming assistant with expertise in multiple programming languages.',
-      knowledgeBases: ['Code Samples', 'Best Practices', 'Language Documentation'],
-      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=code',
-      isExpanded: false
-    },
-    {
-      id: '3',
-      name: 'Community Manager',
-      strategy: 'Community Engagement',
-      channels: ['#community', '#events', '#announcements'],
-      personality: 'Engaging and enthusiastic community manager that helps maintain a positive atmosphere.',
-      knowledgeBases: ['Community Guidelines', 'Event Calendar', 'User Profiles'],
-      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=community',
-      isExpanded: false
-    }
-  ];
+  aiAgents: AIAgent[] = [];
 
   // Dummy vector knowledge bases data
   vectorKBs: VectorKnowledgeBase[] = [
@@ -322,22 +280,30 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAiAgents().subscribe({
       next: (agents) => {
         console.log('AI Agents loaded:', agents);
-        // Map the API response to our AIAgent interface
-        this.aiAgents = agents.map(agent => ({
-          id: agent.id,
-          name: agent.username, // Using username as name for now
-          strategy: agent.strategy?.name || 'No Strategy',
-          channels: agent.channels.map(ch => ch.name), // Map channel objects to channel names
-          personality: 'Default personality description', // Placeholder
-          knowledgeBases: ['General Knowledge'], // Placeholder
-          avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
-          isExpanded: false,
-          newChannel: ''
-        }));
+        this.aiAgents = agents.map(agent => {
+          const defaultPersonality: AiAgentPersonality = {
+            generalPersonality: 'Default personality description',
+            meyersBriggs: MeyersBriggsType.INTP,
+            writingStyle: 'Professional and concise',
+            displayName: agent.username,
+            contactEmail: agent.email
+          };
+
+          return {
+            id: agent.id,
+            name: agent.username,
+            strategy: agent.strategy?.name || 'No Strategy',
+            channels: agent.channels.map(ch => ch.name),
+            personality: agent.personality || defaultPersonality,
+            knowledgeBases: ['General Knowledge'],
+            avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
+            isExpanded: false,
+            newChannel: ''
+          };
+        });
       },
       error: (err) => {
         console.error('Error loading AI agents:', err);
-        // Keep the dummy data if the API call fails
       }
     });
   }
