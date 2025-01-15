@@ -156,9 +156,48 @@
                 </div>
               </div>
 
-              <div class="panel-section">
+              <div class="panel-section" *ngIf="agent.personality">
                 <h4>Personality</h4>
-                <textarea class="personality-input" [(ngModel)]="agent.personality"></textarea>
+                <div class="personality-fields">
+                  <div class="field-group">
+                    <label>General Personality</label>
+                    <textarea 
+                      class="personality-input" 
+                      [(ngModel)]="agent.personality.generalPersonality">
+                    </textarea>
+                  </div>
+
+                  <div class="field-group">
+                    <label>Myers-Briggs Type</label>
+                    <select [(ngModel)]="agent.personality.meyersBriggs">
+                      <option *ngFor="let type of Object.values(MeyersBriggsType)" [value]="type">
+                        {{type}}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="field-group">
+                    <label>Writing Style</label>
+                    <textarea 
+                      class="writing-style-input"
+                      [(ngModel)]="agent.personality.writingStyle">
+                    </textarea>
+                  </div>
+
+                  <div class="field-group">
+                    <label>Display Name</label>
+                    <input 
+                      type="text"
+                      [(ngModel)]="agent.personality.displayName">
+                  </div>
+
+                  <div class="field-group">
+                    <label>Contact Email</label>
+                    <input 
+                      type="email"
+                      [(ngModel)]="agent.personality.contactEmail">
+                  </div>
+                </div>
               </div>
               
               <div class="panel-section">

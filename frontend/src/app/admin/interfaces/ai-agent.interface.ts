@@ -28,6 +28,7 @@ export interface AiAgentPersonality {
 export interface AIAgent {
   id: string;
   name: string;
+  email: string;
   strategy: string;
   channels: string[];
   avatarUrl: string;

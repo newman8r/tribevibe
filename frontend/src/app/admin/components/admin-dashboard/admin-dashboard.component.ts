@@ -203,6 +203,9 @@ export class AdminDashboardComponent implements OnInit {
     '#help'
   ];
 
+  MeyersBriggsType = MeyersBriggsType;
+  Object = Object;
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
@@ -216,6 +219,16 @@ export class AdminDashboardComponent implements OnInit {
 
   toggleAgentExpand(agent: AIAgent) {
     agent.isExpanded = !agent.isExpanded;
+    
+    if (agent.isExpanded && !agent.personality) {
+      agent.personality = {
+        generalPersonality: 'Default personality description',
+        meyersBriggs: MeyersBriggsType.INTP,
+        writingStyle: 'Professional and concise',
+        displayName: agent.name,
+        contactEmail: agent.email || ''
+      };
+    }
   }
 
   loadSystemInfo() {
@@ -280,27 +293,24 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAiAgents().subscribe({
       next: (agents) => {
         console.log('AI Agents loaded:', agents);
-        this.aiAgents = agents.map(agent => {
-          const defaultPersonality: AiAgentPersonality = {
+        this.aiAgents = agents.map(agent => ({
+          id: agent.id,
+          name: agent.username,
+          email: agent.email,
+          strategy: agent.strategy?.name || 'No Strategy',
+          channels: agent.channels.map(ch => ch.name),
+          personality: agent.personality || {
             generalPersonality: 'Default personality description',
             meyersBriggs: MeyersBriggsType.INTP,
             writingStyle: 'Professional and concise',
             displayName: agent.username,
-            contactEmail: agent.email
-          };
-
-          return {
-            id: agent.id,
-            name: agent.username,
-            strategy: agent.strategy?.name || 'No Strategy',
-            channels: agent.channels.map(ch => ch.name),
-            personality: agent.personality || defaultPersonality,
-            knowledgeBases: ['General Knowledge'],
-            avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
-            isExpanded: false,
-            newChannel: ''
-          };
-        });
+            contactEmail: agent.email || ''
+          },
+          knowledgeBases: ['General Knowledge'],
+          avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
+          isExpanded: false,
+          newChannel: ''
+        }));
       },
       error: (err) => {
         console.error('Error loading AI agents:', err);
