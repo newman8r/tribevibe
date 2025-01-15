@@ -23,6 +23,10 @@ export class ApiService {
     return this.http.post<AuthResponse>(`${this.API_URL}/auth/signin`, data);
   }
 
+  refreshToken(refreshToken: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/refresh`, { refreshToken });
+  }
+
   // User endpoints
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.API_URL}/users`);
