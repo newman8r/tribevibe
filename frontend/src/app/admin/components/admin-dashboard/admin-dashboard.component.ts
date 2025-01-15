@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -109,7 +109,14 @@ export class AdminDashboardComponent implements OnInit {
   uploadingFiles: { [kbId: string]: boolean } = {};
   fileUploadError: { [kbId: string]: string | null } = {};
 
-  constructor(private adminService: AdminService) {}
+  private uploadingKBs = new Set<string>();
+  private uploadErrors = new Map<string, string>();
+  private processingKBs = new Set<string>();
+
+  constructor(
+    private adminService: AdminService,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadSystemInfo();
@@ -357,6 +364,8 @@ export class AdminDashboardComponent implements OnInit {
     if (!input.files?.length) return;
 
     const file = input.files[0];
+    console.log('Selected file:', { name: file.name, type: file.type, size: file.size });
+
     if (!file.type.includes('text/')) {
       this.fileUploadError[kb.id] = 'Only text files are allowed';
       return;
@@ -366,13 +375,18 @@ export class AdminDashboardComponent implements OnInit {
     this.fileUploadError[kb.id] = null;
 
     try {
+      console.log('Getting presigned URL for file upload...');
       // Get presigned URL
       const { uploadUrl, file: fileMetadata } = await firstValueFrom(
         this.adminService.getUploadUrl(kb.id, file)
       );
+      console.log('Got presigned URL:', uploadUrl);
+      console.log('File metadata:', fileMetadata);
       
       // Upload to S3
+      console.log('Uploading file to S3...');
       await firstValueFrom(this.adminService.uploadFileToS3(uploadUrl, file));
+      console.log('Successfully uploaded file to S3');
       
       // Initialize corpusFiles array if needed
       if (!kb.corpusFiles) {
@@ -381,10 +395,11 @@ export class AdminDashboardComponent implements OnInit {
       
       // Add file to the list
       kb.corpusFiles.push(fileMetadata);
+      console.log('Updated knowledge base files:', kb.corpusFiles);
       
     } catch (error) {
       console.error('Error uploading file:', error);
-      this.fileUploadError[kb.id] = 'Failed to upload file. Please try again.';
+      this.fileUploadError[kb.id] = error instanceof Error ? error.message : 'Failed to upload file. Please try again.';
     } finally {
       this.uploadingFiles[kb.id] = false;
       // Clear the input
@@ -420,6 +435,34 @@ export class AdminDashboardComponent implements OnInit {
     } catch (error) {
       console.error('Error removing file:', error);
       // You might want to show an error message to the user here
+    }
+  }
+
+  hasUnprocessedFiles(kb: VectorKnowledgeBase): boolean {
+    return kb.corpusFiles?.some(file => !file.processed) ?? false;
+  }
+
+  isProcessing(kb: VectorKnowledgeBase): boolean {
+    return this.processingKBs.has(kb.id);
+  }
+
+  async processFiles(kb: VectorKnowledgeBase): Promise<void> {
+    if (this.isProcessing(kb)) return;
+
+    this.processingKBs.add(kb.id);
+    try {
+      await firstValueFrom(this.adminService.processUnprocessedFiles(kb.id));
+      // Refresh the knowledge base to get updated processing status
+      const updatedKBs = await firstValueFrom(this.adminService.getAllVectorKnowledgeBases());
+      const updatedKB = updatedKBs.find(k => k.id === kb.id);
+      if (updatedKB) {
+        Object.assign(kb, updatedKB);
+      }
+    } catch (error) {
+      console.error('Error processing files:', error);
+    } finally {
+      this.processingKBs.delete(kb.id);
+      this.changeDetector.detectChanges();
     }
   }
 } 

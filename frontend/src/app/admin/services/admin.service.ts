@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, from, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MeyersBriggsType, AiAgentPersonality } from '../interfaces/ai-agent.interface';
 
@@ -171,36 +171,27 @@ export class AdminService {
   }
 
   uploadFileToS3(uploadUrl: string, file: File): Observable<any> {
-    // Create a clean HttpClient request without any interceptors
-    const xhr = new XMLHttpRequest();
-    
-    return new Observable(observer => {
-      xhr.open('PUT', uploadUrl, true);
-      xhr.setRequestHeader('Content-Type', file.type || 'text/plain');
-      xhr.setRequestHeader('x-amz-server-side-encryption', 'AES256');
-      
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          observer.next(xhr.response);
-          observer.complete();
-        } else {
-          observer.error(new Error(`Upload failed with status: ${xhr.status}`));
+    return from(
+      fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type || 'text/plain',
+          'x-amz-server-side-encryption': 'AES256'
         }
-      };
-      
-      xhr.onerror = () => {
-        observer.error(new Error('Upload failed'));
-      };
-      
-      xhr.send(file);
-      
-      // Cleanup on unsubscribe
-      return () => {
-        if (xhr.readyState !== 4) {
-          xhr.abort();
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Upload failed with status: ${response.status}`);
         }
-      };
-    });
+        // S3 returns 200 with empty body for successful uploads
+        return true;
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('S3 upload failed:', error);
+        throw new Error('Failed to upload file to S3');
+      })
+    );
   }
 
   getCorpusFiles(knowledgeBaseId: string): Observable<CorpusFile[]> {
@@ -213,6 +204,14 @@ export class AdminService {
   removeCorpusFile(knowledgeBaseId: string, fileId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/files/${fileId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  processUnprocessedFiles(knowledgeBaseId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/process-files`,
+      {},
       { headers: this.getAuthHeaders() }
     );
   }

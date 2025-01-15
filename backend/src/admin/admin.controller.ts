@@ -3,6 +3,7 @@ import { AdminService, AiAgentDetails } from './admin.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { MeyersBriggsType } from '../entities/ai-agent-personality.entity';
 import { CorpusFileService } from '../services/corpus-file.service';
+import { DocumentProcessingService } from '../services/document-processing.service';
 
 export class UpdateAiAgentPersonalityDto {
   generalPersonality: string;
@@ -27,7 +28,8 @@ export class UploadCorpusFileDto {
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly corpusFileService: CorpusFileService
+    private readonly corpusFileService: CorpusFileService,
+    private readonly documentProcessingService: DocumentProcessingService
   ) {}
 
   @Get('ai-agents')
@@ -98,5 +100,15 @@ export class AdminController {
   @Get('vector-knowledge-bases/:id/files')
   async getCorpusFiles(@Param('id') knowledgeBaseId: string) {
     return this.corpusFileService.findByKnowledgeBase(knowledgeBaseId);
+  }
+
+  @Post('vector-knowledge-bases/:id/process-files')
+  async processUnprocessedFiles(
+    @Param('id') knowledgeBaseId: string
+  ) {
+    await this.corpusFileService.processUnprocessedFiles(
+      knowledgeBaseId,
+      this.documentProcessingService
+    );
   }
 } 

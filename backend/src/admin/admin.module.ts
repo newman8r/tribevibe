@@ -12,6 +12,8 @@ import { CorpusFile } from '../entities/corpus-file.entity';
 import { CorpusFileService } from '../services/corpus-file.service';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { DocumentProcessingService } from '../services/document-processing.service';
+import { DocumentEmbedding } from '../entities/document-embedding.entity';
 
 @Module({
   imports: [
@@ -22,12 +24,13 @@ import { UserModule } from '../user/user.module';
       Channel,
       AiAgentChannel,
       VectorKnowledgeBase,
-      CorpusFile
+      CorpusFile,
+      DocumentEmbedding
     ]),
     AuthModule,
     UserModule
   ],
   controllers: [AdminController],
-  providers: [AdminService, CorpusFileService],
+  providers: [AdminService, CorpusFileService, DocumentProcessingService],
 })
 export class AdminModule {} 

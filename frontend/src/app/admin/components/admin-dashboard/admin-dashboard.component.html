@@ -325,6 +325,15 @@
                   <div *ngIf="getUploadError(kb)" class="upload-error">
                     {{ getUploadError(kb) }}
                   </div>
+                  <button 
+                    class="process-files-btn" 
+                    *ngIf="hasUnprocessedFiles(kb)"
+                    [disabled]="isProcessing(kb)"
+                    (click)="processFiles(kb)"
+                  >
+                    <span *ngIf="!isProcessing(kb)">Process Unprocessed Files</span>
+                    <span *ngIf="isProcessing(kb)">Processing...</span>
+                  </button>
                 </div>
               </div>
 
