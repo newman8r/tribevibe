@@ -25,19 +25,12 @@ export class CreateVectorIndexCommand extends CommandRunner {
       this.logger.log('Dropping existing index...');
       await this.dataSource.query(`DROP INDEX IF EXISTS document_embedding_vector_index;`);
 
-      // Create a new column for the vector type
-      this.logger.log('Adding vector column...');
+      // Alter the column type to vector with dimensions
+      this.logger.log('Altering column type to vector...');
       await this.dataSource.query(`
         ALTER TABLE document_embedding 
-        ADD COLUMN IF NOT EXISTS embedding_vector vector(1536);
-      `);
-
-      // Convert existing embeddings to vectors
-      this.logger.log('Converting embeddings to vectors...');
-      await this.dataSource.query(`
-        UPDATE document_embedding 
-        SET embedding_vector = embedding::vector(1536)
-        WHERE embedding IS NOT NULL;
+        ALTER COLUMN embedding TYPE vector(1536) 
+        USING embedding::vector(1536);
       `);
 
       // Create the vector index
@@ -45,7 +38,7 @@ export class CreateVectorIndexCommand extends CommandRunner {
       await this.dataSource.query(`
         CREATE INDEX document_embedding_vector_index 
         ON document_embedding 
-        USING ivfflat (embedding_vector vector_cosine_ops)
+        USING ivfflat (embedding vector_cosine_ops)
         WITH (lists = 100);
       `);
 

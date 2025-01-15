@@ -111,4 +111,14 @@ export class AdminController {
       this.documentProcessingService
     );
   }
+
+  @Post('vector-knowledge-bases/:id/rebuild')
+  async rebuildKnowledgeBase(
+    @Param('id') knowledgeBaseId: string
+  ) {
+    await this.corpusFileService.rebuildKnowledgeBase(
+      knowledgeBaseId,
+      this.documentProcessingService
+    );
+  }
 } 

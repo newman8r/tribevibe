@@ -112,6 +112,7 @@ export class AdminDashboardComponent implements OnInit {
   private uploadingKBs = new Set<string>();
   private uploadErrors = new Map<string, string>();
   private processingKBs = new Set<string>();
+  private rebuildingKBs = new Set<string>();
 
   constructor(
     private adminService: AdminService,
@@ -432,9 +433,11 @@ export class AdminDashboardComponent implements OnInit {
       await firstValueFrom(this.adminService.removeCorpusFile(kb.id, file.id));
       // Remove the file from the list
       kb.corpusFiles = kb.corpusFiles.filter(f => f.id !== file.id);
+      // Set needsRebuild flag immediately
+      kb.needsRebuild = true;
+      this.changeDetector.detectChanges();
     } catch (error) {
       console.error('Error removing file:', error);
-      // You might want to show an error message to the user here
     }
   }
 
@@ -462,6 +465,48 @@ export class AdminDashboardComponent implements OnInit {
       console.error('Error processing files:', error);
     } finally {
       this.processingKBs.delete(kb.id);
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  needsRebuild(kb: VectorKnowledgeBase): boolean {
+    return kb.needsRebuild || false;
+  }
+
+  isRebuilding(kb: VectorKnowledgeBase): boolean {
+    return this.rebuildingKBs.has(kb.id);
+  }
+
+  async rebuildKnowledgeBase(kb: VectorKnowledgeBase): Promise<void> {
+    if (this.isRebuilding(kb)) return;
+
+    if (!confirm('This will clear all embeddings from the knowledge base. You will need to process the files again afterward. Continue?')) {
+      return;
+    }
+
+    this.rebuildingKBs.add(kb.id);
+    try {
+      // Clear the knowledge base
+      await firstValueFrom(this.adminService.rebuildKnowledgeBase(kb.id));
+      
+      // Mark all files as unprocessed locally
+      if (kb.corpusFiles) {
+        kb.corpusFiles.forEach(file => file.processed = false);
+      }
+      
+      // Refresh the knowledge base to get updated status
+      const updatedKBs = await firstValueFrom(this.adminService.getAllVectorKnowledgeBases());
+      const updatedKB = updatedKBs.find(k => k.id === kb.id);
+      if (updatedKB) {
+        Object.assign(kb, updatedKB);
+      }
+
+      // The "Process Unprocessed Files" button should now appear since files are marked as unprocessed
+      this.changeDetector.detectChanges();
+    } catch (error) {
+      console.error('Error clearing knowledge base:', error);
+    } finally {
+      this.rebuildingKBs.delete(kb.id);
       this.changeDetector.detectChanges();
     }
   }

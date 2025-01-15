@@ -334,6 +334,14 @@
                     <span *ngIf="!isProcessing(kb)">Process Unprocessed Files</span>
                     <span *ngIf="isProcessing(kb)">Processing...</span>
                   </button>
+                  <button 
+                    class="rebuild-kb-btn" 
+                    [disabled]="isRebuilding(kb)"
+                    (click)="rebuildKnowledgeBase(kb)"
+                  >
+                    <span *ngIf="!isRebuilding(kb)">Clear Vector DB</span>
+                    <span *ngIf="isRebuilding(kb)">Clearing...</span>
+                  </button>
                 </div>
               </div>
 

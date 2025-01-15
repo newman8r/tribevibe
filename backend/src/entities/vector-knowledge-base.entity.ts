@@ -39,6 +39,9 @@ export class VectorKnowledgeBase {
   @OneToMany(() => DocumentEmbedding, embedding => embedding.knowledgeBase)
   embeddings: DocumentEmbedding[];
 
+  @Column({ default: false })
+  needsRebuild: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -14,7 +14,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "start:network": "cross-env NODE_ENV=development nest start --watch --host 0.0.0.0",
-    "cli": "ts-node src/cli.ts"
+    "cli": "ts-node src/cli.ts",
+    "create-vector-index": "ts-node src/cli.ts create-vector-index"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.726.0",

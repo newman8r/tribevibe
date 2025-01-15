@@ -14,6 +14,7 @@ import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { DocumentProcessingService } from '../services/document-processing.service';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
+import { VectorModule } from '../services/vector.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { DocumentEmbedding } from '../entities/document-embedding.entity';
       DocumentEmbedding
     ]),
     AuthModule,
-    UserModule
+    UserModule,
+    VectorModule
   ],
   controllers: [AdminController],
   providers: [AdminService, CorpusFileService, DocumentProcessingService],

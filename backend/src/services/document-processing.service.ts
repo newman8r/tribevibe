@@ -70,13 +70,14 @@ export class DocumentProcessingService {
               continue;
             }
 
-            await this.documentEmbeddingRepository.save({
-              content: batch[j],
-              source,
-              sourceId,
-              embedding: embedding,
-              knowledgeBase: knowledgeBase
-            });
+            const documentEmbedding = new DocumentEmbedding();
+            documentEmbedding.content = batch[j];
+            documentEmbedding.source = source;
+            documentEmbedding.sourceId = sourceId;
+            documentEmbedding.embedding = embedding;
+            documentEmbedding.knowledgeBase = knowledgeBase;
+
+            await this.documentEmbeddingRepository.save(documentEmbedding);
             this.logger.log(`Saved document ${i + j} with embedding length ${embedding.length}`);
           }
         } catch (error) {

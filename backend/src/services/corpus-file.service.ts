@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CorpusFile } from '../entities/corpus-file.entity';
 import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 import { DocumentProcessingService } from '../services/document-processing.service';
+import { VectorSearchService } from '../services/vector-search.service';
 
 @Injectable()
 export class CorpusFileService {
@@ -20,7 +21,8 @@ export class CorpusFileService {
     private corpusFileRepository: Repository<CorpusFile>,
     @InjectRepository(VectorKnowledgeBase)
     private knowledgeBaseRepository: Repository<VectorKnowledgeBase>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private vectorSearchService: VectorSearchService
   ) {
     this.s3Client = new S3Client({
       region: this.configService.getOrThrow('AWS_REGION'),
@@ -94,6 +96,11 @@ export class CorpusFileService {
         Key: file.s3Key,
       }),
     );
+
+    // Set needsRebuild flag on the knowledge base
+    const knowledgeBase = file.knowledgeBase;
+    knowledgeBase.needsRebuild = true;
+    await this.knowledgeBaseRepository.save(knowledgeBase);
 
     // Delete from database
     await this.corpusFileRepository.remove(file);
@@ -182,5 +189,40 @@ export class CorpusFileService {
         continue;
       }
     }
+  }
+
+  async rebuildKnowledgeBase(knowledgeBaseId: string, documentProcessingService: DocumentProcessingService): Promise<void> {
+    // Find the knowledge base
+    const knowledgeBase = await this.knowledgeBaseRepository.findOne({
+      where: { id: knowledgeBaseId },
+      relations: ['corpusFiles', 'embeddings']
+    });
+
+    if (!knowledgeBase) {
+      throw new NotFoundException(`Knowledge base with ID ${knowledgeBaseId} not found`);
+    }
+
+    this.logger.log(`Clearing knowledge base ${knowledgeBaseId}`);
+
+    // Delete all existing embeddings first
+    if (knowledgeBase.embeddings?.length) {
+      this.logger.log(`Deleting ${knowledgeBase.embeddings.length} existing embeddings`);
+      await this.vectorSearchService.clearKnowledgeBase(knowledgeBaseId);
+    }
+
+    // Reset processed flag on all files
+    if (knowledgeBase.corpusFiles?.length) {
+      this.logger.log(`Resetting processed flag on ${knowledgeBase.corpusFiles.length} files`);
+      for (const file of knowledgeBase.corpusFiles) {
+        file.processed = false;
+      }
+      await this.corpusFileRepository.save(knowledgeBase.corpusFiles);
+    }
+
+    // Mark knowledge base as needing rebuild
+    knowledgeBase.needsRebuild = true;
+    await this.knowledgeBaseRepository.save(knowledgeBase);
+    
+    this.logger.log(`Successfully cleared knowledge base ${knowledgeBaseId}`);
   }
 } 

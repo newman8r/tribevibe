@@ -66,6 +66,7 @@ export interface VectorKnowledgeBase {
   };
   corpusFiles: CorpusFile[];
   embeddings?: any[];
+  needsRebuild: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -211,6 +212,14 @@ export class AdminService {
   processUnprocessedFiles(knowledgeBaseId: string): Observable<void> {
     return this.http.post<void>(
       `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/process-files`,
+      {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  rebuildKnowledgeBase(knowledgeBaseId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/rebuild`,
       {},
       { headers: this.getAuthHeaders() }
     );
