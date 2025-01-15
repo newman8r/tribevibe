@@ -49,7 +49,7 @@ export class AdminService {
   async getAiAgents(): Promise<AiAgentDetails[]> {
     const aiAgents = await this.userRepository.find({
       where: { isAiAgent: true },
-      relations: ['channels'],
+      relations: ['channels', 'aiAgentChannels', 'aiAgentChannels.channel'],
     });
 
     const agentDetails: AiAgentDetails[] = [];
@@ -63,12 +63,17 @@ export class AdminService {
         where: { agent: { id: agent.id } },
       });
 
+      // Filter to only include active channel associations
+      const activeChannels = agent.aiAgentChannels
+        .filter((ac: { isActive: boolean; channel: Channel }) => ac.isActive)
+        .map((ac: { channel: Channel }) => ac.channel);
+
       agentDetails.push({
         id: agent.id,
         username: agent.username,
         email: agent.email,
-        avatarUrl: agent.avatarUrl,
-        channels: agent.channels.map(channel => ({
+        avatarUrl: agent.avatarUrl || '',
+        channels: activeChannels.map((channel: Channel) => ({
           id: channel.id,
           name: channel.name,
         })),

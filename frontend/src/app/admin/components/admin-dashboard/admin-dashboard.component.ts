@@ -46,6 +46,11 @@ interface SaveNotification {
   message: string;
 }
 
+interface ChannelChanges {
+  added: string[];
+  removed: string[];
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
@@ -205,6 +210,9 @@ export class AdminDashboardComponent implements OnInit {
   // Track save notifications for each agent
   saveNotifications: { [agentId: string]: SaveNotification | null } = {};
 
+  // Track channel changes for each agent
+  channelChanges: { [agentId: string]: ChannelChanges } = {};
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
@@ -280,14 +288,48 @@ export class AdminDashboardComponent implements OnInit {
       .map(channel => channel.name);
   }
 
-  removeChannel(agent: AIAgent, channel: string) {
-    agent.channels = agent.channels.filter(ch => ch !== channel);
+  removeChannel(agent: AIAgent, channelName: string) {
+    // Remove from UI immediately
+    agent.channels = agent.channels.filter(ch => ch !== channelName);
+    
+    // Track the change
+    if (!this.channelChanges[agent.id]) {
+      this.channelChanges[agent.id] = { added: [], removed: [] };
+    }
+    const channelId = this.channels.find(c => c.name === channelName)?.id;
+    if (channelId) {
+      // If it was previously added, just remove from added list
+      const addedIndex = this.channelChanges[agent.id].added.indexOf(channelId);
+      if (addedIndex !== -1) {
+        this.channelChanges[agent.id].added.splice(addedIndex, 1);
+      } else {
+        // Otherwise add to removed list
+        this.channelChanges[agent.id].removed.push(channelId);
+      }
+    }
+    
+    // Mark as unsaved
+    this.markAsUnsaved(agent);
   }
 
   addChannel(agent: AIAgent) {
     if (agent.newChannel && !agent.channels.includes(agent.newChannel)) {
+      // Add to UI immediately
       agent.channels.push(agent.newChannel);
-      agent.newChannel = ''; // Reset the selection
+      
+      // Track the change
+      if (!this.channelChanges[agent.id]) {
+        this.channelChanges[agent.id] = { added: [], removed: [] };
+      }
+      this.channelChanges[agent.id].added.push(
+        this.channels.find(c => c.name === agent.newChannel)?.id || ''
+      );
+      
+      // Mark as unsaved
+      this.markAsUnsaved(agent);
+      
+      // Reset selection
+      agent.newChannel = '';
     }
   }
 
@@ -345,13 +387,21 @@ export class AdminDashboardComponent implements OnInit {
     // Clear any existing notification
     this.saveNotifications[agent.id] = null;
 
-    this.adminService.updateAiAgentPersonality(agent.id, agent.personality).subscribe({
-      next: (updatedPersonality) => {
-        console.log('Personality updated successfully:', updatedPersonality);
-        // Update the local agent data with the response
-        agent.personality = updatedPersonality;
+    // Get channel changes for this agent
+    const changes = this.channelChanges[agent.id] || { added: [], removed: [] };
+
+    this.adminService.saveAgentChanges(
+      agent.id,
+      agent.personality,
+      changes.added,
+      changes.removed
+    ).subscribe({
+      next: () => {
+        console.log('Changes saved successfully');
         // Clear unsaved changes flag
         this.unsavedChanges[agent.id] = false;
+        // Clear channel changes
+        this.channelChanges[agent.id] = { added: [], removed: [] };
         // Show success notification
         this.saveNotifications[agent.id] = {
           type: 'success',
@@ -363,7 +413,7 @@ export class AdminDashboardComponent implements OnInit {
         }, 3000);
       },
       error: (err) => {
-        console.error('Error updating personality:', err);
+        console.error('Error saving changes:', err);
         // Show error notification
         this.saveNotifications[agent.id] = {
           type: 'error',

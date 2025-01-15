@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MeyersBriggsType, AiAgentPersonality } from '../interfaces/ai-agent.interface';
 
@@ -85,5 +85,43 @@ export class AdminService {
       personality,
       { headers: this.getAuthHeaders() }
     );
+  }
+
+  addAgentChannel(agentId: string, channelId: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/ai-agents/${agentId}/channels`,
+      { channelId },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  removeAgentChannel(agentId: string, channelId: string): Observable<any> {
+    return this.http.delete(
+      `${this.apiUrl}/ai-agents/${agentId}/channels/${channelId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  saveAgentChanges(
+    agentId: string, 
+    personality: AiAgentPersonality,
+    channelsToAdd: string[],
+    channelsToRemove: string[]
+  ): Observable<any> {
+    const requests: Observable<any>[] = [];
+
+    if (personality) {
+      requests.push(this.updateAiAgentPersonality(agentId, personality));
+    }
+
+    channelsToAdd.forEach(channelId => {
+      requests.push(this.addAgentChannel(agentId, channelId));
+    });
+
+    channelsToRemove.forEach(channelId => {
+      requests.push(this.removeAgentChannel(agentId, channelId));
+    });
+
+    return forkJoin(requests);
   }
 } 
