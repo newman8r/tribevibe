@@ -11,4 +11,9 @@ export class AdminController {
   async getAiAgents(): Promise<AiAgentDetails[]> {
     return this.adminService.getAiAgents();
   }
+
+  @Get('info')
+  async getSystemInfo() {
+    return this.adminService.getSystemInfo();
+  }
 } 

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { AiAgentStrategy } from '../entities/ai-agent-strategy.entity';
+import * as os from 'os';
 
 export interface AiAgentDetails {
   id: string;
@@ -58,5 +59,25 @@ export class AdminService {
     }
 
     return agentDetails;
+  }
+
+  async getSystemInfo() {
+    const userCount = await this.userRepository.count();
+
+    return {
+      system: {
+        platform: os.platform(),
+        cpus: os.cpus().length,
+        totalMemory: os.totalmem(),
+        freeMemory: os.freemem(),
+        uptime: os.uptime()
+      },
+      application: {
+        userCount,
+        databaseSize: 'Calculating...', // You can implement actual DB size calculation if needed
+        nodeVersion: process.version,
+        processUptime: process.uptime()
+      }
+    };
   }
 } 
