@@ -48,12 +48,14 @@ export class VectorGptStrategy implements BaseStrategy {
   async processMessage(message: Message): Promise<string | null> {
     try {
       // First get the AI agent for this channel
-      const agent = await this.userRepository.findOne({
-        where: { 
-          channels: { id: message.channel.id },
-          isAiAgent: true
-        }
-      });
+      const agent = await this.userRepository
+        .createQueryBuilder('user')
+        .innerJoin('user.aiAgentChannels', 'agentChannel')
+        .innerJoin('agentChannel.channel', 'channel')
+        .where('channel.id = :channelId', { channelId: message.channel.id })
+        .andWhere('user.isAiAgent = :isAiAgent', { isAiAgent: true })
+        .andWhere('agentChannel.isActive = :isActive', { isActive: true })
+        .getOne();
 
       if (!agent) {
         this.logger.error('No AI agent found for channel');
