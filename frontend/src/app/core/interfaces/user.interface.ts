@@ -7,4 +7,5 @@ export interface User {
   avatarUrl: string;
   status?: string;
   isAiAgent?: boolean;
+  isAdmin?: boolean;
 } 
