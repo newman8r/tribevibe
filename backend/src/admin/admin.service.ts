@@ -5,6 +5,7 @@ import { User } from '../entities/user.entity';
 import { AiAgentStrategy } from '../entities/ai-agent-strategy.entity';
 import * as os from 'os';
 import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-personality.entity';
+import { Channel } from '../entities/channel.entity';
 
 export interface AiAgentDetails {
   id: string;
@@ -37,6 +38,8 @@ export class AdminService {
     private aiAgentStrategyRepository: Repository<AiAgentStrategy>,
     @InjectRepository(AiAgentPersonality)
     private aiAgentPersonalityRepository: Repository<AiAgentPersonality>,
+    @InjectRepository(Channel)
+    private channelRepository: Repository<Channel>,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -100,5 +103,21 @@ export class AdminService {
         processUptime: process.uptime()
       }
     };
+  }
+
+  async getAllChannels() {
+    const channels = await this.channelRepository.find({
+      relations: ['users'],
+      order: {
+        name: 'ASC'
+      }
+    });
+
+    return channels.map(channel => ({
+      id: channel.id,
+      name: channel.name,
+      visible: channel.visible,
+      userCount: channel.users.length
+    }));
   }
 } 

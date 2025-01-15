@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AdminService, SystemInfo, AiAgentDetails } from '../../services/admin.service';
+import { AdminService, SystemInfo, AiAgentDetails, Channel } from '../../services/admin.service';
 import { AIAgent, MeyersBriggsType, AiAgentPersonality } from '../../interfaces/ai-agent.interface';
 
 interface AdminTab {
@@ -52,6 +52,7 @@ export class AdminDashboardComponent implements OnInit {
   systemInfo: SystemInfo | null = null;
   error: string | null = null;
   activeTab: string = 'info';
+  channels: Channel[] = [];
 
   tabs: AdminTab[] = [
     { id: 'info', label: 'System Info', icon: '♪' },
@@ -190,19 +191,6 @@ export class AdminDashboardComponent implements OnInit {
     }
   ];
 
-  // Available channels (in a real app, this would come from your backend)
-  availableChannels: string[] = [
-    '#general',
-    '#support',
-    '#development',
-    '#code-review',
-    '#community',
-    '#documentation',
-    '#onboarding',
-    '#announcements',
-    '#help'
-  ];
-
   MeyersBriggsType = MeyersBriggsType;
   Object = Object;
 
@@ -211,6 +199,7 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit() {
     this.loadSystemInfo();
     this.loadAiAgents();
+    this.loadChannels();
   }
 
   setActiveTab(tabId: string) {
@@ -275,7 +264,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getAvailableChannels(agent: AIAgent): string[] {
-    return this.availableChannels.filter(channel => !agent.channels.includes(channel));
+    return this.channels
+      .filter(channel => !agent.channels.includes(channel.name))
+      .map(channel => channel.name);
   }
 
   removeChannel(agent: AIAgent, channel: string) {
@@ -314,6 +305,17 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading AI agents:', err);
+      }
+    });
+  }
+
+  private loadChannels() {
+    this.adminService.getAllChannels().subscribe({
+      next: (channels) => {
+        this.channels = channels;
+      },
+      error: (err) => {
+        console.error('Error loading channels:', err);
       }
     });
   }

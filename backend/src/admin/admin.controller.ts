@@ -12,6 +12,11 @@ export class AdminController {
     return this.adminService.getAiAgents();
   }
 
+  @Get('channels')
+  async getAllChannels() {
+    return this.adminService.getAllChannels();
+  }
+
   @Get('info')
   async getSystemInfo() {
     return this.adminService.getSystemInfo();

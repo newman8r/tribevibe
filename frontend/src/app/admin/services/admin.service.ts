@@ -20,6 +20,13 @@ export interface SystemInfo {
   };
 }
 
+export interface Channel {
+  id: string;
+  name: string;
+  visible: boolean;
+  userCount: number;
+}
+
 export interface AiAgentDetails {
   id: string;
   username: string;
@@ -62,6 +69,12 @@ export class AdminService {
 
   getAiAgents(): Observable<AiAgentDetails[]> {
     return this.http.get<AiAgentDetails[]>(`${this.apiUrl}/ai-agents`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getAllChannels(): Observable<Channel[]> {
+    return this.http.get<Channel[]>(`${this.apiUrl}/channels`, {
       headers: this.getAuthHeaders()
     });
   }
