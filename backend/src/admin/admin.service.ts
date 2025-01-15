@@ -115,18 +115,22 @@ export class AdminService {
   }
 
   async getAllChannels() {
-    const channels = await this.channelRepository.find({
-      select: ['id', 'name', 'visible'],
-      order: {
-        name: 'ASC'
-      }
-    });
+    const channels = await this.channelRepository
+      .createQueryBuilder('channel')
+      .select([
+        'channel.id',
+        'channel.name',
+        'channel.visible',
+        '(SELECT COUNT(*) FROM user_channels_channel WHERE "channelId" = channel.id) as userCount'
+      ])
+      .orderBy('channel.name', 'ASC')
+      .getRawMany();
 
     return channels.map(channel => ({
-      id: channel.id,
-      name: channel.name,
-      visible: channel.visible,
-      userCount: 0 // We'll add this feature back once we get the basic query working
+      id: channel.channel_id,
+      name: channel.channel_name,
+      visible: channel.channel_visible,
+      userCount: parseInt(channel.userCount) || 0
     }));
   }
 
