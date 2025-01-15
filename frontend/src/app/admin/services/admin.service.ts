@@ -40,7 +40,14 @@ export interface AiAgentDetails {
     name: string;
     settings: Record<string, any>;
   };
-  personality?: AiAgentPersonality;
+  personality?: {
+    generalPersonality: string;
+    meyersBriggs: MeyersBriggsType;
+    writingStyle: string;
+    displayName: string;
+    contactEmail: string;
+    instructions?: string;
+  };
 }
 
 export interface CorpusFile {

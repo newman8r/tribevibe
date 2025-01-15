@@ -211,6 +211,21 @@
                   </div>
                 </div>
               </div>
+
+              <div class="panel-section" *ngIf="agent.personality">
+                <h4>Agent Instructions</h4>
+                <div class="field-group">
+                  <textarea 
+                    class="personality-input instructions-input"
+                    [(ngModel)]="agent.personality.instructions"
+                    (ngModelChange)="markAsUnsaved(agent)"
+                    placeholder="Enter custom instructions for how the agent should behave or respond..."
+                    rows="8"></textarea>
+                  <div class="field-description">
+                    These instructions will be added to the agent's system prompt when responding to messages.
+                  </div>
+                </div>
+              </div>
               
               <div class="panel-section save-section" *ngIf="hasUnsavedChanges(agent) || getSaveNotification(agent)">
                 <div class="save-notification" *ngIf="getSaveNotification(agent) as notification" [class]="notification.type">

@@ -23,6 +23,7 @@ export interface AiAgentPersonality {
   writingStyle: string;
   displayName: string;
   contactEmail: string;
+  instructions?: string;
 }
 
 export interface AIAgent {

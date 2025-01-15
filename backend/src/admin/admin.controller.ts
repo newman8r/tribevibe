@@ -12,6 +12,7 @@ export class UpdateAiAgentPersonalityDto {
   writingStyle: string;
   displayName: string;
   contactEmail: string;
+  instructions?: string;
 }
 
 export class AddAgentChannelDto {

@@ -48,6 +48,9 @@ export class AiAgentPersonality {
   @Column({ length: 255, nullable: true })
   contactEmail: string;
 
+  @Column({ type: 'text', nullable: true })
+  instructions: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

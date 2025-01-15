@@ -173,6 +173,8 @@ export class VectorGptStrategy implements BaseStrategy {
                  Relevant Context:
                  ${contextualInfo}
                  
+                 ${agent.personality?.instructions ? `Custom Instructions:\n${agent.personality.instructions}\n` : ''}
+
                  Instructions:
                  - Use the context provided above when it's relevant to the conversation. It will very often not be relevant.
                  - Keep responses concise and engaging. Take an enlightened, awakened approach.

@@ -16,11 +16,11 @@ export class ApiService {
 
   // Auth endpoints
   signUp(data: SignUpDto): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/signup`, data);
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/sign-up`, data);
   }
 
   signIn(data: SignInDto): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/signin`, data);
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/sign-in`, data);
   }
 
   refreshToken(refreshToken: string): Observable<AuthResponse> {

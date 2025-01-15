@@ -5,6 +5,12 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('sign-up')
+  @HttpCode(200)
+  async signUp(@Body() body: { email: string; password: string; username: string; ticketId?: string }) {
+    return this.authService.signUp(body.email, body.password, body.username, body.ticketId || '');
+  }
+
   @Post('sign-in')
   @HttpCode(200)
   async signIn(@Body() body: { email: string; password: string }) {

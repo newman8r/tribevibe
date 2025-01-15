@@ -29,6 +29,7 @@ export interface AiAgentDetails {
     writingStyle: string;
     displayName: string;
     contactEmail: string;
+    instructions?: string;
   };
 }
 
@@ -90,6 +91,7 @@ export class AdminService {
           writingStyle: personality.writingStyle,
           displayName: personality.displayName,
           contactEmail: personality.contactEmail,
+          instructions: personality.instructions
         } : undefined,
       });
     }

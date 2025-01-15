@@ -141,7 +141,8 @@ export class AdminDashboardComponent implements OnInit {
         meyersBriggs: MeyersBriggsType.INTP,
         writingStyle: 'Professional and concise',
         displayName: agent.name,
-        contactEmail: agent.email || ''
+        contactEmail: agent.email || '',
+        instructions: ''
       };
     }
   }
@@ -257,25 +258,35 @@ export class AdminDashboardComponent implements OnInit {
   private loadAiAgents() {
     this.adminService.getAiAgents().subscribe({
       next: (agents) => {
-        console.log('AI Agents loaded:', agents);
-        this.aiAgents = agents.map(agent => ({
-          id: agent.id,
-          name: agent.username,
-          email: agent.email,
-          strategy: agent.strategy?.name || 'No Strategy',
-          channels: agent.channels.map(ch => ch.name),
-          personality: agent.personality || {
-            generalPersonality: 'Default personality description',
-            meyersBriggs: MeyersBriggsType.INTP,
-            writingStyle: 'Professional and concise',
-            displayName: agent.username,
-            contactEmail: agent.email || ''
-          },
-          knowledgeBases: ['General Knowledge'],
-          avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
-          isExpanded: false,
-          newChannel: ''
-        }));
+        console.log('Raw AI Agents loaded from backend:', agents);
+        console.log('First agent personality:', agents[0]?.personality);
+        
+        this.aiAgents = agents.map(agent => {
+          console.log(`Mapping agent ${agent.username}, personality:`, agent.personality);
+          
+          return {
+            id: agent.id,
+            name: agent.username,
+            email: agent.email,
+            strategy: agent.strategy?.name || 'No Strategy',
+            channels: agent.channels.map(ch => ch.name),
+            personality: agent.personality || {
+              generalPersonality: 'Default personality description',
+              meyersBriggs: MeyersBriggsType.INTP,
+              writingStyle: 'Professional and concise',
+              displayName: agent.username,
+              contactEmail: agent.email || '',
+              instructions: ''
+            },
+            knowledgeBases: ['General Knowledge'],
+            avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
+            isExpanded: false,
+            newChannel: ''
+          };
+        });
+        
+        console.log('Mapped AI Agents:', this.aiAgents);
+        console.log('First mapped agent personality:', this.aiAgents[0]?.personality);
       },
       error: (err) => {
         console.error('Error loading AI agents:', err);
