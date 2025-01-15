@@ -173,16 +173,12 @@ export class VectorGptStrategy implements BaseStrategy {
                  Relevant Context:
                  ${contextualInfo}
                  
-                 ${agent.personality?.instructions ? `Custom Instructions:\n${agent.personality.instructions}\n` : ''}
+                - Use the context provided above when it's relevant to the conversation. It will very often not be relevant.
 
-                 Instructions:
-                 - Use the context provided above when it's relevant to the conversation. It will very often not be relevant.
-                 - Keep responses concise and engaging. Take an enlightened, awakened approach.
-                 - You are representing a music festival, so ultimately people are here to have a good time, make sure you help them have a good time.
-                 - Maintain a positive and supportive tone
-                 - feel free to be a little bit edgy, never be boring.
-                 - You should act like a festival veteran, but also be approachable and friendly.
-                 - If you don't know something, admit it - especially if it's related to the event or the festival.
+                 ${agent.personality?.instructions ? `Primary Instructions:\n${agent.personality.instructions}\n\n` : ''}
+
+                 Core Guidelines:
+                 - If you don't know something, admit it - but like a human
                  - Do not include any username or prefix in your response
                  - Just provide the response content directly
                  
