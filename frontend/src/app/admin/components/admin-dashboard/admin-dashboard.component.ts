@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AdminService, SystemInfo } from '../../services/admin.service';
+import { AdminService, SystemInfo, AiAgentDetails } from '../../services/admin.service';
 
 interface AdminTab {
   id: string;
@@ -249,6 +249,7 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadSystemInfo();
+    this.loadAiAgents();
   }
 
   setActiveTab(tabId: string) {
@@ -315,5 +316,16 @@ export class AdminDashboardComponent implements OnInit {
       agent.channels.push(agent.newChannel);
       agent.newChannel = ''; // Reset the selection
     }
+  }
+
+  private loadAiAgents() {
+    this.adminService.getAiAgents().subscribe({
+      next: (agents) => {
+        console.log('AI Agents loaded:', agents);
+      },
+      error: (err) => {
+        console.error('Error loading AI agents:', err);
+      }
+    });
   }
 } 
