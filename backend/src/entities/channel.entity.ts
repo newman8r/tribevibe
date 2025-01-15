@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany, JoinTable } from 'typeorm';
 import { User } from './user.entity';
 import { Message } from './message.entity';
 
@@ -14,6 +14,17 @@ export class Channel {
   visible: boolean;
 
   @ManyToMany(() => User, user => user.channels)
+  @JoinTable({
+    name: 'user_channels_channel',
+    joinColumn: {
+      name: 'channelId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id'
+    }
+  })
   users: User[];
 
   @OneToMany(() => Message, message => message.channel)

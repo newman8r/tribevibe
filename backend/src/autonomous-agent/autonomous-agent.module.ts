@@ -7,6 +7,7 @@ import { AutonomousAgentService } from './autonomous-agent.service';
 import { AutonomousAgentController } from './autonomous-agent.controller';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
 import { AiAgentStrategy } from '../entities/ai-agent-strategy.entity';
+import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
 import { User } from '../entities/user.entity';
 import { SimpleResponseStrategy } from './strategies/simple-response.strategy';
 import { StrategyRegistryService } from './services/strategy-registry.service';
@@ -22,6 +23,7 @@ import { VectorGptStrategy } from './strategies/vector-gpt.strategy';
     TypeOrmModule.forFeature([
       AiAgentChannel,
       AiAgentStrategy,
+      AiAgentKnowledgeBase,
       User
     ])
   ],

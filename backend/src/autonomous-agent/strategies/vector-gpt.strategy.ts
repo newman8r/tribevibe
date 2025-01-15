@@ -6,28 +6,67 @@ import { ConfigService } from '@nestjs/config';
 import { MessageService } from '../../message/message.service';
 import { VectorSearchService } from '../../services/vector-search.service';
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AiAgentKnowledgeBase } from '../../entities/ai-agent-knowledge-base.entity';
+import { VectorKnowledgeBase } from '../../entities/vector-knowledge-base.entity';
+import { User } from '../../entities/user.entity';
+
+interface SearchResult {
+  content: string;
+  similarity: number;
+  source: string;
+  sourceId: string;
+}
+
+interface KnowledgeBaseSearchResult {
+  knowledgeBase: VectorKnowledgeBase | null;
+  originalResults: SearchResult[];
+  reformulatedResults: SearchResult[];
+}
 
 @Injectable()
 export class VectorGptStrategy implements BaseStrategy {
   private readonly logger = new Logger(VectorGptStrategy.name);
   private openai: OpenAI;
   private readonly contextSize = 20;
-  private readonly defaultKnowledgeBaseId: string | undefined;
 
   constructor(
     private configService: ConfigService,
     private messageService: MessageService,
-    private vectorSearchService: VectorSearchService
+    private vectorSearchService: VectorSearchService,
+    @InjectRepository(AiAgentKnowledgeBase)
+    private aiAgentKnowledgeBaseRepository: Repository<AiAgentKnowledgeBase>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY')
     });
-    this.defaultKnowledgeBaseId = this.configService.get<string>('DEFAULT_KNOWLEDGE_BASE_ID') || undefined;
   }
 
   async processMessage(message: Message): Promise<string | null> {
     try {
-      // First, use GPT-4 to reformulate the question for better vector search.
+      // First get the AI agent for this channel
+      const agent = await this.userRepository.findOne({
+        where: { 
+          channels: { id: message.channel.id },
+          isAiAgent: true
+        }
+      });
+
+      if (!agent) {
+        this.logger.error('No AI agent found for channel');
+        return 'I apologize, but I encountered an error processing your message.';
+      }
+
+      // Get all knowledge bases associated with this AI agent
+      const agentKnowledgeBases = await this.aiAgentKnowledgeBaseRepository.find({
+        where: { agent: { id: agent.id } },
+        relations: ['knowledgeBase'],
+      });
+
+      // First, use GPT-4 to reformulate the question for better vector search
       const reformulationResponse = await this.openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
@@ -50,42 +89,64 @@ export class VectorGptStrategy implements BaseStrategy {
 
       const reformulatedQuestion = reformulationResponse.choices[0]?.message?.content || message.content;
       
-      // Perform vector search with both original and reformulated questions - RAG fusion strategy
-      const [originalResults, reformulatedResults] = await Promise.all([
-        this.vectorSearchService.searchSimilarDocuments(message.content, this.defaultKnowledgeBaseId, 1),
-        this.vectorSearchService.searchSimilarDocuments(reformulatedQuestion, this.defaultKnowledgeBaseId, 1)
-      ]);
+      // Search across all knowledge bases associated with this agent
+      const searchPromises: Promise<KnowledgeBaseSearchResult>[] = agentKnowledgeBases.map(async (agentKb) => {
+        const [originalResults, reformulatedResults] = await Promise.all([
+          this.vectorSearchService.searchSimilarDocuments(message.content, agentKb.knowledgeBase.id, 1),
+          this.vectorSearchService.searchSimilarDocuments(reformulatedQuestion, agentKb.knowledgeBase.id, 1)
+        ]);
+        return { 
+          knowledgeBase: agentKb.knowledgeBase,
+          originalResults,
+          reformulatedResults
+        };
+      });
 
-      // Combine contextual information from both searches
+      // If no knowledge bases are associated, search in the legacy store
+      if (agentKnowledgeBases.length === 0) {
+        const [originalResults, reformulatedResults] = await Promise.all([
+          this.vectorSearchService.searchSimilarDocuments(message.content, undefined, 1),
+          this.vectorSearchService.searchSimilarDocuments(reformulatedQuestion, undefined, 1)
+        ]);
+        searchPromises.push(Promise.resolve({
+          knowledgeBase: null,
+          originalResults,
+          reformulatedResults
+        }));
+      }
+
+      const searchResults = await Promise.all(searchPromises);
+      
+      // Combine contextual information from all searches
       let contextualInfo = '';
       
-      if (originalResults.length > 0) {
-        contextualInfo += `Context from original query:\n${originalResults[0].content}\n\n`;
-      }
-      
-      if (reformulatedResults.length > 0) {
-        contextualInfo += `Additional context from expanded query:\n${reformulatedResults[0].content}`;
-      }
+      searchResults.forEach(result => {
+        const kbName = result.knowledgeBase?.name || 'Legacy Store';
+        if (result.originalResults.length > 0) {
+          contextualInfo += `\nContext from ${kbName} (original query):\n${result.originalResults[0].content}\n`;
+        }
+        if (result.reformulatedResults.length > 0) {
+          contextualInfo += `\nContext from ${kbName} (expanded query):\n${result.reformulatedResults[0].content}\n`;
+        }
+      });
 
-      // Get previous messages in the channel for conversation context (limited to 20 here)
+      // Get previous messages in the channel for conversation context
       const previousMessages = await this.messageService.getChannelMessages(
         message.channel.id,
         this.contextSize
       );
 
-      // Format messages for GPT without username prefixes in the content
+      // Format messages for GPT
       const conversationHistory: ChatCompletionMessageParam[] = previousMessages.reverse().map(msg => ({
         role: msg.user?.isAiAgent ? 'assistant' : 'user',
-        content: msg.content // Remove username prefix
+        content: msg.content
       }));
 
-      // Add the current message without username prefix
       conversationHistory.push({
         role: 'user',
-        content: message.content // Remove username prefix
+        content: message.content
       });
 
-      // System prompt with contextual information, personality and instructions
       const systemPrompt: ChatCompletionMessageParam = {
         role: 'system',
         content: `You are a helpful and friendly community manager, with the personality of a festival veteran to electronic music festivals and other events.
@@ -108,9 +169,7 @@ export class VectorGptStrategy implements BaseStrategy {
                  - Do not include any username or prefix in your response
                  - Just provide the response content directly
                  
-                 Below is the conversation history of this channel, use it to understand the context of the conversation.
-                 `
-
+                 Below is the conversation history of this channel, use it to understand the context of the conversation.`
       };
 
       const response = await this.openai.chat.completions.create({
