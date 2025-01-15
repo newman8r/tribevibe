@@ -243,4 +243,14 @@ export class AdminService {
       }
     });
   }
+
+  async updateVectorKnowledgeBase(id: string, updates: Partial<VectorKnowledgeBase>) {
+    const kb = await this.vectorKnowledgeBaseRepository.findOne({ where: { id } });
+    if (!kb) {
+      throw new NotFoundException('Vector knowledge base not found');
+    }
+    
+    Object.assign(kb, updates);
+    return this.vectorKnowledgeBaseRepository.save(kb);
+  }
 } 

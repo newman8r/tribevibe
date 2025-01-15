@@ -58,6 +58,7 @@ export interface VectorKnowledgeBase {
   id: string;
   name: string;
   description?: string;
+  usage?: string;
   chunkingStrategy: 'fixed_size' | 'semantic' | 'paragraph';
   chunkingSettings?: {
     chunkSize?: number;
@@ -221,6 +222,14 @@ export class AdminService {
     return this.http.post<void>(
       `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/rebuild`,
       {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  updateVectorKnowledgeBase(knowledgeBaseId: string, updates: Partial<VectorKnowledgeBase>): Observable<VectorKnowledgeBase> {
+    return this.http.patch<VectorKnowledgeBase>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}`,
+      updates,
       { headers: this.getAuthHeaders() }
     );
   }

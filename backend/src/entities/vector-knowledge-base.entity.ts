@@ -19,6 +19,9 @@ export class VectorKnowledgeBase {
   @Column({ nullable: true })
   description: string;
 
+  @Column({ nullable: true })
+  usage: string;
+
   @Column({
     type: 'enum',
     enum: ChunkingStrategy,

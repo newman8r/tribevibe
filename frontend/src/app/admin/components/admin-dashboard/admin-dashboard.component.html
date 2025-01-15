@@ -346,6 +346,34 @@
               </div>
 
               <div class="panel-section">
+                <h4>Usage</h4>
+                <textarea 
+                  [(ngModel)]="kb.usage" 
+                  class="usage-input" 
+                  placeholder="Enter usage instructions for this knowledge base..."
+                  rows="3"
+                  (ngModelChange)="onUsageChange(kb)"
+                ></textarea>
+                <div class="usage-actions">
+                  <button 
+                    *ngIf="hasUnsavedUsage(kb)" 
+                    class="save-usage-btn"
+                    (click)="saveKnowledgeBaseUsage(kb)"
+                  >
+                    Save Usage
+                  </button>
+                  <div 
+                    *ngIf="getKBSaveNotification(kb)" 
+                    class="save-notification"
+                    [class.success]="getKBSaveNotification(kb)?.type === 'success'"
+                    [class.error]="getKBSaveNotification(kb)?.type === 'error'"
+                  >
+                    {{ getKBSaveNotification(kb)?.message }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-section">
                 <h4>Chunking Settings</h4>
                 <div class="settings-grid">
                   <div class="setting-group">

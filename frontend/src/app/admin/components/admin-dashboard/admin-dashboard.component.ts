@@ -113,6 +113,8 @@ export class AdminDashboardComponent implements OnInit {
   private uploadErrors = new Map<string, string>();
   private processingKBs = new Set<string>();
   private rebuildingKBs = new Set<string>();
+  private unsavedKBUsage = new Set<string>();
+  kbSaveNotifications: { [kbId: string]: SaveNotification | null } = {};
 
   constructor(
     private adminService: AdminService,
@@ -507,6 +509,48 @@ export class AdminDashboardComponent implements OnInit {
       console.error('Error clearing knowledge base:', error);
     } finally {
       this.rebuildingKBs.delete(kb.id);
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  hasUnsavedUsage(kb: VectorKnowledgeBase): boolean {
+    return this.unsavedKBUsage.has(kb.id);
+  }
+
+  onUsageChange(kb: VectorKnowledgeBase) {
+    this.unsavedKBUsage.add(kb.id);
+  }
+
+  getKBSaveNotification(kb: VectorKnowledgeBase): SaveNotification | null {
+    return this.kbSaveNotifications[kb.id] || null;
+  }
+
+  async saveKnowledgeBaseUsage(kb: VectorKnowledgeBase) {
+    try {
+      await firstValueFrom(this.adminService.updateVectorKnowledgeBase(kb.id, { usage: kb.usage }));
+      this.unsavedKBUsage.delete(kb.id);
+      
+      // Show success notification
+      this.kbSaveNotifications[kb.id] = {
+        type: 'success',
+        message: 'Usage saved successfully!'
+      };
+      
+      // Clear notification after 3 seconds
+      setTimeout(() => {
+        this.kbSaveNotifications[kb.id] = null;
+        this.changeDetector.detectChanges();
+      }, 3000);
+      
+      this.changeDetector.detectChanges();
+    } catch (error) {
+      console.error('Error saving knowledge base usage:', error);
+      
+      // Show error notification
+      this.kbSaveNotifications[kb.id] = {
+        type: 'error',
+        message: 'Failed to save usage. Please try again.'
+      };
       this.changeDetector.detectChanges();
     }
   }

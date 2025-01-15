@@ -4,6 +4,7 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { MeyersBriggsType } from '../entities/ai-agent-personality.entity';
 import { CorpusFileService } from '../services/corpus-file.service';
 import { DocumentProcessingService } from '../services/document-processing.service';
+import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 
 export class UpdateAiAgentPersonalityDto {
   generalPersonality: string;
@@ -120,5 +121,13 @@ export class AdminController {
       knowledgeBaseId,
       this.documentProcessingService
     );
+  }
+
+  @Patch('vector-knowledge-bases/:id')
+  async updateVectorKnowledgeBase(
+    @Param('id') id: string,
+    @Body() updateDto: Partial<VectorKnowledgeBase>
+  ) {
+    return this.adminService.updateVectorKnowledgeBase(id, updateDto);
   }
 } 
