@@ -120,11 +120,7 @@
               <div class="panel-section">
                 <h4>Strategy</h4>
                 <div class="strategy-selector">
-                  <select [(ngModel)]="agent.strategy" class="setting-input">
-                    <option *ngFor="let strategy of strategies" [value]="strategy.name">
-                      {{ strategy.name }}
-                    </option>
-                  </select>
+                  <div class="strategy-name">{{ agent.strategy }}</div>
                   <div class="strategy-description" *ngIf="getStrategyDescription(agent.strategy)">
                     {{ getStrategyDescription(agent.strategy) }}
                   </div>
@@ -167,9 +163,18 @@
                     </textarea>
                   </div>
 
+ 
+                </div>
+              </div>
+
+               <div class="panel-section" *ngIf="agent.personality">
+                <h4>Personality (cont)</h4>
+                <div class="personality-details-grid">
                   <div class="field-group">
                     <label>Myers-Briggs Type</label>
-                    <select [(ngModel)]="agent.personality.meyersBriggs">
+                    <select 
+                      class="personality-input select-input"
+                      [(ngModel)]="agent.personality.meyersBriggs">
                       <option *ngFor="let type of Object.values(MeyersBriggsType)" [value]="type">
                         {{type}}
                       </option>
@@ -179,7 +184,7 @@
                   <div class="field-group">
                     <label>Writing Style</label>
                     <textarea 
-                      class="writing-style-input"
+                      class="personality-input"
                       [(ngModel)]="agent.personality.writingStyle">
                     </textarea>
                   </div>
@@ -188,6 +193,7 @@
                     <label>Display Name</label>
                     <input 
                       type="text"
+                      class="personality-input"
                       [(ngModel)]="agent.personality.displayName">
                   </div>
 
@@ -195,6 +201,7 @@
                     <label>Contact Email</label>
                     <input 
                       type="email"
+                      class="personality-input"
                       [(ngModel)]="agent.personality.contactEmail">
                   </div>
                 </div>

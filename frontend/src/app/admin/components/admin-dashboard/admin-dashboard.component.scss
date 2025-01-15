@@ -749,3 +749,25 @@
     .table-header .col-channels {
       padding-left: 20px;
     }
+
+    .select-input {
+      min-height: unset !important;
+      height: 40px;
+    }
+
+    .personality-fields {
+      .field-group {
+        textarea.personality-input {
+          min-height: 200px;
+        }
+      }
+    }
+
+    .strategy-name {
+      color: white;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 20, 147, 0.3);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
