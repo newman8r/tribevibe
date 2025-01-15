@@ -134,6 +134,12 @@ export class VectorGptStrategy implements BaseStrategy {
       
       searchResults.forEach(result => {
         const kbName = result.knowledgeBase?.name || 'Legacy Store';
+        
+        // Add usage instructions if available
+        if (result.knowledgeBase?.usage) {
+          contextualInfo += `\nCustom Search Result Instructions for ${kbName}:\n${result.knowledgeBase.usage}\n`;
+        }
+        
         if (result.originalResults.length > 0) {
           contextualInfo += `\nContext from ${kbName} (original query):\n${result.originalResults[0].content}\n`;
         }
