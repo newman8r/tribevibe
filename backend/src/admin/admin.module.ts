@@ -8,6 +8,7 @@ import { AiAgentPersonality } from '../entities/ai-agent-personality.entity';
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { Channel } from '../entities/channel.entity';
+import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { Channel } from '../entities/channel.entity';
       User,
       AiAgentStrategy,
       AiAgentPersonality,
-      Channel
+      Channel,
+      AiAgentChannel
     ]),
     UserModule,
     AuthModule

@@ -7,6 +7,7 @@ import * as os from 'os';
 import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-personality.entity';
 import { Channel } from '../entities/channel.entity';
 import { UpdateAiAgentPersonalityDto } from './admin.controller';
+import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
 
 export interface AiAgentDetails {
   id: string;
@@ -41,6 +42,8 @@ export class AdminService {
     private aiAgentPersonalityRepository: Repository<AiAgentPersonality>,
     @InjectRepository(Channel)
     private channelRepository: Repository<Channel>,
+    @InjectRepository(AiAgentChannel)
+    private aiAgentChannelRepository: Repository<AiAgentChannel>,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -153,5 +156,70 @@ export class AdminService {
     await this.aiAgentPersonalityRepository.save(personality);
 
     return personality;
+  }
+
+  async addAgentChannel(agentId: string, channelId: string) {
+    // Check if agent exists and is an AI agent
+    const agent = await this.userRepository.findOne({
+      where: { id: agentId, isAiAgent: true }
+    });
+
+    if (!agent) {
+      throw new NotFoundException('AI agent not found');
+    }
+
+    // Check if channel exists
+    const channel = await this.channelRepository.findOne({
+      where: { id: channelId }
+    });
+
+    if (!channel) {
+      throw new NotFoundException('Channel not found');
+    }
+
+    // Check if association already exists
+    const existingAssociation = await this.aiAgentChannelRepository.findOne({
+      where: {
+        agent: { id: agentId },
+        channel: { id: channelId }
+      }
+    });
+
+    if (existingAssociation) {
+      // If it exists but was inactive, reactivate it
+      if (!existingAssociation.isActive) {
+        existingAssociation.isActive = true;
+        return this.aiAgentChannelRepository.save(existingAssociation);
+      }
+      return existingAssociation;
+    }
+
+    // Create new association
+    const newAssociation = this.aiAgentChannelRepository.create({
+      agent,
+      channel,
+      isActive: true
+    });
+
+    return this.aiAgentChannelRepository.save(newAssociation);
+  }
+
+  async removeAgentChannel(agentId: string, channelId: string) {
+    // Find the association
+    const association = await this.aiAgentChannelRepository.findOne({
+      where: {
+        agent: { id: agentId },
+        channel: { id: channelId },
+        isActive: true
+      }
+    });
+
+    if (!association) {
+      throw new NotFoundException('Agent channel association not found');
+    }
+
+    // Soft delete by marking as inactive
+    association.isActive = false;
+    return this.aiAgentChannelRepository.save(association);
   }
 } 
