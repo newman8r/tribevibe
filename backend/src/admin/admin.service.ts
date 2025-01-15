@@ -1,43 +1,62 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { UserService } from '../user/user.service';
-import * as os from 'os';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
+import { AiAgentStrategy } from '../entities/ai-agent-strategy.entity';
+
+export interface AiAgentDetails {
+  id: string;
+  username: string;
+  email: string;
+  avatarUrl: string;
+  channels: {
+    id: string;
+    name: string;
+  }[];
+  strategy?: {
+    name: string;
+    settings: Record<string, any>;
+  };
+}
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectDataSource() private dataSource: DataSource,
-    private userService: UserService
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(AiAgentStrategy)
+    private aiAgentStrategyRepository: Repository<AiAgentStrategy>,
   ) {}
 
-  async getSystemInfo() {
-    const [userCount, dbSize] = await Promise.all([
-      this.userService.findAll().then(users => users.length),
-      this.getDatabaseSize()
-    ]);
+  async getAiAgents(): Promise<AiAgentDetails[]> {
+    const aiAgents = await this.userRepository.find({
+      where: { isAiAgent: true },
+      relations: ['channels'],
+    });
 
-    return {
-      system: {
-        platform: os.platform(),
-        cpus: os.cpus().length,
-        totalMemory: os.totalmem(),
-        freeMemory: os.freemem(),
-        uptime: os.uptime()
-      },
-      application: {
-        userCount,
-        databaseSize: dbSize,
-        nodeVersion: process.version,
-        processUptime: process.uptime()
-      }
-    };
-  }
+    const agentDetails: AiAgentDetails[] = [];
 
-  private async getDatabaseSize(): Promise<string> {
-    const result = await this.dataSource.query(
-      "SELECT pg_size_pretty(pg_database_size(current_database()))"
-    );
-    return result[0].pg_size_pretty;
+    for (const agent of aiAgents) {
+      const strategy = await this.aiAgentStrategyRepository.findOne({
+        where: { agent: { id: agent.id } },
+      });
+
+      agentDetails.push({
+        id: agent.id,
+        username: agent.username,
+        email: agent.email,
+        avatarUrl: agent.avatarUrl,
+        channels: agent.channels.map(channel => ({
+          id: channel.id,
+          name: channel.name,
+        })),
+        strategy: strategy ? {
+          name: strategy.strategyName,
+          settings: strategy.settings,
+        } : undefined,
+      });
+    }
+
+    return agentDetails;
   }
 } 

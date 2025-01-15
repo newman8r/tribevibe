@@ -1,14 +1,14 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { AdminGuard } from '../auth/admin.guard';
-import { AdminService } from './admin.service';
+import { AdminService, AiAgentDetails } from './admin.service';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) {}
 
-  @Get('info')
-  async getAdminInfo() {
-    return this.adminService.getSystemInfo();
+  @Get('ai-agents')
+  async getAiAgents(): Promise<AiAgentDetails[]> {
+    return this.adminService.getAiAgents();
   }
 } 
