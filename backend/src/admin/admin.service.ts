@@ -10,6 +10,7 @@ import { UpdateAiAgentPersonalityDto } from './admin.controller';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
 import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 import { CreateAiAgentDto } from './admin.controller';
+import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
 
 export interface AiAgentDetails {
   id: string;
@@ -33,6 +34,10 @@ export interface AiAgentDetails {
     instructions?: string;
     maxHourlyResponses: number;
   };
+  knowledgeBases: {
+    id: string;
+    name: string;
+  }[];
 }
 
 @Injectable()
@@ -50,6 +55,8 @@ export class AdminService {
     private aiAgentChannelRepository: Repository<AiAgentChannel>,
     @InjectRepository(VectorKnowledgeBase)
     private vectorKnowledgeBaseRepository: Repository<VectorKnowledgeBase>,
+    @InjectRepository(AiAgentKnowledgeBase)
+    private aiAgentKnowledgeBaseRepository: Repository<AiAgentKnowledgeBase>,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -67,6 +74,12 @@ export class AdminService {
 
       const personality = await this.aiAgentPersonalityRepository.findOne({
         where: { agent: { id: agent.id } },
+      });
+
+      // Get knowledge base associations
+      const knowledgeBaseAssociations = await this.aiAgentKnowledgeBaseRepository.find({
+        where: { agent: { id: agent.id } },
+        relations: ['knowledgeBase']
       });
 
       // Filter to only include active channel associations
@@ -96,6 +109,10 @@ export class AdminService {
           instructions: personality.instructions,
           maxHourlyResponses: personality.maxHourlyResponses
         } : undefined,
+        knowledgeBases: knowledgeBaseAssociations.map(assoc => ({
+          id: assoc.knowledgeBase.id,
+          name: assoc.knowledgeBase.name
+        }))
       });
     }
 
@@ -303,7 +320,65 @@ export class AdminService {
       strategy: {
         name: strategy.strategyName,
         settings: strategy.settings
-      }
+      },
+      knowledgeBases: []
     };
+  }
+
+  async addAgentKnowledgeBase(agentId: string, knowledgeBaseId: string) {
+    // Check if agent exists and is an AI agent
+    const agent = await this.userRepository.findOne({
+      where: { id: agentId, isAiAgent: true }
+    });
+
+    if (!agent) {
+      throw new NotFoundException('AI agent not found');
+    }
+
+    // Check if knowledge base exists
+    const knowledgeBase = await this.vectorKnowledgeBaseRepository.findOne({
+      where: { id: knowledgeBaseId }
+    });
+
+    if (!knowledgeBase) {
+      throw new NotFoundException('Knowledge base not found');
+    }
+
+    // Check if association already exists
+    const existingAssociation = await this.aiAgentKnowledgeBaseRepository.findOne({
+      where: {
+        agent: { id: agentId },
+        knowledgeBase: { id: knowledgeBaseId }
+      }
+    });
+
+    if (existingAssociation) {
+      return existingAssociation;
+    }
+
+    // Create new association
+    const newAssociation = this.aiAgentKnowledgeBaseRepository.create({
+      agent,
+      knowledgeBase
+    });
+
+    return this.aiAgentKnowledgeBaseRepository.save(newAssociation);
+  }
+
+  async removeAgentKnowledgeBase(agentId: string, knowledgeBaseId: string) {
+    // Find the association
+    const association = await this.aiAgentKnowledgeBaseRepository.findOne({
+      where: {
+        agent: { id: agentId },
+        knowledgeBase: { id: knowledgeBaseId }
+      }
+    });
+
+    if (!association) {
+      throw new NotFoundException('Agent knowledge base association not found');
+    }
+
+    // Delete the association
+    await this.aiAgentKnowledgeBaseRepository.remove(association);
   }
 } 

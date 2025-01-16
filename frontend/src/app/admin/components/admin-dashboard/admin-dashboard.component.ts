@@ -126,6 +126,9 @@ export class AdminDashboardComponent implements OnInit {
   };
   addAgentError: string | null = null;
 
+  // Track knowledge base changes for each agent
+  knowledgeBaseChanges: { [agentId: string]: { added: string[]; removed: string[]; } } = {};
+
   constructor(
     private adminService: AdminService,
     private changeDetector: ChangeDetectorRef
@@ -290,10 +293,11 @@ export class AdminDashboardComponent implements OnInit {
               instructions: '',
               maxHourlyResponses: 100
             },
-            knowledgeBases: ['General Knowledge'],
+            knowledgeBases: agent.knowledgeBases || [],
             avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
             isExpanded: false,
-            newChannel: ''
+            newChannel: '',
+            newKnowledgeBase: ''
           };
         });
         
@@ -350,13 +354,18 @@ export class AdminDashboardComponent implements OnInit {
     this.saveNotifications[agent.id] = null;
 
     // Get channel changes for this agent
-    const changes = this.channelChanges[agent.id] || { added: [], removed: [] };
+    const channelChanges = this.channelChanges[agent.id] || { added: [], removed: [] };
+    
+    // Get knowledge base changes for this agent
+    const kbChanges = this.knowledgeBaseChanges[agent.id] || { added: [], removed: [] };
 
     this.adminService.saveAgentChanges(
       agent.id,
       agent.personality,
-      changes.added,
-      changes.removed
+      channelChanges.added,
+      channelChanges.removed,
+      kbChanges.added,
+      kbChanges.removed
     ).subscribe({
       next: () => {
         console.log('Changes saved successfully');
@@ -364,6 +373,8 @@ export class AdminDashboardComponent implements OnInit {
         this.unsavedChanges[agent.id] = false;
         // Clear channel changes
         this.channelChanges[agent.id] = { added: [], removed: [] };
+        // Clear knowledge base changes
+        this.knowledgeBaseChanges[agent.id] = { added: [], removed: [] };
         // Show success notification
         this.saveNotifications[agent.id] = {
           type: 'success',
@@ -659,6 +670,49 @@ export class AdminDashboardComponent implements OnInit {
     } catch (error) {
       console.error('Error creating AI agent:', error);
       this.addAgentError = error instanceof Error ? error.message : 'Failed to create agent. Please try again.';
+    }
+  }
+
+  addKnowledgeBase(agent: AIAgent, knowledgeBaseId: string) {
+    if (!agent.knowledgeBases.some(kb => kb.id === knowledgeBaseId)) {
+      // Find the knowledge base details
+      const kb = this.vectorKBs.find(kb => kb.id === knowledgeBaseId);
+      if (!kb) return;
+
+      // Add to UI immediately
+      agent.knowledgeBases.push({
+        id: kb.id,
+        name: kb.name
+      });
+      
+      // Track the change
+      if (!this.knowledgeBaseChanges[agent.id]) {
+        this.knowledgeBaseChanges[agent.id] = { added: [], removed: [] };
+      }
+      this.knowledgeBaseChanges[agent.id].added.push(knowledgeBaseId);
+      
+      // Mark as unsaved
+      this.markAsUnsaved(agent);
+
+      // Reset selection
+      agent.newKnowledgeBase = '';
+    }
+  }
+
+  removeKnowledgeBase(agent: AIAgent, knowledgeBaseId: string) {
+    const index = agent.knowledgeBases.findIndex(kb => kb.id === knowledgeBaseId);
+    if (index > -1) {
+      // Remove from UI immediately
+      agent.knowledgeBases.splice(index, 1);
+      
+      // Track the change
+      if (!this.knowledgeBaseChanges[agent.id]) {
+        this.knowledgeBaseChanges[agent.id] = { added: [], removed: [] };
+      }
+      this.knowledgeBaseChanges[agent.id].removed.push(knowledgeBaseId);
+      
+      // Mark as unsaved
+      this.markAsUnsaved(agent);
     }
   }
 } 

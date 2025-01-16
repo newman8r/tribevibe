@@ -36,6 +36,10 @@ export interface AIAgent {
   avatarUrl: string;
   isExpanded: boolean;
   newChannel: string;
+  newKnowledgeBase: string;
   personality?: AiAgentPersonality;
-  knowledgeBases: string[];
+  knowledgeBases: {
+    id: string;
+    name: string;
+  }[];
 } 

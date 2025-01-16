@@ -15,6 +15,7 @@ import { UserModule } from '../user/user.module';
 import { DocumentProcessingService } from '../services/document-processing.service';
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
 import { VectorModule } from '../services/vector.module';
+import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { VectorModule } from '../services/vector.module';
       AiAgentChannel,
       VectorKnowledgeBase,
       CorpusFile,
-      DocumentEmbedding
+      DocumentEmbedding,
+      AiAgentKnowledgeBase
     ]),
     AuthModule,
     UserModule,

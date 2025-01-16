@@ -31,6 +31,10 @@ export class CreateAiAgentDto {
   email: string;
 }
 
+export class AddAgentKnowledgeBaseDto {
+  knowledgeBaseId: string;
+}
+
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class AdminController {
@@ -141,5 +145,21 @@ export class AdminController {
   @Post('ai-agents')
   async createAiAgent(@Body() createDto: CreateAiAgentDto): Promise<AiAgentDetails> {
     return this.adminService.createAiAgent(createDto);
+  }
+
+  @Post('ai-agents/:id/knowledge-bases')
+  async addAgentKnowledgeBase(
+    @Param('id') agentId: string,
+    @Body() dto: AddAgentKnowledgeBaseDto
+  ) {
+    return this.adminService.addAgentKnowledgeBase(agentId, dto.knowledgeBaseId);
+  }
+
+  @Delete('ai-agents/:agentId/knowledge-bases/:knowledgeBaseId')
+  async removeAgentKnowledgeBase(
+    @Param('agentId') agentId: string,
+    @Param('knowledgeBaseId') knowledgeBaseId: string
+  ) {
+    return this.adminService.removeAgentKnowledgeBase(agentId, knowledgeBaseId);
   }
 } 

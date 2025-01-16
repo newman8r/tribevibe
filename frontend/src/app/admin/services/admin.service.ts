@@ -49,6 +49,10 @@ export interface AiAgentDetails {
     instructions?: string;
     maxHourlyResponses?: number;
   };
+  knowledgeBases: {
+    id: string;
+    name: string;
+  }[];
 }
 
 export interface CorpusFile {
@@ -139,11 +143,28 @@ export class AdminService {
     );
   }
 
+  addAgentKnowledgeBase(agentId: string, knowledgeBaseId: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/ai-agents/${agentId}/knowledge-bases`,
+      { knowledgeBaseId },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  removeAgentKnowledgeBase(agentId: string, knowledgeBaseId: string): Observable<any> {
+    return this.http.delete(
+      `${this.apiUrl}/ai-agents/${agentId}/knowledge-bases/${knowledgeBaseId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
   saveAgentChanges(
     agentId: string, 
     personality: AiAgentPersonality,
     channelsToAdd: string[],
-    channelsToRemove: string[]
+    channelsToRemove: string[],
+    knowledgeBasesToAdd: string[],
+    knowledgeBasesToRemove: string[]
   ): Observable<any> {
     const requests: Observable<any>[] = [];
 
@@ -157,6 +178,14 @@ export class AdminService {
 
     channelsToRemove.forEach(channelId => {
       requests.push(this.removeAgentChannel(agentId, channelId));
+    });
+
+    knowledgeBasesToAdd.forEach(kbId => {
+      requests.push(this.addAgentKnowledgeBase(agentId, kbId));
+    });
+
+    knowledgeBasesToRemove.forEach(kbId => {
+      requests.push(this.removeAgentKnowledgeBase(agentId, kbId));
     });
 
     return forkJoin(requests);

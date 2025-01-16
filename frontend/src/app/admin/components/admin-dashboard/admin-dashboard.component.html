@@ -129,6 +129,24 @@
               </div>
 
               <div class="panel-section">
+                <h4>Knowledge Bases</h4>
+                <div class="knowledge-bases-selector">
+                  <div class="current-knowledge-bases">
+                    <div *ngFor="let kb of agent.knowledgeBases" class="knowledge-base-tag">
+                      {{ kb.name }}
+                      <button class="remove-kb-btn" (click)="removeKnowledgeBase(agent, kb.id)">×</button>
+                    </div>
+                  </div>
+                  <div class="add-knowledge-base">
+                    <select [(ngModel)]="agent.newKnowledgeBase" (change)="addKnowledgeBase(agent, agent.newKnowledgeBase)">
+                      <option value="">Select a knowledge base...</option>
+                      <option *ngFor="let kb of vectorKBs" [value]="kb.id">{{ kb.name }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-section">
                 <h4>Channels</h4>
                 <div class="channels-manager">
                   <div class="current-channels">
