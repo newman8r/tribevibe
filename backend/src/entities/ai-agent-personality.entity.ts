@@ -51,6 +51,9 @@ export class AiAgentPersonality {
   @Column({ type: 'text', nullable: true })
   instructions: string;
 
+  @Column({ type: 'integer', default: 100 })
+  maxHourlyResponses: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

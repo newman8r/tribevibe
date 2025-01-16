@@ -22,6 +22,12 @@ export class GptAssistantStrategy implements BaseStrategy {
 
   async processMessage(message: Message): Promise<string | null> {
     try {
+      // Skip processing if the message is from another AI agent
+      if (message.user?.isAiAgent) {
+        console.debug('Skipping message from another AI agent');
+        return null;
+      }
+
       // Get previous messages for context
       const previousMessages = await this.messageService.getChannelMessages(
         message.channel.id,

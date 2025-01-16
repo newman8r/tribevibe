@@ -30,6 +30,7 @@ export interface AiAgentDetails {
     displayName: string;
     contactEmail: string;
     instructions?: string;
+    maxHourlyResponses: number;
   };
 }
 
@@ -91,7 +92,8 @@ export class AdminService {
           writingStyle: personality.writingStyle,
           displayName: personality.displayName,
           contactEmail: personality.contactEmail,
-          instructions: personality.instructions
+          instructions: personality.instructions,
+          maxHourlyResponses: personality.maxHourlyResponses
         } : undefined,
       });
     }

@@ -48,6 +48,12 @@ export class VectorGptStrategy implements BaseStrategy {
 
   async processMessage(message: Message): Promise<string | null> {
     try {
+      // Skip processing if the message is from another AI agent
+      if (message.user?.isAiAgent) {
+        this.logger.debug('Skipping message from another AI agent');
+        return null;
+      }
+
       // First get the AI agent for this channel
       const agent = await this.userRepository
         .createQueryBuilder('user')
@@ -62,6 +68,19 @@ export class VectorGptStrategy implements BaseStrategy {
       if (!agent) {
         this.logger.error('No AI agent found for channel');
         return 'I apologize, but I encountered an error processing your message.';
+      }
+
+      // Check rate limit
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const messageCount = await this.messageService.countMessagesFromUser(
+        agent.id,
+        oneHourAgo
+      );
+
+      const maxResponses = agent.personality?.maxHourlyResponses || 100;
+      if (messageCount >= maxResponses) {
+        this.logger.warn(`AI agent ${agent.username} has exceeded hourly message limit of ${maxResponses}`);
+        return null;
       }
 
       // Get current date for context

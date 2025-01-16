@@ -47,6 +47,7 @@ export interface AiAgentDetails {
     displayName: string;
     contactEmail: string;
     instructions?: string;
+    maxHourlyResponses?: number;
   };
 }
 

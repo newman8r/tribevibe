@@ -8,6 +8,7 @@ import { Reaction } from '../entities/reaction.entity';
 import { Thread } from '../entities/thread.entity';
 import { File, FileType } from '../entities/file.entity';
 import { FileService } from '../file/file.service';
+import { MoreThan } from 'typeorm';
 
 interface FileWithUrls extends File {
   url: string;
@@ -241,5 +242,14 @@ export class MessageService {
       return { ...message, files: filesWithUrls };
     }
     return { ...message, files: [] };
+  }
+
+  async countMessagesFromUser(userId: string, afterDate: Date): Promise<number> {
+    return this.messageRepository.count({
+      where: {
+        user: { id: userId },
+        createdAt: MoreThan(afterDate)
+      }
+    });
   }
 } 

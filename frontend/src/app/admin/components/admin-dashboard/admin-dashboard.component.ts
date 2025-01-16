@@ -144,7 +144,8 @@ export class AdminDashboardComponent implements OnInit {
         writingStyle: 'Professional and concise',
         displayName: agent.name,
         contactEmail: agent.email || '',
-        instructions: ''
+        instructions: '',
+        maxHourlyResponses: 100
       };
     }
   }
@@ -278,7 +279,8 @@ export class AdminDashboardComponent implements OnInit {
               writingStyle: 'Professional and concise',
               displayName: agent.username,
               contactEmail: agent.email || '',
-              instructions: ''
+              instructions: '',
+              maxHourlyResponses: 100
             },
             knowledgeBases: ['General Knowledge'],
             avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.id}`,
@@ -326,6 +328,11 @@ export class AdminDashboardComponent implements OnInit {
 
   hasUnsavedChanges(agent: AIAgent): boolean {
     return this.unsavedChanges[agent.id] || false;
+  }
+
+  onPersonalityChange(agent: AIAgent) {
+    this.markAsUnsaved(agent);
+    this.changeDetector.detectChanges();
   }
 
   saveAgentPersonality(agent: AIAgent) {

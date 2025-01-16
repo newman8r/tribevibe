@@ -1253,3 +1253,35 @@
         transform: translateY(0);
       }
     }
+
+    .rate-limit-setting {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      label {
+        color: #e0e0e0;
+        font-size: 0.9rem;
+      }
+
+      .rate-limit-input {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid #444;
+        border-radius: 4px;
+        color: #fff;
+        padding: 0.5rem;
+        width: 100px;
+        font-size: 0.9rem;
+
+        &:focus {
+          outline: none;
+          border-color: #666;
+          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+
+        &::-webkit-inner-spin-button {
+          opacity: 1;
+        }
+      }
+    }

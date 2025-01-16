@@ -156,15 +156,24 @@
 
               <div class="panel-section" *ngIf="agent.personality">
                 <h4>Personality</h4>
-                <div class="personality-fields">
-                  <div class="field-group">
-                    <label>General Personality</label>
-                    <textarea 
-                      class="personality-input" 
-                      [(ngModel)]="agent.personality.generalPersonality"
-                      (ngModelChange)="markAsUnsaved(agent)">
-                    </textarea>
-                  </div>
+                <textarea 
+                  [(ngModel)]="agent.personality.generalPersonality" 
+                  (ngModelChange)="onPersonalityChange(agent)"
+                  class="personality-input" 
+                  placeholder="Enter a general personality description..."
+                  rows="5"
+                ></textarea>
+                <div class="rate-limit-setting">
+                  <label for="maxResponses">Maximum Responses per Hour:</label>
+                  <input 
+                    type="number" 
+                    id="maxResponses"
+                    [(ngModel)]="agent.personality.maxHourlyResponses" 
+                    (ngModelChange)="onPersonalityChange(agent)"
+                    min="1" 
+                    max="1000"
+                    class="rate-limit-input"
+                  >
                 </div>
               </div>
 

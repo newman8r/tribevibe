@@ -24,6 +24,7 @@ export interface AiAgentPersonality {
   displayName: string;
   contactEmail: string;
   instructions?: string;
+  maxHourlyResponses?: number;
 }
 
 export interface AIAgent {
