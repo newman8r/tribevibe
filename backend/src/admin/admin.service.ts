@@ -8,7 +8,7 @@ import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-perso
 import { Channel } from '../entities/channel.entity';
 import { UpdateAiAgentPersonalityDto } from './admin.controller';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
-import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
+import { VectorKnowledgeBase, ChunkingStrategy } from '../entities/vector-knowledge-base.entity';
 import { CreateAiAgentDto } from './admin.controller';
 import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
 import { CreateVectorKnowledgeBaseDto } from './admin.controller';
@@ -387,13 +387,15 @@ export class AdminService {
     const newKnowledgeBase = this.vectorKnowledgeBaseRepository.create({
       name: createDto.name,
       description: createDto.description,
-      chunkingStrategy: 'fixed_size',
+      usage: '',
+      chunkingStrategy: ChunkingStrategy.FIXED_SIZE,
       chunkingSettings: {
         chunkSize: 1000,
         chunkOverlap: 200
       },
       needsRebuild: false,
-      corpusFiles: []
+      corpusFiles: [],
+      embeddings: []
     });
 
     return this.vectorKnowledgeBaseRepository.save(newKnowledgeBase);
