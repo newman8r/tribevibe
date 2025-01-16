@@ -1195,3 +1195,61 @@
         transform: translateY(0);
       }
     }
+
+    .settings-actions {
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .save-settings-btn {
+      background: rgba(255, 20, 147, 0.2);
+      color: deeppink;
+      border: 1px solid deeppink;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: rgba(255, 20, 147, 0.3);
+        box-shadow: 0 0 10px rgba(255, 20, 147, 0.3);
+      }
+    }
+
+    .save-notification {
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      animation: fadeIn 0.3s ease;
+
+      &.success {
+        background: rgba(0, 255, 0, 0.1);
+        color: #00ff00;
+        border: 1px solid rgba(0, 255, 0, 0.3);
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+      }
+
+      &.error {
+        background: rgba(255, 0, 0, 0.1);
+        color: #ff0000;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }

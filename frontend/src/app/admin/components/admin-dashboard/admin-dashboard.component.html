@@ -393,7 +393,11 @@
                 <div class="settings-grid">
                   <div class="setting-group">
                     <label>Strategy</label>
-                    <select [(ngModel)]="kb.chunkingStrategy" class="setting-input">
+                    <select 
+                      [(ngModel)]="kb.chunkingStrategy" 
+                      class="setting-input"
+                      (ngModelChange)="onChunkingSettingsChange(kb)"
+                    >
                       <option value="fixed_size">Fixed Size</option>
                       <option value="semantic">Semantic</option>
                       <option value="paragraph">Paragraph</option>
@@ -402,12 +406,39 @@
 
                   <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
                     <label>Chunk Size</label>
-                    <input type="number" [(ngModel)]="kb.chunkingSettings!.chunkSize" class="setting-input">
+                    <input 
+                      type="number" 
+                      [(ngModel)]="kb.chunkingSettings!.chunkSize" 
+                      class="setting-input"
+                      (ngModelChange)="onChunkingSettingsChange(kb)"
+                    >
                   </div>
 
                   <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
                     <label>Chunk Overlap</label>
-                    <input type="number" [(ngModel)]="kb.chunkingSettings!.chunkOverlap" class="setting-input">
+                    <input 
+                      type="number" 
+                      [(ngModel)]="kb.chunkingSettings!.chunkOverlap" 
+                      class="setting-input"
+                      (ngModelChange)="onChunkingSettingsChange(kb)"
+                    >
+                  </div>
+                </div>
+                <div class="settings-actions">
+                  <button 
+                    *ngIf="hasUnsavedSettings(kb)" 
+                    class="save-settings-btn"
+                    (click)="saveKnowledgeBaseSettings(kb)"
+                  >
+                    Save Settings
+                  </button>
+                  <div 
+                    *ngIf="getKBSettingsNotification(kb)" 
+                    class="save-notification"
+                    [class.success]="getKBSettingsNotification(kb)?.type === 'success'"
+                    [class.error]="getKBSettingsNotification(kb)?.type === 'error'"
+                  >
+                    {{ getKBSettingsNotification(kb)?.message }}
                   </div>
                 </div>
               </div>

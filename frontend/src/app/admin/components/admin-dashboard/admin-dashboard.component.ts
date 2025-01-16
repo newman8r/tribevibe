@@ -115,6 +115,8 @@ export class AdminDashboardComponent implements OnInit {
   private rebuildingKBs = new Set<string>();
   private unsavedKBUsage = new Set<string>();
   kbSaveNotifications: { [kbId: string]: SaveNotification | null } = {};
+  private unsavedKBSettings = new Set<string>();
+  kbSettingsNotifications: { [kbId: string]: SaveNotification | null } = {};
 
   constructor(
     private adminService: AdminService,
@@ -564,5 +566,48 @@ export class AdminDashboardComponent implements OnInit {
       };
       this.changeDetector.detectChanges();
     }
+  }
+
+  onChunkingSettingsChange(kb: VectorKnowledgeBase) {
+    this.unsavedKBSettings.add(kb.id);
+    this.changeDetector.detectChanges();
+  }
+
+  hasUnsavedSettings(kb: VectorKnowledgeBase): boolean {
+    return this.unsavedKBSettings.has(kb.id);
+  }
+
+  async saveKnowledgeBaseSettings(kb: VectorKnowledgeBase): Promise<void> {
+    try {
+      const updates = {
+        chunkingStrategy: kb.chunkingStrategy,
+        chunkingSettings: kb.chunkingSettings
+      };
+
+      await firstValueFrom(this.adminService.updateVectorKnowledgeBase(kb.id, updates));
+      
+      this.unsavedKBSettings.delete(kb.id);
+      this.kbSettingsNotifications[kb.id] = {
+        type: 'success',
+        message: 'Settings saved successfully!'
+      };
+
+      setTimeout(() => {
+        this.kbSettingsNotifications[kb.id] = null;
+        this.changeDetector.detectChanges();
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error saving knowledge base settings:', error);
+      this.kbSettingsNotifications[kb.id] = {
+        type: 'error',
+        message: 'Failed to save settings. Please try again.'
+      };
+    }
+    this.changeDetector.detectChanges();
+  }
+
+  getKBSettingsNotification(kb: VectorKnowledgeBase): SaveNotification | null {
+    return this.kbSettingsNotifications[kb.id] || null;
   }
 } 
