@@ -205,6 +205,14 @@ export class AdminService {
     );
   }
 
+  createVectorKnowledgeBase(name: string, description: string): Observable<VectorKnowledgeBase> {
+    return this.http.post<VectorKnowledgeBase>(
+      `${this.apiUrl}/vector-knowledge-bases`,
+      { name, description },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
   getUploadUrl(knowledgeBaseId: string, file: File): Observable<{ uploadUrl: string; file: CorpusFile }> {
     return this.http.post<{ uploadUrl: string; file: CorpusFile }>(
       `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/files`,

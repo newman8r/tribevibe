@@ -11,6 +11,7 @@ import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
 import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
 import { CreateAiAgentDto } from './admin.controller';
 import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
+import { CreateVectorKnowledgeBaseDto } from './admin.controller';
 
 export interface AiAgentDetails {
   id: string;
@@ -380,5 +381,21 @@ export class AdminService {
 
     // Delete the association
     await this.aiAgentKnowledgeBaseRepository.remove(association);
+  }
+
+  async createVectorKnowledgeBase(createDto: CreateVectorKnowledgeBaseDto): Promise<VectorKnowledgeBase> {
+    const newKnowledgeBase = this.vectorKnowledgeBaseRepository.create({
+      name: createDto.name,
+      description: createDto.description,
+      chunkingStrategy: 'fixed_size',
+      chunkingSettings: {
+        chunkSize: 1000,
+        chunkOverlap: 200
+      },
+      needsRebuild: false,
+      corpusFiles: []
+    });
+
+    return this.vectorKnowledgeBaseRepository.save(newKnowledgeBase);
   }
 } 

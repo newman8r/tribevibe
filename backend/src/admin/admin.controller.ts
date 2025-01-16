@@ -31,6 +31,11 @@ export class CreateAiAgentDto {
   email: string;
 }
 
+export class CreateVectorKnowledgeBaseDto {
+  name: string;
+  description: string;
+}
+
 export class AddAgentKnowledgeBaseDto {
   knowledgeBaseId: string;
 }
@@ -161,5 +166,10 @@ export class AdminController {
     @Param('knowledgeBaseId') knowledgeBaseId: string
   ) {
     return this.adminService.removeAgentKnowledgeBase(agentId, knowledgeBaseId);
+  }
+
+  @Post('vector-knowledge-bases')
+  async createVectorKnowledgeBase(@Body() createDto: CreateVectorKnowledgeBaseDto) {
+    return this.adminService.createVectorKnowledgeBase(createDto);
   }
 } 

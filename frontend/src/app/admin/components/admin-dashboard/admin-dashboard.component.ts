@@ -126,6 +126,14 @@ export class AdminDashboardComponent implements OnInit {
   };
   addAgentError: string | null = null;
 
+  // Add Knowledge Base Modal
+  showingAddKBModal = false;
+  newKnowledgeBase = {
+    name: '',
+    description: ''
+  };
+  addKBError: string | null = null;
+
   // Track knowledge base changes for each agent
   knowledgeBaseChanges: { [agentId: string]: { added: string[]; removed: string[]; } } = {};
 
@@ -713,6 +721,45 @@ export class AdminDashboardComponent implements OnInit {
       
       // Mark as unsaved
       this.markAsUnsaved(agent);
+    }
+  }
+
+  showAddKBModal() {
+    this.showingAddKBModal = true;
+    this.newKnowledgeBase = {
+      name: '',
+      description: ''
+    };
+    this.addKBError = null;
+  }
+
+  hideAddKBModal() {
+    this.showingAddKBModal = false;
+    this.addKBError = null;
+  }
+
+  async createKnowledgeBase() {
+    if (!this.newKnowledgeBase.name) {
+      this.addKBError = 'Please enter a name for the knowledge base';
+      return;
+    }
+
+    try {
+      const kb = await firstValueFrom(
+        this.adminService.createVectorKnowledgeBase(
+          this.newKnowledgeBase.name,
+          this.newKnowledgeBase.description
+        )
+      );
+      
+      // Refresh the knowledge bases list
+      this.loadVectorKnowledgeBases();
+      
+      // Close the modal
+      this.hideAddKBModal();
+    } catch (error) {
+      console.error('Error creating vector knowledge base:', error);
+      this.addKBError = error instanceof Error ? error.message : 'Failed to create knowledge base. Please try again.';
     }
   }
 } 
