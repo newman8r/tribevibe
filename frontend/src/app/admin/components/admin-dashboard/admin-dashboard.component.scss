@@ -1285,3 +1285,106 @@
         }
       }
     }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #1a1a1a;
+      border-radius: 8px;
+      padding: 24px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      h3 {
+        margin: 0 0 20px;
+        color: #fff;
+        font-size: 1.5rem;
+      }
+    }
+
+    .modal-body {
+      margin-bottom: 24px;
+
+      .form-group {
+        margin-bottom: 16px;
+
+        label {
+          display: block;
+          margin-bottom: 8px;
+          color: #fff;
+        }
+
+        input {
+          width: 100%;
+          padding: 8px 12px;
+          border: 1px solid #333;
+          border-radius: 4px;
+          background-color: #2a2a2a;
+          color: #fff;
+          font-size: 14px;
+
+          &:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+          }
+        }
+      }
+    }
+
+    .modal-error {
+      color: #ff4444;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+
+      button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &.cancel-btn {
+          background-color: transparent;
+          border: 1px solid #666;
+          color: #fff;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+        }
+
+        &.create-btn {
+          background-color: #0066cc;
+          border: none;
+          color: #fff;
+
+          &:hover {
+            background-color: #0052a3;
+          }
+
+          &:disabled {
+            background-color: #333;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }

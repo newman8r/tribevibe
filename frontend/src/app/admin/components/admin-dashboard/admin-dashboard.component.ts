@@ -118,6 +118,14 @@ export class AdminDashboardComponent implements OnInit {
   private unsavedKBSettings = new Set<string>();
   kbSettingsNotifications: { [kbId: string]: SaveNotification | null } = {};
 
+  // Add Agent Modal
+  showingAddAgentModal = false;
+  newAgent = {
+    username: '',
+    email: ''
+  };
+  addAgentError: string | null = null;
+
   constructor(
     private adminService: AdminService,
     private changeDetector: ChangeDetectorRef
@@ -616,5 +624,41 @@ export class AdminDashboardComponent implements OnInit {
 
   getKBSettingsNotification(kb: VectorKnowledgeBase): SaveNotification | null {
     return this.kbSettingsNotifications[kb.id] || null;
+  }
+
+  showAddAgentModal() {
+    this.showingAddAgentModal = true;
+    this.newAgent = {
+      username: '',
+      email: ''
+    };
+    this.addAgentError = null;
+  }
+
+  hideAddAgentModal() {
+    this.showingAddAgentModal = false;
+    this.addAgentError = null;
+  }
+
+  async createAgent() {
+    if (!this.newAgent.username || !this.newAgent.email) {
+      this.addAgentError = 'Please fill in all fields';
+      return;
+    }
+
+    try {
+      const agent = await firstValueFrom(
+        this.adminService.createAiAgent(this.newAgent.username, this.newAgent.email)
+      );
+      
+      // Refresh the agents list
+      this.loadAiAgents();
+      
+      // Close the modal
+      this.hideAddAgentModal();
+    } catch (error) {
+      console.error('Error creating AI agent:', error);
+      this.addAgentError = error instanceof Error ? error.message : 'Failed to create agent. Please try again.';
+    }
   }
 } 

@@ -85,7 +85,7 @@
     <div *ngSwitchCase="'agents'" class="agents-tab">
       <div class="header-actions">
         <h2>🤖 AI Agents</h2>
-        <button class="add-agent-btn">+ New Agent</button>
+        <button class="add-agent-btn" (click)="showAddAgentModal()">+ New Agent</button>
       </div>
       
       <div class="agents-table">
@@ -455,6 +455,46 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div> 
+
+<!-- Add Agent Modal -->
+<div class="modal-overlay" *ngIf="showingAddAgentModal" (click)="hideAddAgentModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Add New AI Agent</h3>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="agentUsername">Username</label>
+        <input 
+          type="text" 
+          id="agentUsername" 
+          [(ngModel)]="newAgent.username" 
+          placeholder="Enter agent username"
+        >
+      </div>
+      <div class="form-group">
+        <label for="agentEmail">Email</label>
+        <input 
+          type="email" 
+          id="agentEmail" 
+          [(ngModel)]="newAgent.email" 
+          placeholder="Enter agent email"
+        >
+      </div>
+      <div class="modal-error" *ngIf="addAgentError">
+        {{ addAgentError }}
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="hideAddAgentModal()">Cancel</button>
+      <button 
+        class="create-btn" 
+        [disabled]="!newAgent.username || !newAgent.email"
+        (click)="createAgent()"
+      >
+        Create Agent
+      </button>
     </div>
   </div>
 </div> 

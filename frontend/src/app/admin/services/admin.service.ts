@@ -168,6 +168,14 @@ export class AdminService {
     });
   }
 
+  createAiAgent(username: string, email: string): Observable<AiAgentDetails> {
+    return this.http.post<AiAgentDetails>(
+      `${this.apiUrl}/ai-agents`,
+      { username, email },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
   getUploadUrl(knowledgeBaseId: string, file: File): Observable<{ uploadUrl: string; file: CorpusFile }> {
     return this.http.post<{ uploadUrl: string; file: CorpusFile }>(
       `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/files`,

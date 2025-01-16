@@ -26,6 +26,11 @@ export class UploadCorpusFileDto {
   size: number;
 }
 
+export class CreateAiAgentDto {
+  username: string;
+  email: string;
+}
+
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class AdminController {
@@ -131,5 +136,10 @@ export class AdminController {
     @Body() updateDto: Partial<VectorKnowledgeBase>
   ) {
     return this.adminService.updateVectorKnowledgeBase(id, updateDto);
+  }
+
+  @Post('ai-agents')
+  async createAiAgent(@Body() createDto: CreateAiAgentDto): Promise<AiAgentDetails> {
+    return this.adminService.createAiAgent(createDto);
   }
 } 

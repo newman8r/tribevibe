@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -9,6 +9,7 @@ import { Channel } from '../entities/channel.entity';
 import { UpdateAiAgentPersonalityDto } from './admin.controller';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
 import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
+import { CreateAiAgentDto } from './admin.controller';
 
 export interface AiAgentDetails {
   id: string;
@@ -256,5 +257,53 @@ export class AdminService {
     
     Object.assign(kb, updates);
     return this.vectorKnowledgeBaseRepository.save(kb);
+  }
+
+  async createAiAgent(createDto: CreateAiAgentDto): Promise<AiAgentDetails> {
+    // Check if username is already taken
+    const existingUser = await this.userRepository.findOne({
+      where: [
+        { username: createDto.username },
+        { email: createDto.email }
+      ]
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Username or email already exists');
+    }
+
+    // Create the AI agent user
+    const newAgent = this.userRepository.create({
+      username: createDto.username,
+      email: createDto.email,
+      isAiAgent: true,
+      isAdmin: false,
+      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${Date.now()}`
+    });
+
+    await this.userRepository.save(newAgent);
+
+    // Create the vector-gpt strategy for the agent
+    const strategy = this.aiAgentStrategyRepository.create({
+      agent: newAgent,
+      strategyName: 'vector-gpt',
+      settings: {} // Default settings
+    });
+
+    await this.aiAgentStrategyRepository.save(strategy);
+
+    // Return the agent details in the expected format
+    return {
+      id: newAgent.id,
+      username: newAgent.username,
+      email: newAgent.email,
+      avatarUrl: newAgent.avatarUrl || '',
+      channels: [],
+      personality: undefined,
+      strategy: {
+        name: strategy.strategyName,
+        settings: strategy.settings
+      }
+    };
   }
 } 
