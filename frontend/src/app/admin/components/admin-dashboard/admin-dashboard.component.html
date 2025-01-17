@@ -462,30 +462,45 @@
               <div class="panel-section">
                 <h4>Chat Histories</h4>
                 <div class="chat-histories-section">
-                  <div class="selected-users">
-                    <div *ngFor="let user of selectedUsers[kb.id] || []" class="selected-user-tag">
-                      {{ user.username }}
-                      <button class="remove-user-btn" (click)="removeUser(kb, user)">×</button>
-                    </div>
+                  <!-- Loading state -->
+                  <div *ngIf="loadingChatHistoryUsers[kb.id]" class="loading-state">
+                    Loading users...
                   </div>
-                  
-                  <div class="user-search">
-                    <input
-                      type="text"
-                      [(ngModel)]="searchTerm[kb.id]"
-                      (ngModelChange)="filterUsers(kb)"
-                      placeholder="Search users..."
-                      class="user-search-input"
-                    >
-                    <div class="user-search-results" *ngIf="searchTerm[kb.id]">
-                      <div 
-                        *ngFor="let user of filteredUsers[kb.id]"
-                        class="user-search-item"
-                        (click)="addUser(kb, user)">
+
+                  <!-- Error state -->
+                  <div *ngIf="chatHistoryError[kb.id]" class="error-state">
+                    {{ chatHistoryError[kb.id] }}
+                  </div>
+
+                  <!-- Content when loaded -->
+                  <ng-container *ngIf="!loadingChatHistoryUsers[kb.id] && !chatHistoryError[kb.id]">
+                    <!-- Selected users -->
+                    <div class="selected-users">
+                      <div *ngFor="let user of chatHistoryUsers[kb.id] || []" class="selected-user-tag">
                         {{ user.username }}
+                        <button class="remove-user-btn" (click)="removeUserFromChatHistory(kb, user)">×</button>
                       </div>
                     </div>
-                  </div>
+                    
+                    <!-- User search -->
+                    <div class="user-search">
+                      <input
+                        type="text"
+                        [(ngModel)]="searchTerm[kb.id]"
+                        (ngModelChange)="filterUsers(kb)"
+                        placeholder="Search users..."
+                        class="user-search-input"
+                      >
+                      <div class="user-search-results" *ngIf="searchTerm[kb.id]">
+                        <div 
+                          *ngFor="let user of filteredUsers[kb.id]"
+                          class="user-search-item"
+                          (click)="addUserToChatHistory(kb, user)">
+                          {{ user.username }}
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
                 </div>
               </div>
 

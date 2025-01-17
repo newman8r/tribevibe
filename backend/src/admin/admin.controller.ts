@@ -5,6 +5,8 @@ import { MeyersBriggsType } from '../entities/ai-agent-personality.entity';
 import { CorpusFileService } from '../services/corpus-file.service';
 import { DocumentProcessingService } from '../services/document-processing.service';
 import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
+import { VectorChatHistoryService } from '../services/vector-chat-history.service';
+import { User } from '../entities/user.entity';
 
 export class UpdateAiAgentPersonalityDto {
   generalPersonality: string;
@@ -46,7 +48,8 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly corpusFileService: CorpusFileService,
-    private readonly documentProcessingService: DocumentProcessingService
+    private readonly documentProcessingService: DocumentProcessingService,
+    private readonly vectorChatHistoryService: VectorChatHistoryService
   ) {}
 
   @Get('ai-agents')
@@ -171,5 +174,26 @@ export class AdminController {
   @Post('vector-knowledge-bases')
   async createVectorKnowledgeBase(@Body() createDto: CreateVectorKnowledgeBaseDto) {
     return this.adminService.createVectorKnowledgeBase(createDto);
+  }
+
+  @Get('vector-knowledge-bases/:id/chat-history-users')
+  async getChatHistoryUsers(@Param('id') knowledgeBaseId: string): Promise<User[]> {
+    return this.vectorChatHistoryService.getChatHistoryUsers(knowledgeBaseId);
+  }
+
+  @Post('vector-knowledge-bases/:id/chat-history-users/:userId')
+  async addChatHistoryUser(
+    @Param('id') knowledgeBaseId: string,
+    @Param('userId') userId: string
+  ): Promise<void> {
+    await this.vectorChatHistoryService.addUserToChatHistory(knowledgeBaseId, userId);
+  }
+
+  @Delete('vector-knowledge-bases/:id/chat-history-users/:userId')
+  async removeChatHistoryUser(
+    @Param('id') knowledgeBaseId: string,
+    @Param('userId') userId: string
+  ): Promise<void> {
+    await this.vectorChatHistoryService.removeUserFromChatHistory(knowledgeBaseId, userId);
   }
 } 

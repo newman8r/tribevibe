@@ -16,6 +16,7 @@ import { DocumentProcessingService } from '../services/document-processing.servi
 import { DocumentEmbedding } from '../entities/document-embedding.entity';
 import { VectorModule } from '../services/vector.module';
 import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
+import { VectorChatHistoryService } from '../services/vector-chat-history.service';
 
 @Module({
   imports: [
@@ -35,6 +36,6 @@ import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity
     VectorModule
   ],
   controllers: [AdminController],
-  providers: [AdminService, CorpusFileService, DocumentProcessingService],
+  providers: [AdminService, CorpusFileService, DocumentProcessingService, VectorChatHistoryService],
 })
 export class AdminModule {} 

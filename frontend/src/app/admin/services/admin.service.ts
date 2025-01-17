@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, forkJoin, from, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MeyersBriggsType, AiAgentPersonality } from '../interfaces/ai-agent.interface';
+import { User } from '../../core/interfaces/user.interface';
 
 export interface SystemInfo {
   system: {
@@ -283,6 +284,28 @@ export class AdminService {
     return this.http.patch<VectorKnowledgeBase>(
       `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}`,
       updates,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  getChatHistoryUsers(knowledgeBaseId: string): Observable<User[]> {
+    return this.http.get<User[]>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/chat-history-users`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  addChatHistoryUser(knowledgeBaseId: string, userId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/chat-history-users/${userId}`,
+      {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  removeChatHistoryUser(knowledgeBaseId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/chat-history-users/${userId}`,
       { headers: this.getAuthHeaders() }
     );
   }

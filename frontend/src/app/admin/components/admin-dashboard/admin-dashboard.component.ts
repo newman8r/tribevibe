@@ -145,6 +145,11 @@ export class AdminDashboardComponent implements OnInit {
   searchTerm: { [kbId: string]: string } = {};
   filteredUsers: { [kbId: string]: User[] } = {};
 
+  // Properties for managing chat history users
+  chatHistoryUsers: { [kbId: string]: User[] } = {};
+  loadingChatHistoryUsers: { [kbId: string]: boolean } = {};
+  chatHistoryError: { [kbId: string]: string | null } = {};
+
   constructor(
     private adminService: AdminService,
     private apiService: ApiService,
@@ -214,16 +219,12 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   toggleVectorKBExpand(kb: VectorKnowledgeBase) {
-    console.log('Toggling KB expansion for:', kb);
-    console.log('Current corpus files:', kb.corpusFiles);
-    this.expandedKBs[kb.id] = !this.expandedKBs[kb.id];
-    
-    // Initialize settings if they don't exist
-    if (this.expandedKBs[kb.id] && !kb.chunkingSettings) {
-      kb.chunkingSettings = {
-        chunkSize: 1000,
-        chunkOverlap: 200
-      };
+    const isCurrentlyExpanded = this.expandedKBs[kb.id];
+    this.expandedKBs[kb.id] = !isCurrentlyExpanded;
+
+    if (!isCurrentlyExpanded) {
+      // Load chat history users when expanding
+      this.loadChatHistoryUsers(kb);
     }
   }
 
@@ -784,14 +785,14 @@ export class AdminDashboardComponent implements OnInit {
   filterUsers(kb: VectorKnowledgeBase) {
     const term = this.searchTerm[kb.id]?.toLowerCase() || '';
     this.filteredUsers[kb.id] = this.users.filter(user => 
-      !this.isUserSelected(kb, user) && 
+      !this.isChatHistoryUser(kb, user) && 
       (user.username.toLowerCase().includes(term) || 
        user.email?.toLowerCase().includes(term))
     );
   }
 
-  isUserSelected(kb: VectorKnowledgeBase, user: User): boolean {
-    return (this.selectedUsers[kb.id] || []).some(u => u.id === user.id);
+  isChatHistoryUser(kb: VectorKnowledgeBase, user: User): boolean {
+    return (this.chatHistoryUsers[kb.id] || []).some(u => u.id === user.id);
   }
 
   addUser(kb: VectorKnowledgeBase, user: User) {
@@ -806,5 +807,40 @@ export class AdminDashboardComponent implements OnInit {
   removeUser(kb: VectorKnowledgeBase, user: User) {
     this.selectedUsers[kb.id] = this.selectedUsers[kb.id].filter(u => u.id !== user.id);
     this.filterUsers(kb);
+  }
+
+  async loadChatHistoryUsers(kb: VectorKnowledgeBase) {
+    this.loadingChatHistoryUsers[kb.id] = true;
+    this.chatHistoryError[kb.id] = null;
+
+    try {
+      const users = await firstValueFrom(this.adminService.getChatHistoryUsers(kb.id));
+      this.chatHistoryUsers[kb.id] = users;
+    } catch (error) {
+      console.error('Error loading chat history users:', error);
+      this.chatHistoryError[kb.id] = 'Failed to load chat history users';
+    } finally {
+      this.loadingChatHistoryUsers[kb.id] = false;
+    }
+  }
+
+  async addUserToChatHistory(kb: VectorKnowledgeBase, user: User) {
+    try {
+      await firstValueFrom(this.adminService.addChatHistoryUser(kb.id, user.id));
+      await this.loadChatHistoryUsers(kb); // Reload the list
+    } catch (error) {
+      console.error('Error adding user to chat history:', error);
+      this.chatHistoryError[kb.id] = 'Failed to add user to chat history';
+    }
+  }
+
+  async removeUserFromChatHistory(kb: VectorKnowledgeBase, user: User) {
+    try {
+      await firstValueFrom(this.adminService.removeChatHistoryUser(kb.id, user.id));
+      await this.loadChatHistoryUsers(kb); // Reload the list
+    } catch (error) {
+      console.error('Error removing user from chat history:', error);
+      this.chatHistoryError[kb.id] = 'Failed to remove user from chat history';
+    }
   }
 } 

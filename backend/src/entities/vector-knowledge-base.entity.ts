@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
 import { DocumentEmbedding } from './document-embedding.entity';
 import { CorpusFile } from './corpus-file.entity';
+import { User } from './user.entity';
 
 export enum ChunkingStrategy {
   FIXED_SIZE = 'fixed_size',
@@ -41,6 +42,20 @@ export class VectorKnowledgeBase {
 
   @OneToMany(() => DocumentEmbedding, embedding => embedding.knowledgeBase)
   embeddings: DocumentEmbedding[];
+
+  @ManyToMany(() => User)
+  @JoinTable({
+    name: 'vector_kb_chat_histories',
+    joinColumn: {
+      name: 'knowledge_base_id',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id'
+    }
+  })
+  chatHistoryUsers: User[];
 
   @Column({ default: false })
   needsRebuild: boolean;
