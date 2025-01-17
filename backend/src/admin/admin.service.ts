@@ -12,6 +12,9 @@ import { VectorKnowledgeBase, ChunkingStrategy } from '../entities/vector-knowle
 import { CreateAiAgentDto } from './admin.controller';
 import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
 import { CreateVectorKnowledgeBaseDto } from './admin.controller';
+import { CorpusFileService } from '../services/corpus-file.service';
+import { VectorChatHistoryService } from '../services/vector-chat-history.service';
+import { DocumentProcessingService } from '../services/document-processing.service';
 
 export interface AiAgentDetails {
   id: string;
@@ -58,6 +61,9 @@ export class AdminService {
     private vectorKnowledgeBaseRepository: Repository<VectorKnowledgeBase>,
     @InjectRepository(AiAgentKnowledgeBase)
     private aiAgentKnowledgeBaseRepository: Repository<AiAgentKnowledgeBase>,
+    private corpusFileService: CorpusFileService,
+    private vectorChatHistoryService: VectorChatHistoryService,
+    private documentProcessingService: DocumentProcessingService,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -399,5 +405,34 @@ export class AdminService {
     });
 
     return this.vectorKnowledgeBaseRepository.save(newKnowledgeBase);
+  }
+
+  async processVectorKnowledgeBase(id: string): Promise<void> {
+    const knowledgeBase = await this.vectorKnowledgeBaseRepository.findOne({
+      where: { id },
+      relations: ['corpusFiles']
+    });
+
+    if (!knowledgeBase) {
+      throw new NotFoundException('Vector knowledge base not found');
+    }
+
+    // Process files
+    for (const file of knowledgeBase.corpusFiles) {
+      if (!file.processed) {
+        await this.corpusFileService.processUnprocessedFiles(id, this.documentProcessingService);
+      }
+    }
+
+    // Process chat histories if they haven't been processed yet
+    if (!knowledgeBase.chatHistoriesProcessed) {
+      await this.vectorChatHistoryService.processChatHistories(id);
+    }
+
+    // Mark knowledge base as not needing rebuild
+    await this.vectorKnowledgeBaseRepository.update(
+      { id },
+      { needsRebuild: false }
+    );
   }
 } 

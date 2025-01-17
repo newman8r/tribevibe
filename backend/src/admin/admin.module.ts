@@ -17,6 +17,8 @@ import { DocumentEmbedding } from '../entities/document-embedding.entity';
 import { VectorModule } from '../services/vector.module';
 import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
 import { VectorChatHistoryService } from '../services/vector-chat-history.service';
+import { MessageModule } from '../message/message.module';
+import { Message } from '../entities/message.entity';
 
 @Module({
   imports: [
@@ -29,11 +31,13 @@ import { VectorChatHistoryService } from '../services/vector-chat-history.servic
       VectorKnowledgeBase,
       CorpusFile,
       DocumentEmbedding,
-      AiAgentKnowledgeBase
+      AiAgentKnowledgeBase,
+      Message
     ]),
     AuthModule,
     UserModule,
-    VectorModule
+    VectorModule,
+    MessageModule
   ],
   controllers: [AdminController],
   providers: [AdminService, CorpusFileService, DocumentProcessingService, VectorChatHistoryService],

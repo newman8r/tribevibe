@@ -196,4 +196,11 @@ export class AdminController {
   ): Promise<void> {
     await this.vectorChatHistoryService.removeUserFromChatHistory(knowledgeBaseId, userId);
   }
+
+  @Post('vector-knowledge-bases/:id/process')
+  async processVectorKnowledgeBase(
+    @Param('id') knowledgeBaseId: string
+  ): Promise<void> {
+    await this.adminService.processVectorKnowledgeBase(knowledgeBaseId);
+  }
 } 

@@ -514,7 +514,7 @@ export class AdminDashboardComponent implements OnInit {
 
     this.processingKBs.add(kb.id);
     try {
-      await firstValueFrom(this.adminService.processUnprocessedFiles(kb.id));
+      await firstValueFrom(this.adminService.processVectorKnowledgeBase(kb.id));
       // Refresh the knowledge base to get updated processing status
       const updatedKBs = await firstValueFrom(this.adminService.getAllVectorKnowledgeBases());
       const updatedKB = updatedKBs.find(k => k.id === kb.id);

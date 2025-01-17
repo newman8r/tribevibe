@@ -60,6 +60,9 @@ export class VectorKnowledgeBase {
   @Column({ default: false })
   needsRebuild: boolean;
 
+  @Column({ default: false })
+  chatHistoriesProcessed: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

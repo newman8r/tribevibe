@@ -309,4 +309,12 @@ export class AdminService {
       { headers: this.getAuthHeaders() }
     );
   }
+
+  processVectorKnowledgeBase(knowledgeBaseId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/vector-knowledge-bases/${knowledgeBaseId}/process`,
+      {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
 } 
