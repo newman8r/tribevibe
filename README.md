@@ -24,13 +24,7 @@
 - Emoji Reactions to messages
 - 'more messages below' indicator for new messages when scrolled up
 - user list
-
-## Future Features
-- AI integration
-- custom avatars
-- message search
-- admin panel
-- Create multiple events, each with their own channels and user access
-- User roles (admin, moderator, user)
-- typing indicators
-- link previews
+- Make multiple AI agents, assign them to channels
+- Create multiple vector knowledge bases for each ai agent
+- add chat histories to vector knowledge bases
+- Admin panel
