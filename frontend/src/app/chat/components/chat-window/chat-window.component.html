@@ -12,10 +12,6 @@
       <button class="action-btn" title="More options">
         <i class="fas fa-ellipsis-v"></i>
       </button>
-      <button class="settings-btn" (click)="showUserSettingsModal()">
-        <i class="fas fa-cog"></i>
-        Settings
-      </button>
     </div>
   </div>
 
@@ -368,6 +364,13 @@
             >
               Choose New Avatar
             </button>
+            <button 
+              class="remove-btn" 
+              *ngIf="(currentUser$ | async)?.avatarUrl && !(currentUser$ | async)?.avatarUrl?.includes('dicebear.com')"
+              (click)="removeAvatar()"
+            >
+              Remove Custom Avatar
+            </button>
             <div class="selected-file" *ngIf="selectedAvatarFile">
               Selected: {{ selectedAvatarFile.name }}
             </div>
@@ -376,7 +379,6 @@
             </div>
           </div>
         </div>
-        <!-- More settings sections can be added here later -->
       </div>
       <div class="modal-actions">
         <button class="cancel-btn" (click)="hideUserSettingsModal()">Cancel</button>

@@ -13,6 +13,7 @@ import { ExplorerType } from './components/data-display/data-display.component';
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     ExplorerComponent,
@@ -21,8 +22,7 @@ import { ExplorerType } from './components/data-display/data-display.component';
     UserProfileComponent,
     UserListComponent,
     DataDisplayComponent
-  ],
-  standalone: true
+  ]
 })
 export class ChatComponent implements OnInit {
   @ViewChild(DataDisplayComponent) dataDisplay!: DataDisplayComponent;

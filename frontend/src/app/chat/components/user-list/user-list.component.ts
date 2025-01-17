@@ -38,6 +38,9 @@ export class UserListComponent implements OnInit, OnDestroy {
   private conversations: DirectMessageConversation[] = [];
   showDebug = false;
 
+  // Add this property to track user statuses
+  private userStatuses = new Map<string, UserStatus>();
+
   constructor(
     private websocketService: WebsocketService,
     private directMessageService: DirectMessageService,
@@ -73,10 +76,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.websocketService.onUserStatusUpdate().subscribe(({userId, status}) => {
-        this.users = this.users.map(user => 
-          user.id === userId ? { ...user, status: status as UserStatus } : user
-        );
-        this.groupUsers();
+        this.updateUserStatus(userId, status as UserStatus);
       })
     );
 
@@ -128,31 +128,34 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   private groupUsers() {
-    // Create new object to force change detection
-    const newGroupedUsers: { [key in UserStatus]: UserWithStatus[] } = {
+    // Initialize groups
+    this.groupedUsers = {
       [UserStatus.ONLINE]: [],
       [UserStatus.AWAY]: [],
       [UserStatus.BUSY]: [],
       [UserStatus.OFFLINE]: []
     };
 
-    // Group users while preserving unread counts
     this.users.forEach(user => {
-      // Create a new user object with the unread count
-      const userWithCount: UserWithStatus = {
-        ...user,
-        unreadCount: user.unreadCount || 0
-      };
-      newGroupedUsers[user.status].push(userWithCount);
+      // Always put AI users in the online group
+      if (user.isAiAgent) {
+        this.groupedUsers[UserStatus.ONLINE].push(user);
+      } else {
+        // Get user status from the map or default to offline
+        const status = this.userStatuses.get(user.id) || UserStatus.OFFLINE;
+        this.groupedUsers[status].push(user);
+      }
     });
 
-    // Sort each group
-    Object.values(newGroupedUsers).forEach(group => {
+    // Sort each group by username
+    Object.values(this.groupedUsers).forEach(group => {
       group.sort((a, b) => a.username.localeCompare(b.username));
     });
+  }
 
-    // Update the grouped users
-    this.groupedUsers = newGroupedUsers;
+  private updateUserStatus(userId: string, status: UserStatus) {
+    this.userStatuses.set(userId, status);
+    this.groupUsers();
   }
 
   private updateUserUnreadCounts() {

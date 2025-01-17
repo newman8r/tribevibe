@@ -18,6 +18,8 @@ import { AuthPromptModalComponent } from '../../../shared/components/auth-prompt
 import { EmojiPickerComponent } from '../../../shared/components/emoji-picker/emoji-picker.component';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
+import { UserService } from '../../../core/services/user.service';
+import { firstValueFrom } from 'rxjs';
 
 interface AttachedFile {
   id: string;
@@ -92,13 +94,20 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   // Add new property for iOS Safari detection
   isSafariIOS = false;
 
+  // Add these new properties
+  showingUserSettingsModal = false;
+  selectedAvatarFile: File | null = null;
+  avatarUploadError: string | null = null;
+  hasUnsavedChanges = false;
+
   constructor(
     private channelStateService: ChannelStateService,
     private websocketService: WebsocketService,
     private authService: AuthService,
     private directMessageService: DirectMessageService,
     private fileService: FileService,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) {
     // Get or generate anonymous ID
     this.anonymousId = localStorage.getItem('anonymousId') || 
@@ -387,10 +396,34 @@ setInterval(() => {
   }
 
   getUserStatus(message: Message): string {
+    // Always show AI user as online
+    if (message.user?.isAiAgent) {
+      return 'online';
+    }
+    
+    // For regular users, get their status from the map
     if (message.user?.id) {
       return this.userStatuses.get(message.user.id) || 'offline';
     }
+    
+    // For anonymous users
     return message.anonymousId ? 'none' : 'offline';
+  }
+
+  // Add this helper method for status color
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'online':
+        return '#44b700';
+      case 'away':
+        return '#ffa500';
+      case 'busy':
+        return '#ff0000';
+      case 'offline':
+        return '#808080';
+      default:
+        return 'transparent';
+    }
   }
 
   onMessageMouseEnter(messageId: string) {
@@ -732,5 +765,99 @@ setInterval(() => {
     } else {
       this.websocketService.addReaction(message.id, emoji, userId);
     }
+  }
+
+  showUserSettingsModal() {
+    this.showingUserSettingsModal = true;
+  }
+
+  hideUserSettingsModal() {
+    this.showingUserSettingsModal = false;
+    this.selectedAvatarFile = null;
+    this.avatarUploadError = null;
+    this.hasUnsavedChanges = false;
+  }
+
+  async onAvatarFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file size (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.avatarUploadError = 'File size must be less than 5MB';
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.avatarUploadError = 'File must be an image';
+        return;
+      }
+
+      this.selectedAvatarFile = file;
+      this.hasUnsavedChanges = true;
+      this.avatarUploadError = null;
+    }
+  }
+
+  async updateUserSettings() {
+    if (!this.selectedAvatarFile) return;
+
+    try {
+      // Get upload URL
+      const { uploadUrl, fileId } = await firstValueFrom(
+        this.userService.requestAvatarUpload(this.selectedAvatarFile)
+      );
+
+      // Upload to S3
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        body: this.selectedAvatarFile,
+        headers: {
+          'Content-Type': this.selectedAvatarFile.type
+        }
+      });
+
+      // Confirm upload
+      const { avatarUrl } = await firstValueFrom(
+        this.userService.confirmAvatarUpload(fileId)
+      );
+
+      // Update current user's avatar URL
+      const currentUser = this.currentUser$.value;
+      if (currentUser) {
+        currentUser.avatarUrl = avatarUrl;
+        this.currentUser$.next(currentUser);
+      }
+
+      this.hideUserSettingsModal();
+    } catch (error) {
+      console.error('Failed to update avatar:', error);
+      this.avatarUploadError = 'Failed to upload avatar. Please try again.';
+    }
+  }
+
+  async removeAvatar() {
+    try {
+      const { avatarUrl } = await firstValueFrom(this.userService.removeAvatar());
+      
+      // Update the current user's avatar URL
+      const currentUser = this.currentUser$.value;
+      if (currentUser) {
+        currentUser.avatarUrl = avatarUrl;
+        this.currentUser$.next(currentUser);
+      }
+
+      this.hideUserSettingsModal();
+    } catch (error) {
+      console.error('Failed to remove avatar:', error);
+      this.avatarUploadError = 'Failed to remove avatar. Please try again.';
+    }
+  }
+
+  // Add document property for template access
+  get document(): Document {
+    return document;
   }
 } 

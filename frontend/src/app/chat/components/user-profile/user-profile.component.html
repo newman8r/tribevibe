@@ -4,6 +4,7 @@
          [alt]="currentUser?.username || anonymousUsername || 'Anonymous'" 
          class="avatar">
     <div class="status-indicator" 
+         [style.background-color]="getStatusColor(currentUserStatus)"
          [class]="currentUserStatus"
          (click)="cycleStatus($event)">
     </div>

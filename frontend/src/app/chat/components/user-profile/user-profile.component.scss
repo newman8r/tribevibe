@@ -11,46 +11,40 @@
 
 .avatar-wrapper {
   position: relative;
-  width: 80px;
-  height: 80px;
-}
-
-.avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.status-indicator {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid var(--surface-dark);
-  cursor: pointer;
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: scale(1.1);
+  display: inline-block;
+  
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
   }
 
-  &.online {
-    background-color: var(--status-online);
-  }
-
-  &.away {
-    background-color: var(--status-away);
-  }
-
-  &.busy {
-    background-color: var(--status-busy);
-  }
-
-  &.offline {
-    background-color: var(--status-offline);
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border: 2px solid #fff;
+    cursor: pointer;
+    
+    &.online {
+      box-shadow: 0 0 0 2px rgba(68, 183, 0, 0.2);
+    }
+    
+    &.away {
+      box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2);
+    }
+    
+    &.busy {
+      box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+    }
+    
+    &.offline {
+      box-shadow: 0 0 0 2px rgba(128, 128, 128, 0.2);
+    }
   }
 }
 

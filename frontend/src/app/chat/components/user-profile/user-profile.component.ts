@@ -66,4 +66,19 @@ export class UserProfileComponent implements OnInit {
     console.log('Updating status to:', newStatus); // Debug log
     this.websocketService.updateManualStatus(userId, newStatus);
   }
+
+  getStatusColor(status: UserStatus): string {
+    switch (status) {
+      case UserStatus.ONLINE:
+        return '#44b700';
+      case UserStatus.AWAY:
+        return '#ffa500';
+      case UserStatus.BUSY:
+        return '#ff0000';
+      case UserStatus.OFFLINE:
+        return '#808080';
+      default:
+        return 'transparent';
+    }
+  }
 } 
