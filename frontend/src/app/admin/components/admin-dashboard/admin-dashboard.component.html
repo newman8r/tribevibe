@@ -267,17 +267,6 @@
               </div>
               
               <div class="panel-section">
-                <h4>Knowledge Bases</h4>
-                <div class="knowledge-bases-list">
-                  <div *ngFor="let kb of agent.knowledgeBases" class="knowledge-base-item">
-                    <span class="kb-name">{{ kb }}</span>
-                    <button class="remove-kb-btn">×</button>
-                  </div>
-                  <button class="add-kb-btn">+ Add Knowledge Base</button>
-                </div>
-              </div>
-              
-              <div class="panel-section">
                 <h4>Avatar</h4>
                 <div class="avatar-preview">
                   <img [src]="agent.avatarUrl" [alt]="agent.name">
