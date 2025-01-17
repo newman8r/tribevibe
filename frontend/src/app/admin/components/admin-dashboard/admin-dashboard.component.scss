@@ -1494,10 +1494,12 @@
           max-height: 200px;
           overflow-y: auto;
           z-index: 1000;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
           .user-search-item {
             padding: 8px 12px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
 
             &:hover {
               background: rgba(255, 20, 147, 0.1);
@@ -1508,6 +1510,8 @@
 
       .processing-controls {
         margin-top: 15px;
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
         gap: 10px;

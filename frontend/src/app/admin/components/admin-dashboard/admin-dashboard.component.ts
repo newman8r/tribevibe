@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -150,6 +150,7 @@ export class AdminDashboardComponent implements OnInit {
   loadingChatHistoryUsers: { [kbId: string]: boolean } = {};
   chatHistoryError: { [kbId: string]: string | null } = {};
   userSearchQuery: { [kbId: string]: string } = {};
+  showUserSearchDropdown: { [kbId: string]: boolean } = {};
 
   constructor(
     private adminService: AdminService,
@@ -784,12 +785,13 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   filterUsers(kb: VectorKnowledgeBase) {
-    const term = this.searchTerm[kb.id]?.toLowerCase() || '';
+    const term = this.userSearchQuery[kb.id]?.toLowerCase() || '';
     this.filteredUsers[kb.id] = this.users.filter(user => 
       !this.isChatHistoryUser(kb, user) && 
       (user.username.toLowerCase().includes(term) || 
        user.email?.toLowerCase().includes(term))
     );
+    this.showUserSearchDropdown[kb.id] = term.length > 0 && this.filteredUsers[kb.id].length > 0;
   }
 
   isChatHistoryUser(kb: VectorKnowledgeBase, user: User): boolean {
@@ -828,7 +830,9 @@ export class AdminDashboardComponent implements OnInit {
   async addUserToChatHistory(kb: VectorKnowledgeBase, user: User) {
     try {
       await firstValueFrom(this.adminService.addChatHistoryUser(kb.id, user.id));
-      await this.loadChatHistoryUsers(kb); // Reload the list
+      await this.loadChatHistoryUsers(kb);
+      this.userSearchQuery[kb.id] = '';
+      this.showUserSearchDropdown[kb.id] = false;
     } catch (error) {
       console.error('Error adding user to chat history:', error);
       this.chatHistoryError[kb.id] = 'Failed to add user to chat history';
@@ -882,5 +886,16 @@ export class AdminDashboardComponent implements OnInit {
     setTimeout(() => {
       this.saveNotifications[agentId] = null;
     }, 3000);
+  }
+
+  hideUserSearchDropdown(kb: VectorKnowledgeBase) {
+    this.showUserSearchDropdown[kb.id] = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapePressed() {
+    Object.keys(this.showUserSearchDropdown).forEach(kbId => {
+      this.showUserSearchDropdown[kbId] = false;
+    });
   }
 } 

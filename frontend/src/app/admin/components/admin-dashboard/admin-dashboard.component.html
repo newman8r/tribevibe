@@ -475,13 +475,18 @@
                       class="user-search-input"
                       [(ngModel)]="userSearchQuery[kb.id]"
                       (input)="filterUsers(kb)"
+                      (blur)="hideUserSearchDropdown(kb)"
                       placeholder="Search users..."
                     />
-                    <div class="user-search-results" *ngIf="filteredUsers[kb.id]?.length">
+                    <div 
+                      class="user-search-results" 
+                      *ngIf="showUserSearchDropdown[kb.id]"
+                      (mousedown)="$event.preventDefault()"
+                    >
                       <div
                         *ngFor="let user of filteredUsers[kb.id]"
                         class="user-search-item"
-                        (click)="addUserToChatHistory(kb, user)"
+                        (mousedown)="addUserToChatHistory(kb, user)"
                       >
                         {{ user.username }}
                       </div>
