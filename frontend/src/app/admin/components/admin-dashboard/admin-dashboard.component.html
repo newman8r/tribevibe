@@ -458,6 +458,37 @@
                   </div>
                 </div>
               </div>
+
+              <div class="panel-section">
+                <h4>Chat Histories</h4>
+                <div class="chat-histories-section">
+                  <div class="selected-users">
+                    <div *ngFor="let user of selectedUsers[kb.id] || []" class="selected-user-tag">
+                      {{ user.username }}
+                      <button class="remove-user-btn" (click)="removeUser(kb, user)">×</button>
+                    </div>
+                  </div>
+                  
+                  <div class="user-search">
+                    <input
+                      type="text"
+                      [(ngModel)]="searchTerm[kb.id]"
+                      (ngModelChange)="filterUsers(kb)"
+                      placeholder="Search users..."
+                      class="user-search-input"
+                    >
+                    <div class="user-search-results" *ngIf="searchTerm[kb.id]">
+                      <div 
+                        *ngFor="let user of filteredUsers[kb.id]"
+                        class="user-search-item"
+                        (click)="addUser(kb, user)">
+                        {{ user.username }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

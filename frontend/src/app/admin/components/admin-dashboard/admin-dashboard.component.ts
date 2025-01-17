@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminService, SystemInfo, AiAgentDetails, Channel, VectorKnowledgeBase, CorpusFile } from '../../services/admin.service';
 import { AIAgent, MeyersBriggsType, AiAgentPersonality } from '../../interfaces/ai-agent.interface';
+import { ApiService } from '../../../core/services/api.service';
+import { User } from '../../../core/interfaces/user.interface';
 import { firstValueFrom } from 'rxjs';
 
 interface AdminTab {
@@ -137,8 +139,15 @@ export class AdminDashboardComponent implements OnInit {
   // Track knowledge base changes for each agent
   knowledgeBaseChanges: { [agentId: string]: { added: string[]; removed: string[]; } } = {};
 
+  // Properties for managing selected users
+  users: User[] = [];
+  selectedUsers: { [kbId: string]: User[] } = {};
+  searchTerm: { [kbId: string]: string } = {};
+  filteredUsers: { [kbId: string]: User[] } = {};
+
   constructor(
     private adminService: AdminService,
+    private apiService: ApiService,
     private changeDetector: ChangeDetectorRef
   ) {}
 
@@ -147,6 +156,7 @@ export class AdminDashboardComponent implements OnInit {
     this.loadAiAgents();
     this.loadChannels();
     this.loadVectorKnowledgeBases();
+    this.loadUsers();
   }
 
   setActiveTab(tabId: string) {
@@ -761,5 +771,40 @@ export class AdminDashboardComponent implements OnInit {
       console.error('Error creating vector knowledge base:', error);
       this.addKBError = error instanceof Error ? error.message : 'Failed to create knowledge base. Please try again.';
     }
+  }
+
+  private async loadUsers() {
+    try {
+      this.users = await firstValueFrom(this.apiService.getAllUsers());
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  }
+
+  filterUsers(kb: VectorKnowledgeBase) {
+    const term = this.searchTerm[kb.id]?.toLowerCase() || '';
+    this.filteredUsers[kb.id] = this.users.filter(user => 
+      !this.isUserSelected(kb, user) && 
+      (user.username.toLowerCase().includes(term) || 
+       user.email?.toLowerCase().includes(term))
+    );
+  }
+
+  isUserSelected(kb: VectorKnowledgeBase, user: User): boolean {
+    return (this.selectedUsers[kb.id] || []).some(u => u.id === user.id);
+  }
+
+  addUser(kb: VectorKnowledgeBase, user: User) {
+    if (!this.selectedUsers[kb.id]) {
+      this.selectedUsers[kb.id] = [];
+    }
+    this.selectedUsers[kb.id].push(user);
+    this.searchTerm[kb.id] = '';
+    this.filterUsers(kb);
+  }
+
+  removeUser(kb: VectorKnowledgeBase, user: User) {
+    this.selectedUsers[kb.id] = this.selectedUsers[kb.id].filter(u => u.id !== user.id);
+    this.filterUsers(kb);
   }
 } 
