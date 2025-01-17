@@ -48,6 +48,12 @@ export class AiAgentPersonality {
   @Column({ length: 255, nullable: true })
   contactEmail: string;
 
+  @Column({ type: 'text', nullable: true })
+  instructions: string;
+
+  @Column({ type: 'integer', default: 100 })
+  maxHourlyResponses: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

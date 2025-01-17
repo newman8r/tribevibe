@@ -23,6 +23,8 @@ export interface AiAgentPersonality {
   writingStyle: string;
   displayName: string;
   contactEmail: string;
+  instructions?: string;
+  maxHourlyResponses?: number;
 }
 
 export interface AIAgent {
@@ -34,6 +36,10 @@ export interface AIAgent {
   avatarUrl: string;
   isExpanded: boolean;
   newChannel: string;
+  newKnowledgeBase: string;
   personality?: AiAgentPersonality;
-  knowledgeBases: string[];
+  knowledgeBases: {
+    id: string;
+    name: string;
+  }[];
 } 

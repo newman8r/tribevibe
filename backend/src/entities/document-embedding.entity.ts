@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne } from 'typeorm';
+import { VectorKnowledgeBase } from './vector-knowledge-base.entity';
+import { VectorTransformer } from './column-types/vector.column-type';
 
 @Entity()
 export class DocumentEmbedding {
@@ -16,9 +18,13 @@ export class DocumentEmbedding {
 
   @Column('float8', { 
     array: true,
-    nullable: true 
+    nullable: true,
+    transformer: new VectorTransformer()
   })
   embedding: number[] | null;
+
+  @ManyToOne(() => VectorKnowledgeBase, kb => kb.embeddings, { nullable: true })
+  knowledgeBase: VectorKnowledgeBase | null;
 
   @CreateDateColumn()
   createdAt: Date;

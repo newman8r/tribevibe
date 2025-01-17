@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -8,6 +8,14 @@ import { AiAgentPersonality, MeyersBriggsType } from '../entities/ai-agent-perso
 import { Channel } from '../entities/channel.entity';
 import { UpdateAiAgentPersonalityDto } from './admin.controller';
 import { AiAgentChannel } from '../entities/ai-agent-channel.entity';
+import { VectorKnowledgeBase, ChunkingStrategy } from '../entities/vector-knowledge-base.entity';
+import { CreateAiAgentDto } from './admin.controller';
+import { AiAgentKnowledgeBase } from '../entities/ai-agent-knowledge-base.entity';
+import { CreateVectorKnowledgeBaseDto } from './admin.controller';
+import { CorpusFileService } from '../services/corpus-file.service';
+import { VectorChatHistoryService } from '../services/vector-chat-history.service';
+import { DocumentProcessingService } from '../services/document-processing.service';
+import { Logger } from '@nestjs/common';
 
 export interface AiAgentDetails {
   id: string;
@@ -28,11 +36,19 @@ export interface AiAgentDetails {
     writingStyle: string;
     displayName: string;
     contactEmail: string;
+    instructions?: string;
+    maxHourlyResponses: number;
   };
+  knowledgeBases: {
+    id: string;
+    name: string;
+  }[];
 }
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -44,6 +60,13 @@ export class AdminService {
     private channelRepository: Repository<Channel>,
     @InjectRepository(AiAgentChannel)
     private aiAgentChannelRepository: Repository<AiAgentChannel>,
+    @InjectRepository(VectorKnowledgeBase)
+    private vectorKnowledgeBaseRepository: Repository<VectorKnowledgeBase>,
+    @InjectRepository(AiAgentKnowledgeBase)
+    private aiAgentKnowledgeBaseRepository: Repository<AiAgentKnowledgeBase>,
+    private corpusFileService: CorpusFileService,
+    private vectorChatHistoryService: VectorChatHistoryService,
+    private documentProcessingService: DocumentProcessingService,
   ) {}
 
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -61,6 +84,12 @@ export class AdminService {
 
       const personality = await this.aiAgentPersonalityRepository.findOne({
         where: { agent: { id: agent.id } },
+      });
+
+      // Get knowledge base associations
+      const knowledgeBaseAssociations = await this.aiAgentKnowledgeBaseRepository.find({
+        where: { agent: { id: agent.id } },
+        relations: ['knowledgeBase']
       });
 
       // Filter to only include active channel associations
@@ -87,7 +116,13 @@ export class AdminService {
           writingStyle: personality.writingStyle,
           displayName: personality.displayName,
           contactEmail: personality.contactEmail,
+          instructions: personality.instructions,
+          maxHourlyResponses: personality.maxHourlyResponses
         } : undefined,
+        knowledgeBases: knowledgeBaseAssociations.map(assoc => ({
+          id: assoc.knowledgeBase.id,
+          name: assoc.knowledgeBase.name
+        }))
       });
     }
 
@@ -230,5 +265,160 @@ export class AdminService {
     // Soft delete by marking as inactive
     association.isActive = false;
     return this.aiAgentChannelRepository.save(association);
+  }
+
+  async getAllVectorKnowledgeBases() {
+    return this.vectorKnowledgeBaseRepository.find({
+      relations: ['embeddings', 'corpusFiles'],
+      order: {
+        createdAt: 'DESC'
+      }
+    });
+  }
+
+  async updateVectorKnowledgeBase(id: string, updates: Partial<VectorKnowledgeBase>) {
+    const kb = await this.vectorKnowledgeBaseRepository.findOne({ where: { id } });
+    if (!kb) {
+      throw new NotFoundException('Vector knowledge base not found');
+    }
+    
+    Object.assign(kb, updates);
+    return this.vectorKnowledgeBaseRepository.save(kb);
+  }
+
+  async createAiAgent(createDto: CreateAiAgentDto): Promise<AiAgentDetails> {
+    // Check if username is already taken
+    const existingUser = await this.userRepository.findOne({
+      where: [
+        { username: createDto.username },
+        { email: createDto.email }
+      ]
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Username or email already exists');
+    }
+
+    // Create the AI agent user
+    const newAgent = this.userRepository.create({
+      username: createDto.username,
+      email: createDto.email,
+      isAiAgent: true,
+      isAdmin: false,
+      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${Date.now()}`
+    });
+
+    await this.userRepository.save(newAgent);
+
+    // Create the vector-gpt strategy for the agent
+    const strategy = this.aiAgentStrategyRepository.create({
+      agent: newAgent,
+      strategyName: 'vector-gpt',
+      settings: {} // Default settings
+    });
+
+    await this.aiAgentStrategyRepository.save(strategy);
+
+    // Return the agent details in the expected format
+    return {
+      id: newAgent.id,
+      username: newAgent.username,
+      email: newAgent.email,
+      avatarUrl: newAgent.avatarUrl || '',
+      channels: [],
+      personality: undefined,
+      strategy: {
+        name: strategy.strategyName,
+        settings: strategy.settings
+      },
+      knowledgeBases: []
+    };
+  }
+
+  async addAgentKnowledgeBase(agentId: string, knowledgeBaseId: string) {
+    // Check if agent exists and is an AI agent
+    const agent = await this.userRepository.findOne({
+      where: { id: agentId, isAiAgent: true }
+    });
+
+    if (!agent) {
+      throw new NotFoundException('AI agent not found');
+    }
+
+    // Check if knowledge base exists
+    const knowledgeBase = await this.vectorKnowledgeBaseRepository.findOne({
+      where: { id: knowledgeBaseId }
+    });
+
+    if (!knowledgeBase) {
+      throw new NotFoundException('Knowledge base not found');
+    }
+
+    // Check if association already exists
+    const existingAssociation = await this.aiAgentKnowledgeBaseRepository.findOne({
+      where: {
+        agent: { id: agentId },
+        knowledgeBase: { id: knowledgeBaseId }
+      }
+    });
+
+    if (existingAssociation) {
+      return existingAssociation;
+    }
+
+    // Create new association
+    const newAssociation = this.aiAgentKnowledgeBaseRepository.create({
+      agent,
+      knowledgeBase
+    });
+
+    return this.aiAgentKnowledgeBaseRepository.save(newAssociation);
+  }
+
+  async removeAgentKnowledgeBase(agentId: string, knowledgeBaseId: string) {
+    // Find the association
+    const association = await this.aiAgentKnowledgeBaseRepository.findOne({
+      where: {
+        agent: { id: agentId },
+        knowledgeBase: { id: knowledgeBaseId }
+      }
+    });
+
+    if (!association) {
+      throw new NotFoundException('Agent knowledge base association not found');
+    }
+
+    // Delete the association
+    await this.aiAgentKnowledgeBaseRepository.remove(association);
+  }
+
+  async createVectorKnowledgeBase(createDto: CreateVectorKnowledgeBaseDto): Promise<VectorKnowledgeBase> {
+    const newKnowledgeBase = this.vectorKnowledgeBaseRepository.create({
+      name: createDto.name,
+      description: createDto.description,
+      usage: '',
+      chunkingStrategy: ChunkingStrategy.FIXED_SIZE,
+      chunkingSettings: {
+        chunkSize: 1000,
+        chunkOverlap: 200
+      },
+      needsRebuild: false,
+      corpusFiles: [],
+      embeddings: []
+    });
+
+    return this.vectorKnowledgeBaseRepository.save(newKnowledgeBase);
+  }
+
+  async processVectorKnowledgeBase(id: string): Promise<void> {
+    this.logger.log(`Processing vector knowledge base ${id}`);
+
+    // Process unprocessed files
+    await this.corpusFileService.processUnprocessedFiles(id, this.documentProcessingService);
+    
+    // Process chat histories
+    await this.vectorChatHistoryService.processChatHistories(id);
+
+    this.logger.log(`Finished processing vector knowledge base ${id}`);
   }
 } 

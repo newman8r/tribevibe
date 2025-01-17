@@ -17,29 +17,6 @@
       </div>
     </div>
 
-    <!-- SoundCloud Player Section -->
-    <div class="music-card">
-      <h3 class="gradient-text">Playlist Vibes</h3>
-      
-      <div class="player-wrapper">
-        <iframe
-          *ngIf="soundcloudPlayerUrl"
-          [src]="soundcloudPlayerUrl"
-          frameborder="0"
-          allow="autoplay"
-          class="soundcloud-player">
-        </iframe>
-      </div>
-
-      <div class="playlist-info">
-        <span class="playlist-label">🎵 Full Playlist:</span>
-        <a [href]="playlistUrl" 
-           target="_blank" 
-           class="playlist-link">
-          View on SoundCloud
-        </a>
-      </div>
-    </div>
     <!-- Add invisible spacer for mobile -->
     <div class="mobile-bottom-spacer"></div>
   </div>

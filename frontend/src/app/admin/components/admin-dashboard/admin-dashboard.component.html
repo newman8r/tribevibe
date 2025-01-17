@@ -85,7 +85,7 @@
     <div *ngSwitchCase="'agents'" class="agents-tab">
       <div class="header-actions">
         <h2>🤖 AI Agents</h2>
-        <button class="add-agent-btn">+ New Agent</button>
+        <button class="add-agent-btn" (click)="showAddAgentModal()">+ New Agent</button>
       </div>
       
       <div class="agents-table">
@@ -129,6 +129,24 @@
               </div>
 
               <div class="panel-section">
+                <h4>Knowledge Bases</h4>
+                <div class="knowledge-bases-selector">
+                  <div class="current-knowledge-bases">
+                    <div *ngFor="let kb of agent.knowledgeBases" class="knowledge-base-tag">
+                      {{ kb.name }}
+                      <button class="remove-kb-btn" (click)="removeKnowledgeBase(agent, kb.id)">×</button>
+                    </div>
+                  </div>
+                  <div class="add-knowledge-base">
+                    <select [(ngModel)]="agent.newKnowledgeBase" (change)="addKnowledgeBase(agent, agent.newKnowledgeBase)">
+                      <option value="">Select a knowledge base...</option>
+                      <option *ngFor="let kb of vectorKBs" [value]="kb.id">{{ kb.name }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-section">
                 <h4>Channels</h4>
                 <div class="channels-manager">
                   <div class="current-channels">
@@ -156,15 +174,24 @@
 
               <div class="panel-section" *ngIf="agent.personality">
                 <h4>Personality</h4>
-                <div class="personality-fields">
-                  <div class="field-group">
-                    <label>General Personality</label>
-                    <textarea 
-                      class="personality-input" 
-                      [(ngModel)]="agent.personality.generalPersonality"
-                      (ngModelChange)="markAsUnsaved(agent)">
-                    </textarea>
-                  </div>
+                <textarea 
+                  [(ngModel)]="agent.personality.generalPersonality" 
+                  (ngModelChange)="onPersonalityChange(agent)"
+                  class="personality-input" 
+                  placeholder="Enter a general personality description..."
+                  rows="5"
+                ></textarea>
+                <div class="rate-limit-setting">
+                  <label for="maxResponses">Maximum Responses per Hour:</label>
+                  <input 
+                    type="number" 
+                    id="maxResponses"
+                    [(ngModel)]="agent.personality.maxHourlyResponses" 
+                    (ngModelChange)="onPersonalityChange(agent)"
+                    min="1" 
+                    max="1000"
+                    class="rate-limit-input"
+                  >
                 </div>
               </div>
 
@@ -211,6 +238,21 @@
                   </div>
                 </div>
               </div>
+
+              <div class="panel-section" *ngIf="agent.personality">
+                <h4>Agent Instructions</h4>
+                <div class="field-group">
+                  <textarea 
+                    class="personality-input instructions-input"
+                    [(ngModel)]="agent.personality.instructions"
+                    (ngModelChange)="markAsUnsaved(agent)"
+                    placeholder="Enter custom instructions for how the agent should behave or respond..."
+                    rows="8"></textarea>
+                  <div class="field-description">
+                    These instructions will be added to the agent's system prompt when responding to messages.
+                  </div>
+                </div>
+              </div>
               
               <div class="panel-section save-section" *ngIf="hasUnsavedChanges(agent) || getSaveNotification(agent)">
                 <div class="save-notification" *ngIf="getSaveNotification(agent) as notification" [class]="notification.type">
@@ -222,17 +264,6 @@
                   *ngIf="hasUnsavedChanges(agent)">
                   Save Agent Changes
                 </button>
-              </div>
-              
-              <div class="panel-section">
-                <h4>Knowledge Bases</h4>
-                <div class="knowledge-bases-list">
-                  <div *ngFor="let kb of agent.knowledgeBases" class="knowledge-base-item">
-                    <span class="kb-name">{{ kb }}</span>
-                    <button class="remove-kb-btn">×</button>
-                  </div>
-                  <button class="add-kb-btn">+ Add Knowledge Base</button>
-                </div>
               </div>
               
               <div class="panel-section">
@@ -251,104 +282,317 @@
     <div *ngSwitchCase="'vectors'" class="vectors-tab">
       <div class="header-actions">
         <h2>🧬 Vector Knowledge Bases</h2>
-        <button class="add-kb-btn">+ New Knowledge Base</button>
+        <button class="add-kb-btn" (click)="showAddKBModal()">+ New Knowledge Base</button>
       </div>
       
       <div class="vectors-table">
         <div class="table-header">
-          <div class="col-title">Title</div>
+          <div class="col-name">Name</div>
+          <div class="col-description">Description</div>
           <div class="col-files">Files</div>
-          <div class="col-updated">Last Updated</div>
+          <div class="col-updated">Updated</div>
           <div class="col-actions">Actions</div>
         </div>
         
         <div *ngFor="let kb of vectorKBs" class="vector-row">
-          <div class="vector-main-row" [class.expanded]="kb.isExpanded">
-            <div class="col-title">
-              <span class="kb-title">{{ kb.title }}</span>
-              <span class="kb-description">{{ kb.description }}</span>
+          <div class="vector-main-row" [class.expanded]="isVectorKBExpanded(kb)">
+            <div class="col-name">{{ kb.name }}</div>
+            <div class="col-description">{{ kb.description }}</div>
+            <div class="col-files">
+              <ng-container *ngIf="kb.corpusFiles?.length; else noFiles">
+                {{ kb.corpusFiles.length }} files:
+                <div class="file-list-preview">
+                  <span *ngFor="let file of kb.corpusFiles" class="file-preview-item" [class.processed]="file.processed" [class.unprocessed]="!file.processed">
+                    {{ file.filename }}
+                    <span class="status-dot"></span>
+                  </span>
+                </div>
+              </ng-container>
+              <ng-template #noFiles>
+                No files
+              </ng-template>
             </div>
-            <div class="col-files">{{ kb.files.length }} files</div>
-            <div class="col-updated">{{ kb.lastUpdated | date:'short' }}</div>
+            <div class="col-updated">{{ kb.updatedAt | date:'short' }}</div>
             <div class="col-actions">
               <button class="manage-btn" (click)="toggleVectorKBExpand(kb)">
-                {{ kb.isExpanded ? 'Close' : 'Manage' }}
+                {{ isVectorKBExpanded(kb) ? 'Close' : 'Manage' }}
               </button>
             </div>
           </div>
           
-          <div class="vector-expanded-panel" *ngIf="kb.isExpanded">
+          <div class="vector-expanded-panel" *ngIf="isVectorKBExpanded(kb)">
             <div class="panel-content">
-              <div class="panel-section files-section">
+              <div class="panel-section">
                 <h4>Files</h4>
                 <div class="files-list">
-                  <div *ngFor="let file of kb.files" class="file-item">
+                  <div *ngFor="let file of kb.corpusFiles" class="file-item">
                     <div class="file-info">
-                      <span class="file-name">{{ file.name }}</span>
-                      <span class="file-meta">
-                        {{ formatBytes(file.size) }} • 
-                        {{ file.uploadDate | date:'short' }}
+                      <span class="filename">{{ file.filename }}</span>
+                      <span class="status-indicator" [class.processed]="file.processed">
+                        {{ file.processed ? '✓' : '...' }}
                       </span>
                     </div>
-                    <div class="file-status" [class]="file.status">
-                      {{ file.status }}
-                    </div>
-                    <button class="remove-file-btn">×</button>
+                    <button class="remove-file-btn" (click)="removeCorpusFile(kb, file)">×</button>
                   </div>
-                  <div class="file-upload">
-                    <button class="upload-btn">
-                      <span>+ Add Files</span>
-                      <input type="file" multiple class="file-input" />
-                    </button>
+                  <button 
+                    class="add-file-btn" 
+                    (click)="triggerFileInput(kb)"
+                    [disabled]="isUploading(kb)"
+                  >
+                    <span *ngIf="!isUploading(kb)">+ Add File</span>
+                    <span *ngIf="isUploading(kb)">Uploading...</span>
+                  </button>
+                  <input
+                    type="file"
+                    [id]="'file-upload-' + kb.id"
+                    style="display: none;"
+                    (change)="onFileSelected($event, kb)"
+                    accept=".txt,.md,.json"
+                  >
+                  <div *ngIf="getUploadError(kb)" class="upload-error">
+                    {{ getUploadError(kb) }}
+                  </div>
+                  <button 
+                    class="process-files-btn" 
+                    *ngIf="hasUnprocessedContent(kb)"
+                    [disabled]="isProcessing(kb)"
+                    (click)="processFiles(kb)"
+                  >
+                    <span *ngIf="!isProcessing(kb)">
+                      Process {{ getUnprocessedContentDescription(kb) }}
+                    </span>
+                    <span *ngIf="isProcessing(kb)">Processing...</span>
+                  </button>
+                  <button 
+                    class="rebuild-kb-btn" 
+                    [disabled]="isRebuilding(kb)"
+                    (click)="rebuildKnowledgeBase(kb)"
+                  >
+                    <span *ngIf="!isRebuilding(kb)">Clear Vector DB</span>
+                    <span *ngIf="isRebuilding(kb)">Clearing...</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="panel-section">
+                <h4>Usage</h4>
+                <textarea 
+                  [(ngModel)]="kb.usage" 
+                  class="usage-input" 
+                  placeholder="Enter usage instructions for this knowledge base..."
+                  rows="3"
+                  (ngModelChange)="onUsageChange(kb)"
+                ></textarea>
+                <div class="usage-actions">
+                  <button 
+                    *ngIf="hasUnsavedUsage(kb)" 
+                    class="save-usage-btn"
+                    (click)="saveKnowledgeBaseUsage(kb)"
+                  >
+                    Save Usage
+                  </button>
+                  <div 
+                    *ngIf="getKBSaveNotification(kb)" 
+                    class="save-notification"
+                    [class.success]="getKBSaveNotification(kb)?.type === 'success'"
+                    [class.error]="getKBSaveNotification(kb)?.type === 'error'"
+                  >
+                    {{ getKBSaveNotification(kb)?.message }}
                   </div>
                 </div>
               </div>
-              
-              <div class="panel-section settings-section">
-                <h4>Settings</h4>
+
+              <div class="panel-section">
+                <h4>Chunking Settings</h4>
                 <div class="settings-grid">
-                  <div class="setting-item">
-                    <label>Chunk Size</label>
-                    <input type="number" [(ngModel)]="kb.settings.chunkSize" class="setting-input" />
-                  </div>
-                  <div class="setting-item">
-                    <label>Chunk Overlap</label>
-                    <input type="number" [(ngModel)]="kb.settings.chunkOverlap" class="setting-input" />
-                  </div>
-                  <div class="setting-item">
-                    <label>Embedding Model</label>
-                    <select [(ngModel)]="kb.settings.embeddingModel" class="setting-input">
-                      <option value="openai">OpenAI</option>
-                      <option value="huggingface">HuggingFace</option>
-                      <option value="cohere">Cohere</option>
+                  <div class="setting-group">
+                    <label>Strategy</label>
+                    <select 
+                      [(ngModel)]="kb.chunkingStrategy" 
+                      class="setting-input"
+                      (ngModelChange)="onChunkingSettingsChange(kb)"
+                    >
+                      <option value="fixed_size">Fixed Size</option>
+                      <option value="semantic">Semantic</option>
+                      <option value="paragraph">Paragraph</option>
                     </select>
                   </div>
-                  <div class="setting-item">
-                    <label>Similarity Threshold</label>
+
+                  <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
+                    <label>Chunk Size</label>
                     <input 
-                      type="range" 
-                      [(ngModel)]="kb.settings.similarityThreshold" 
-                      min="0" 
-                      max="1" 
-                      step="0.1" 
-                      class="setting-input range" />
-                    <span class="range-value">{{ kb.settings.similarityThreshold }}</span>
+                      type="number" 
+                      [(ngModel)]="kb.chunkingSettings!.chunkSize" 
+                      class="setting-input"
+                      (ngModelChange)="onChunkingSettingsChange(kb)"
+                    >
+                  </div>
+
+                  <div class="setting-group" *ngIf="kb.chunkingStrategy === 'fixed_size'">
+                    <label>Chunk Overlap</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="kb.chunkingSettings!.chunkOverlap" 
+                      class="setting-input"
+                      (ngModelChange)="onChunkingSettingsChange(kb)"
+                    >
+                  </div>
+                </div>
+                <div class="settings-actions">
+                  <button 
+                    *ngIf="hasUnsavedSettings(kb)" 
+                    class="save-settings-btn"
+                    (click)="saveKnowledgeBaseSettings(kb)"
+                  >
+                    Save Settings
+                  </button>
+                  <div 
+                    *ngIf="getKBSettingsNotification(kb)" 
+                    class="save-notification"
+                    [class.success]="getKBSettingsNotification(kb)?.type === 'success'"
+                    [class.error]="getKBSettingsNotification(kb)?.type === 'error'"
+                  >
+                    {{ getKBSettingsNotification(kb)?.message }}
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="panel-actions">
-              <button class="action-btn rebuild">
-                🔄 Rebuild Vectors
-              </button>
-              <button class="action-btn save">
-                💾 Save Changes
-              </button>
+
+              <div class="panel-section">
+                <h4>Chat Histories</h4>
+                <div class="chat-histories-section">
+                  <h4>Chat Histories</h4>
+                  <div class="selected-users">
+                    <ng-container *ngFor="let user of chatHistoryUsers[kb.id]">
+                      <div class="selected-user-tag">
+                        {{ user.username }}
+                        <button class="remove-user-btn" (click)="removeUserFromChatHistory(kb, user)">×</button>
+                      </div>
+                    </ng-container>
+                  </div>
+                  <div class="user-search">
+                    <input
+                      type="text"
+                      class="user-search-input"
+                      [(ngModel)]="userSearchQuery[kb.id]"
+                      (input)="filterUsers(kb)"
+                      (blur)="hideUserSearchDropdown(kb)"
+                      placeholder="Search users..."
+                    />
+                    <div 
+                      class="user-search-results" 
+                      *ngIf="showUserSearchDropdown[kb.id]"
+                      (mousedown)="$event.preventDefault()"
+                    >
+                      <div
+                        *ngFor="let user of filteredUsers[kb.id]"
+                        class="user-search-item"
+                        (mousedown)="addUserToChatHistory(kb, user)"
+                      >
+                        {{ user.username }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="processing-controls">
+                    <button
+                      class="process-button"
+                      [disabled]="processingKBs.has(kb.id)"
+                      (click)="processChatHistories(kb)"
+                    >
+                      <span *ngIf="!processingKBs.has(kb.id)">Process Chat Histories</span>
+                      <span *ngIf="processingKBs.has(kb.id)">Processing...</span>
+                    </button>
+                    <div class="status-indicator" *ngIf="!processingKBs.has(kb.id)">
+                      <span class="status-dot" [class.processed]="kb.chatHistoriesProcessed"></span>
+                      {{ kb.chatHistoriesProcessed ? 'Processed' : 'Not processed' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div> 
+
+<!-- Add Agent Modal -->
+<div class="modal-overlay" *ngIf="showingAddAgentModal" (click)="hideAddAgentModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Add New AI Agent</h3>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="agentUsername">Username</label>
+        <input 
+          type="text" 
+          id="agentUsername" 
+          [(ngModel)]="newAgent.username" 
+          placeholder="Enter agent username"
+        >
+      </div>
+      <div class="form-group">
+        <label for="agentEmail">Email</label>
+        <input 
+          type="email" 
+          id="agentEmail" 
+          [(ngModel)]="newAgent.email" 
+          placeholder="Enter agent email"
+        >
+      </div>
+      <div class="modal-error" *ngIf="addAgentError">
+        {{ addAgentError }}
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="hideAddAgentModal()">Cancel</button>
+      <button 
+        class="create-btn" 
+        [disabled]="!newAgent.username || !newAgent.email"
+        (click)="createAgent()"
+      >
+        Create Agent
+      </button>
+    </div>
+  </div>
+</div> 
+
+<!-- Add Knowledge Base Modal -->
+<div class="modal-overlay" *ngIf="showingAddKBModal" (click)="hideAddKBModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Add New Knowledge Base</h3>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="kbName">Name</label>
+        <input 
+          type="text" 
+          id="kbName" 
+          [(ngModel)]="newKnowledgeBase.name" 
+          placeholder="Enter knowledge base name"
+        >
+      </div>
+      <div class="form-group">
+        <label for="kbDescription">Description</label>
+        <textarea 
+          id="kbDescription" 
+          [(ngModel)]="newKnowledgeBase.description" 
+          placeholder="Enter knowledge base description"
+          rows="3"
+        ></textarea>
+      </div>
+      <div class="modal-error" *ngIf="addKBError">
+        {{ addKBError }}
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="hideAddKBModal()">Cancel</button>
+      <button 
+        class="create-btn" 
+        [disabled]="!newKnowledgeBase.name"
+        (click)="createKnowledgeBase()"
+      >
+        Create Knowledge Base
+      </button>
     </div>
   </div>
 </div> 

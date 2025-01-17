@@ -2,6 +2,11 @@ import { Controller, Get, UseGuards, Patch, Param, Body, Post, Delete } from '@n
 import { AdminService, AiAgentDetails } from './admin.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { MeyersBriggsType } from '../entities/ai-agent-personality.entity';
+import { CorpusFileService } from '../services/corpus-file.service';
+import { DocumentProcessingService } from '../services/document-processing.service';
+import { VectorKnowledgeBase } from '../entities/vector-knowledge-base.entity';
+import { VectorChatHistoryService } from '../services/vector-chat-history.service';
+import { User } from '../entities/user.entity';
 
 export class UpdateAiAgentPersonalityDto {
   generalPersonality: string;
@@ -9,16 +14,43 @@ export class UpdateAiAgentPersonalityDto {
   writingStyle: string;
   displayName: string;
   contactEmail: string;
+  instructions?: string;
+  maxHourlyResponses?: number;
 }
 
 export class AddAgentChannelDto {
   channelId: string;
 }
 
+export class UploadCorpusFileDto {
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
+export class CreateAiAgentDto {
+  username: string;
+  email: string;
+}
+
+export class CreateVectorKnowledgeBaseDto {
+  name: string;
+  description: string;
+}
+
+export class AddAgentKnowledgeBaseDto {
+  knowledgeBaseId: string;
+}
+
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly corpusFileService: CorpusFileService,
+    private readonly documentProcessingService: DocumentProcessingService,
+    private readonly vectorChatHistoryService: VectorChatHistoryService
+  ) {}
 
   @Get('ai-agents')
   async getAiAgents(): Promise<AiAgentDetails[]> {
@@ -57,5 +89,118 @@ export class AdminController {
     @Param('channelId') channelId: string
   ) {
     return this.adminService.removeAgentChannel(agentId, channelId);
+  }
+
+  @Get('vector-knowledge-bases')
+  async getAllVectorKnowledgeBases() {
+    return this.adminService.getAllVectorKnowledgeBases();
+  }
+
+  @Post('vector-knowledge-bases/:id/files')
+  async getCorpusFileUploadUrl(
+    @Param('id') knowledgeBaseId: string,
+    @Body() uploadDto: UploadCorpusFileDto
+  ) {
+    return this.corpusFileService.createPresignedUploadUrl(
+      uploadDto.filename,
+      uploadDto.mimeType,
+      uploadDto.size,
+      knowledgeBaseId
+    );
+  }
+
+  @Delete('vector-knowledge-bases/:kbId/files/:fileId')
+  async removeCorpusFile(
+    @Param('kbId') knowledgeBaseId: string,
+    @Param('fileId') fileId: string
+  ) {
+    await this.corpusFileService.removeFromKnowledgeBase(fileId);
+  }
+
+  @Get('vector-knowledge-bases/:id/files')
+  async getCorpusFiles(@Param('id') knowledgeBaseId: string) {
+    return this.corpusFileService.findByKnowledgeBase(knowledgeBaseId);
+  }
+
+  @Post('vector-knowledge-bases/:id/process-files')
+  async processUnprocessedFiles(
+    @Param('id') knowledgeBaseId: string
+  ) {
+    await this.corpusFileService.processUnprocessedFiles(
+      knowledgeBaseId,
+      this.documentProcessingService
+    );
+  }
+
+  @Post('vector-knowledge-bases/:id/rebuild')
+  async rebuildKnowledgeBase(
+    @Param('id') knowledgeBaseId: string
+  ) {
+    await this.corpusFileService.rebuildKnowledgeBase(
+      knowledgeBaseId,
+      this.documentProcessingService
+    );
+  }
+
+  @Patch('vector-knowledge-bases/:id')
+  async updateVectorKnowledgeBase(
+    @Param('id') id: string,
+    @Body() updateDto: Partial<VectorKnowledgeBase>
+  ) {
+    return this.adminService.updateVectorKnowledgeBase(id, updateDto);
+  }
+
+  @Post('ai-agents')
+  async createAiAgent(@Body() createDto: CreateAiAgentDto): Promise<AiAgentDetails> {
+    return this.adminService.createAiAgent(createDto);
+  }
+
+  @Post('ai-agents/:id/knowledge-bases')
+  async addAgentKnowledgeBase(
+    @Param('id') agentId: string,
+    @Body() dto: AddAgentKnowledgeBaseDto
+  ) {
+    return this.adminService.addAgentKnowledgeBase(agentId, dto.knowledgeBaseId);
+  }
+
+  @Delete('ai-agents/:agentId/knowledge-bases/:knowledgeBaseId')
+  async removeAgentKnowledgeBase(
+    @Param('agentId') agentId: string,
+    @Param('knowledgeBaseId') knowledgeBaseId: string
+  ) {
+    return this.adminService.removeAgentKnowledgeBase(agentId, knowledgeBaseId);
+  }
+
+  @Post('vector-knowledge-bases')
+  async createVectorKnowledgeBase(@Body() createDto: CreateVectorKnowledgeBaseDto) {
+    return this.adminService.createVectorKnowledgeBase(createDto);
+  }
+
+  @Get('vector-knowledge-bases/:id/chat-history-users')
+  async getChatHistoryUsers(@Param('id') knowledgeBaseId: string): Promise<User[]> {
+    return this.vectorChatHistoryService.getChatHistoryUsers(knowledgeBaseId);
+  }
+
+  @Post('vector-knowledge-bases/:id/chat-history-users/:userId')
+  async addChatHistoryUser(
+    @Param('id') knowledgeBaseId: string,
+    @Param('userId') userId: string
+  ): Promise<void> {
+    await this.vectorChatHistoryService.addUserToChatHistory(knowledgeBaseId, userId);
+  }
+
+  @Delete('vector-knowledge-bases/:id/chat-history-users/:userId')
+  async removeChatHistoryUser(
+    @Param('id') knowledgeBaseId: string,
+    @Param('userId') userId: string
+  ): Promise<void> {
+    await this.vectorChatHistoryService.removeUserFromChatHistory(knowledgeBaseId, userId);
+  }
+
+  @Post('vector-knowledge-bases/:id/process')
+  async processVectorKnowledgeBase(
+    @Param('id') knowledgeBaseId: string
+  ): Promise<void> {
+    await this.adminService.processVectorKnowledgeBase(knowledgeBaseId);
   }
 } 

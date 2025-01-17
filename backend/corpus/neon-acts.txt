@@ -1,0 +1,204 @@
+Neon Nights 2025 - Acts and Performances
+
+    Pulse Vector
+    Genre: Techno
+    Description: Innovative techno blends with immersive light shows, known for their deep bass and digital landscapes.
+
+    Bass Architect
+    Genre: Drum and Bass
+    Description: Fast-paced rhythms with intricately layered drum patterns, thrilling D&B enthusiasts.
+
+    Solar Flare
+    Genre: EDM
+    Description: Energetic and visually stunning, they bring a fusion of electro-pop and radiant pyrotechnics.
+
+    Chillwave Collective
+    Genre: Chill
+    Description: Masters of mellow vibes, perfect for sunset sessions with their smooth synths and relaxed beats.
+
+    Neon Pulse
+    Genre: House
+    Description: A vibrant mix of classic and modern house tunes, creating an inviting dance floor experience.
+
+    Subsonic Threads
+    Genre: Techno
+    Description: Deep and dark techno with a minimalist approach, focusing on the power of pure sound.
+
+    Harmony Spectrum
+    Genre: EDM
+    Description: Known for their catchy melodies and explosive drops, a crowd favorite for sing-alongs.
+
+    Eclipse Shadows
+    Genre: Chillout
+    Description: Ambient soundscapes mixed with live visual art, providing a soul-soothing retreat.
+
+    Rave Requiem
+    Genre: Trance
+    Description: Trance anthems with a symphonic twist, infusing orchestral elements into electronic beats.
+
+    Digital Mirage
+    Genre: Future Bass
+    Description: Colorful and bouncy beats with an inventive use of vocals and futuristic sound design.
+
+    Thunderhead
+    Genre: Drum and Bass
+    Description: Intense energy with powerful bass lines designed to resonate through the festival grounds.
+
+    Mystic Groove
+    Genre: House
+    Description: Deep house with an ethnic flair, blending traditional instruments with electronic rhythms.
+
+    Phantom Beat
+    Genre: Techno
+    Description: Stealthy and mysterious, their sets are a deep dive into the unknown corners of techno.
+
+    Celestial Rythm
+    Genre: Chillout
+    Description: A journey into tranquility with soft percussion and dreamlike melodies.
+
+    Nova Cadence
+    Genre: EDM
+    Description: High-octane performances with stunning visuals, known for their dynamic stage presence.
+
+    Vortex Illusion
+    Genre: Progressive House
+    Description: Layered textures and progressive rhythms, creating expansive soundscapes.
+
+    Lunar Phase
+    Genre: Ambient Techno
+    Description: Combining the calm of ambient music with the rhythmic allure of techno.
+
+    Aurora Tides
+    Genre: Chill Wave
+    Description: Capturing the essence of chill with their soothing and reflective sound.
+
+    Echo Syndicate
+    Genre: Tech House
+    Description: A blend of techno beats and house music that creates a hypnotic dance experience.
+
+    Sonic Bloom
+    Genre: EDM
+    Description: Uplifting beats with an infectious energy, evoking joy and euphoria in every track.
+
+    Subterrain
+    Genre: Deep House
+    Description: Subtle, soulful deep house tracks that resonate with late-night festival vibes.
+
+    Galactic Noise
+    Genre: Electro House
+    Description: A cosmic journey powered by electrifying soundwaves and otherworldly visuals.
+
+    Ocean Rhythm
+    Genre: Tropical House
+    Description: Beachy beats and sun-soaked melodies that bring the spirit of summer to any stage.
+
+    Night Skyline
+    Genre: Minimal Techno
+    Description: Minimalist approach where less is more, focusing on the bare essentials of sound.
+
+    Infinite Echoes
+    Genre: Ambient
+    Description: Ethereal sounds that invite introspection and deep connection.
+
+    Spark Radian
+    Genre: Electro Pop
+    Description: Catchy hooks and bright synths that make their performance a pop extravaganza.
+
+    Crimson Beats
+    Genre: Drum and Bass
+    Description: Rapid-fire rhythms and deep bass that drive you to move with relentless energy.
+
+    Twilight Frequency
+    Genre: Dubstep
+    Description: Intense drops and wobbles, perfect for those who love a heavy bass shower.
+
+    HoloDream
+    Genre: Future House
+    Description: Innovators of house music, integrating AI-generated visuals and sounds into performances.
+
+    Aura Wave
+    Genre: Chillout
+    Description: Lush textures and soothing tones, ideal for calming the mind and spirit.
+
+...continued:
+
+    Ethereal Journey
+    Genre: Ambient Techno
+    Description: Soundscapes that blend techno rhythms with ambient serenity for a deeply immersive experience.
+
+    Bassline Drift
+    Genre: Garage
+    Description: Upbeat and gritty, perfect for dancing through the night with a revival of classic garage beats.
+
+    Quantum Leap
+    Genre: Trance
+    Description: Progressive trance that elevates the senses and transports listeners to another dimension.
+
+    Afterglow
+    Genre: Chill Wave
+    Description: Dreamy synths and relaxing beats that capture the serene moments of the night.
+
+    Polaris Pulse
+    Genre: Progressive House
+    Description: Melodic builds and sweeping crescendos that encapsulate the spirit of adventure.
+
+    Neon Drifter
+    Genre: Synthwave
+    Description: Retro-futuristic sound that brings 80s vibes into modern electronic music.
+
+    Starfall Symphony
+    Genre: Electro House
+    Description: Energetic and vibrant, combining classical music elements with pounding house rhythms.
+
+    Whisper Tones
+    Genre: Ambient
+    Description: Soft, whispering melodies that offer a personal and intimate listening experience.
+
+    Bionic Rhythm
+    Genre: Industrial Techno
+    Description: Mechanical and intense, delivering a raw power found in the fusion of man and machine.
+
+    Zenith Echo
+    Genre: Deep House
+    Description: Atmospheric deep house that resonates with the soulful side of the night.
+
+    Aether Vibe
+    Genre: Lounge
+    Description: Smooth and sophisticated, perfect for a relaxing break amidst the festival's madness.
+
+    Hybrid Frequency
+    Genre: Experimental EDM
+    Description: Breaking boundaries with experimental sounds and unexpected beats.
+
+    Midnight Howl
+    Genre: Tech House
+    Description: Dark, moody tech house that stirs the primal instincts within.
+
+    Skyline Reverie
+    Genre: Uplifting Trance
+    Description: Soaring melodies that fill the air with hope and euphoria.
+
+    Phantasm Beats
+    Genre: Breakbeat
+    Description: A fusion of breakbeat with cinematic storytelling, every set feels like an epic narrative.
+
+    Celestial Dusk
+    Genre: Chillstep
+    Description: Smooth, melodic dubstep infused with chill vibes, perfect for winding down.
+
+    Vibronix
+    Genre: Electro Funk
+    Description: Funky grooves meet electronic beats in an explosive, dance-inducing performance.
+
+    Luminous Waves
+    Genre: Ambient House
+    Description: Combines the rhythmic appeal of house with the soothing aspects of ambient music.
+
+    Prism Echo
+    Genre: Synth Pop
+    Description: Bright, catchy synths paired with pop sensibility make for an infectious dance floor experience.
+
+    Orbit Shift
+    Genre: Space Disco
+    Description: Interstellar grooves that transport you straight to the dance floors of a distant galaxy.
+

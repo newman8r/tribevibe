@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
@@ -78,6 +78,15 @@ export class AuthService {
     }
 
     return data.user;
+  }
+
+  async refreshToken(refreshToken: string) {
+    const { data, error } = await this.supabase.auth.refreshSession({
+      refresh_token: refreshToken
+    });
+
+    if (error) throw new UnauthorizedException(error.message);
+    return data;
   }
 }
 

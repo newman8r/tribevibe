@@ -335,4 +335,61 @@
   <div class="nav-bar" [class.ios-safari]="isSafariIOS">
     <!-- your nav bar content -->
   </div>
+
+  <!-- User Settings Modal -->
+  <div class="modal-overlay" *ngIf="showingUserSettingsModal" (click)="hideUserSettingsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>User Settings</h3>
+      <div class="modal-body">
+        <div class="avatar-section">
+          <h4>Avatar</h4>
+          <div class="current-avatar">
+            <img 
+              [src]="(currentUser$ | async)?.avatarUrl || 'assets/default-avatar.png'" 
+              [alt]="(currentUser$ | async)?.username"
+              class="avatar-preview"
+            >
+          </div>
+          <div class="avatar-upload">
+            <input 
+              type="file" 
+              id="avatar-upload" 
+              (change)="onAvatarFileSelected($event)"
+              accept="image/*"
+              style="display: none"
+            >
+            <button 
+              class="upload-btn" 
+              (click)="document.getElementById('avatar-upload')?.click()"
+            >
+              Choose New Avatar
+            </button>
+            <button 
+              class="remove-btn" 
+              *ngIf="(currentUser$ | async)?.avatarUrl && !(currentUser$ | async)?.avatarUrl?.includes('dicebear.com')"
+              (click)="removeAvatar()"
+            >
+              Remove Custom Avatar
+            </button>
+            <div class="selected-file" *ngIf="selectedAvatarFile">
+              Selected: {{ selectedAvatarFile.name }}
+            </div>
+            <div class="upload-error" *ngIf="avatarUploadError">
+              {{ avatarUploadError }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="hideUserSettingsModal()">Cancel</button>
+        <button 
+          class="save-btn" 
+          [disabled]="!selectedAvatarFile && !hasUnsavedChanges"
+          (click)="updateUserSettings()"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
 </div> 
