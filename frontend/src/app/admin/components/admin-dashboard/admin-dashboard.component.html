@@ -342,6 +342,13 @@
                     <span *ngIf="!isUploading(kb)">+ Add File</span>
                     <span *ngIf="isUploading(kb)">Uploading...</span>
                   </button>
+                  <input
+                    type="file"
+                    [id]="'file-upload-' + kb.id"
+                    style="display: none;"
+                    (change)="onFileSelected($event, kb)"
+                    accept=".txt,.md,.json"
+                  >
                   <div *ngIf="getUploadError(kb)" class="upload-error">
                     {{ getUploadError(kb) }}
                   </div>
