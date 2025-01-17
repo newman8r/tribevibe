@@ -113,7 +113,7 @@ export class AdminDashboardComponent implements OnInit {
 
   private uploadingKBs = new Set<string>();
   private uploadErrors = new Map<string, string>();
-  private processingKBs = new Set<string>();
+  processingKBs = new Set<string>();
   private rebuildingKBs = new Set<string>();
   private unsavedKBUsage = new Set<string>();
   kbSaveNotifications: { [kbId: string]: SaveNotification | null } = {};
@@ -149,6 +149,7 @@ export class AdminDashboardComponent implements OnInit {
   chatHistoryUsers: { [kbId: string]: User[] } = {};
   loadingChatHistoryUsers: { [kbId: string]: boolean } = {};
   chatHistoryError: { [kbId: string]: string | null } = {};
+  userSearchQuery: { [kbId: string]: string } = {};
 
   constructor(
     private adminService: AdminService,
@@ -842,5 +843,44 @@ export class AdminDashboardComponent implements OnInit {
       console.error('Error removing user from chat history:', error);
       this.chatHistoryError[kb.id] = 'Failed to remove user from chat history';
     }
+  }
+
+  hasUnprocessedContent(kb: VectorKnowledgeBase): boolean {
+    return this.hasUnprocessedFiles(kb) || !kb.chatHistoriesProcessed;
+  }
+
+  getUnprocessedContentDescription(kb: VectorKnowledgeBase): string {
+    const unprocessedItems: string[] = [];
+    
+    if (this.hasUnprocessedFiles(kb)) {
+      unprocessedItems.push('files');
+    }
+    
+    if (!kb.chatHistoriesProcessed) {
+      unprocessedItems.push('chat histories');
+    }
+    
+    return `unprocessed ${unprocessedItems.join(' and ')}`;
+  }
+
+  async processChatHistories(kb: VectorKnowledgeBase) {
+    try {
+      this.processingKBs.add(kb.id);
+      await this.adminService.processVectorKnowledgeBase(kb.id).toPromise();
+      kb.chatHistoriesProcessed = true;
+      console.log('Chat histories processed successfully');
+    } catch (error) {
+      console.error('Error processing chat histories:', error);
+    } finally {
+      this.processingKBs.delete(kb.id);
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  private showSaveNotification(agentId: string, notification: SaveNotification) {
+    this.saveNotifications[agentId] = notification;
+    setTimeout(() => {
+      this.saveNotifications[agentId] = null;
+    }, 3000);
   }
 } 

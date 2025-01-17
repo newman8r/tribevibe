@@ -327,28 +327,17 @@
                 <div class="files-list">
                   <div *ngFor="let file of kb.corpusFiles" class="file-item">
                     <div class="file-info">
-                      <span class="file-name">{{ file.filename }}</span>
-                      <span class="file-meta">
-                        {{ file.size | number }} bytes • {{ file.createdAt | date:'short' }}
-                        <span class="file-status" [class.processed]="file.processed" [class.unprocessed]="!file.processed">
-                          {{ file.processed ? 'Processed' : 'Unprocessed' }}
-                        </span>
+                      <span class="filename">{{ file.filename }}</span>
+                      <span class="status-indicator" [class.processed]="file.processed">
+                        {{ file.processed ? '✓' : '...' }}
                       </span>
                     </div>
                     <button class="remove-file-btn" (click)="removeCorpusFile(kb, file)">×</button>
                   </div>
-                  <input
-                    type="file"
-                    [id]="'file-upload-' + kb.id"
-                    (change)="onFileSelected($event, kb)"
-                    accept=".txt"
-                    style="display: none"
-                  >
                   <button 
                     class="add-file-btn" 
-                    [class.uploading]="isUploading(kb)"
-                    [disabled]="isUploading(kb)"
                     (click)="triggerFileInput(kb)"
+                    [disabled]="isUploading(kb)"
                   >
                     <span *ngIf="!isUploading(kb)">+ Add File</span>
                     <span *ngIf="isUploading(kb)">Uploading...</span>
@@ -358,11 +347,13 @@
                   </div>
                   <button 
                     class="process-files-btn" 
-                    *ngIf="hasUnprocessedFiles(kb)"
+                    *ngIf="hasUnprocessedContent(kb)"
                     [disabled]="isProcessing(kb)"
                     (click)="processFiles(kb)"
                   >
-                    <span *ngIf="!isProcessing(kb)">Process Unprocessed Files</span>
+                    <span *ngIf="!isProcessing(kb)">
+                      Process {{ getUnprocessedContentDescription(kb) }}
+                    </span>
                     <span *ngIf="isProcessing(kb)">Processing...</span>
                   </button>
                   <button 
@@ -462,45 +453,47 @@
               <div class="panel-section">
                 <h4>Chat Histories</h4>
                 <div class="chat-histories-section">
-                  <!-- Loading state -->
-                  <div *ngIf="loadingChatHistoryUsers[kb.id]" class="loading-state">
-                    Loading users...
-                  </div>
-
-                  <!-- Error state -->
-                  <div *ngIf="chatHistoryError[kb.id]" class="error-state">
-                    {{ chatHistoryError[kb.id] }}
-                  </div>
-
-                  <!-- Content when loaded -->
-                  <ng-container *ngIf="!loadingChatHistoryUsers[kb.id] && !chatHistoryError[kb.id]">
-                    <!-- Selected users -->
-                    <div class="selected-users">
-                      <div *ngFor="let user of chatHistoryUsers[kb.id] || []" class="selected-user-tag">
+                  <h4>Chat Histories</h4>
+                  <div class="selected-users">
+                    <ng-container *ngFor="let user of chatHistoryUsers[kb.id]">
+                      <div class="selected-user-tag">
                         {{ user.username }}
                         <button class="remove-user-btn" (click)="removeUserFromChatHistory(kb, user)">×</button>
                       </div>
-                    </div>
-                    
-                    <!-- User search -->
-                    <div class="user-search">
-                      <input
-                        type="text"
-                        [(ngModel)]="searchTerm[kb.id]"
-                        (ngModelChange)="filterUsers(kb)"
-                        placeholder="Search users..."
-                        class="user-search-input"
+                    </ng-container>
+                  </div>
+                  <div class="user-search">
+                    <input
+                      type="text"
+                      class="user-search-input"
+                      [(ngModel)]="userSearchQuery[kb.id]"
+                      (input)="filterUsers(kb)"
+                      placeholder="Search users..."
+                    />
+                    <div class="user-search-results" *ngIf="filteredUsers[kb.id]?.length">
+                      <div
+                        *ngFor="let user of filteredUsers[kb.id]"
+                        class="user-search-item"
+                        (click)="addUserToChatHistory(kb, user)"
                       >
-                      <div class="user-search-results" *ngIf="searchTerm[kb.id]">
-                        <div 
-                          *ngFor="let user of filteredUsers[kb.id]"
-                          class="user-search-item"
-                          (click)="addUserToChatHistory(kb, user)">
-                          {{ user.username }}
-                        </div>
+                        {{ user.username }}
                       </div>
                     </div>
-                  </ng-container>
+                  </div>
+                  <div class="processing-controls">
+                    <button
+                      class="process-button"
+                      [disabled]="processingKBs.has(kb.id)"
+                      (click)="processChatHistories(kb)"
+                    >
+                      <span *ngIf="!processingKBs.has(kb.id)">Process Chat Histories</span>
+                      <span *ngIf="processingKBs.has(kb.id)">Processing...</span>
+                    </button>
+                    <div class="status-indicator" *ngIf="!processingKBs.has(kb.id)">
+                      <span class="status-dot" [class.processed]="kb.chatHistoriesProcessed"></span>
+                      {{ kb.chatHistoriesProcessed ? 'Processed' : 'Not processed' }}
+                    </div>
+                  </div>
                 </div>
               </div>
 

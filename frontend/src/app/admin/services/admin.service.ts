@@ -81,6 +81,7 @@ export interface VectorKnowledgeBase {
   corpusFiles: CorpusFile[];
   embeddings?: any[];
   needsRebuild: boolean;
+  chatHistoriesProcessed: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

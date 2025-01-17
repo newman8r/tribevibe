@@ -93,6 +93,8 @@ export class VectorChatHistoryService {
   }
 
   async processChatHistories(knowledgeBaseId: string): Promise<void> {
+    this.logger.log(`Starting chat history processing for knowledge base ${knowledgeBaseId}`);
+    
     const knowledgeBase = await this.knowledgeBaseRepository.findOne({
       where: { id: knowledgeBaseId },
       relations: ['chatHistoryUsers']
@@ -102,15 +104,26 @@ export class VectorChatHistoryService {
       throw new Error('Knowledge base not found');
     }
 
+    this.logger.log(`Found ${knowledgeBase.chatHistoryUsers?.length || 0} users with chat histories to process`);
+
     // Delete existing chat history embeddings for this knowledge base
-    await this.documentEmbeddingRepository.delete({
+    const deleteResult = await this.documentEmbeddingRepository.delete({
       knowledgeBase: { id: knowledgeBaseId },
       source: 'chat_history'
     });
+    this.logger.log(`Deleted ${deleteResult.affected || 0} existing chat history embeddings`);
 
     // Process each user's chat history
-    for (const user of knowledgeBase.chatHistoryUsers) {
-      await this.processUserChatHistory(user, knowledgeBase);
+    if (knowledgeBase.chatHistoryUsers?.length) {
+      for (const user of knowledgeBase.chatHistoryUsers) {
+        this.logger.log(`Processing chat history for user ${user.username} (${user.id})`);
+        try {
+          await this.processUserChatHistory(user, knowledgeBase);
+        } catch (error) {
+          this.logger.error(`Error processing chat history for user ${user.username}:`, error);
+          // Continue with next user
+        }
+      }
     }
 
     // Mark chat histories as processed
@@ -118,14 +131,18 @@ export class VectorChatHistoryService {
       { id: knowledgeBaseId },
       { chatHistoriesProcessed: true }
     );
+    this.logger.log(`Finished processing chat histories for knowledge base ${knowledgeBaseId}`);
   }
 
   private async processUserChatHistory(user: User, knowledgeBase: VectorKnowledgeBase): Promise<void> {
     // Get all messages for the user
     const messages = await this.messageRepository.find({
       where: { user: { id: user.id } },
-      order: { createdAt: 'ASC' }
+      order: { createdAt: 'ASC' },
+      relations: ['channel', 'directMessageConversation']
     });
+
+    this.logger.log(`Found ${messages.length} messages for user ${user.username}`);
 
     if (messages.length === 0) {
       return;
@@ -133,14 +150,20 @@ export class VectorChatHistoryService {
 
     // Group messages by conversation (either channel or DM)
     const conversations = this.groupMessagesByConversation(messages);
+    this.logger.log(`Grouped messages into ${Object.keys(conversations).length} conversations`);
 
     // Process each conversation
     for (const [conversationId, conversationMessages] of Object.entries(conversations)) {
+      this.logger.log(`Processing conversation ${conversationId} with ${conversationMessages.length} messages`);
+      
       const conversationText = this.formatConversation(conversationMessages);
+      this.logger.log(`Formatted conversation text length: ${conversationText.length} characters`);
       
       try {
         // Generate embedding for the conversation
+        this.logger.log('Generating embedding for conversation...');
         const embedding = await this.embeddings.embedQuery(conversationText);
+        this.logger.log(`Generated embedding with length ${embedding.length}`);
 
         // Create document embedding
         const documentEmbedding = this.documentEmbeddingRepository.create({
@@ -152,8 +175,10 @@ export class VectorChatHistoryService {
         });
 
         await this.documentEmbeddingRepository.save(documentEmbedding);
+        this.logger.log(`Saved document embedding for conversation ${conversationId}`);
       } catch (error) {
         this.logger.error(`Error processing conversation ${conversationId} for user ${user.id}:`, error);
+        throw error;
       }
     }
   }
