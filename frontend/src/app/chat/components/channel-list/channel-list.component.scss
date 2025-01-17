@@ -20,16 +20,6 @@
     .channels-grid {
       flex: 0 0 auto;
     }
-
-    .music-card {
-      flex: 0 0 auto;
-      margin-bottom: 60px;
-      
-      // Additional bottom spacing for iOS
-      @supports (-webkit-touch-callout: none) {
-        margin-bottom: calc(60px + env(safe-area-inset-bottom, 0));
-      }
-    }
   }
 
   .mobile-bottom-spacer {
@@ -239,25 +229,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-  }
-
-  .music-card {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: var(--surface-medium);
-    border-radius: 12px;
-    width: 100%;
-    min-width: 0;
-    
-    .playlist-info {
-      overflow: hidden;
-      
-      .playlist-label, .playlist-link {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
     }
   }
 }

@@ -33,6 +33,10 @@ export class DataDisplayComponent implements OnInit {
   isExpanded = true;
   isMobile = window.innerWidth <= 992;
   youtubeUrl: SafeResourceUrl;
+  soundcloudPlayerUrl: SafeResourceUrl | null = null;
+  readonly playlistUrl = 'https://soundcloud.com/bradmoontribe/sets/most-loved-moontribe-mixes';
+  
+  private readonly embedUrl = 'https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/bradmoontribe/sets/most-loved-moontribe-mixes&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';
 
   constructor(private sanitizer: DomSanitizer) {
     this.youtubeUrl = this.getRandomizedYoutubeUrl();
@@ -41,6 +45,7 @@ export class DataDisplayComponent implements OnInit {
   ngOnInit() {
     // Set initial state based on screen size
     this.isExpanded = !this.isMobile;
+    this.soundcloudPlayerUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.embedUrl);
   }
 
   @HostListener('window:resize')
