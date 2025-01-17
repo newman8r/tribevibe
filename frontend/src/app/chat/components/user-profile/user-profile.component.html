@@ -1,5 +1,5 @@
 <div class="user-profile">
-  <div class="avatar-wrapper">
+  <div class="avatar-wrapper" (click)="openSettingsModal()">
     <img [src]="currentUser?.avatarUrl || anonymousAvatar" 
          [alt]="currentUser?.username || anonymousUsername || 'Anonymous'" 
          class="avatar">
@@ -33,4 +33,46 @@
       Register
     </button>
   </ng-template>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" *ngIf="showSettingsModal" (click)="closeSettingsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>User Settings</h3>
+      <div class="modal-body">
+        <div class="avatar-section">
+          <h4>Avatar</h4>
+          <div class="current-avatar">
+            <img [src]="currentUser?.avatarUrl || anonymousAvatar" 
+                 [alt]="currentUser?.username || 'Anonymous'"
+                 class="avatar-preview">
+          </div>
+          <div class="avatar-upload">
+            <input type="file" 
+                   id="avatar-upload" 
+                   (change)="onAvatarFileSelected($event)"
+                   accept="image/*"
+                   hidden>
+            <button class="upload-btn" 
+                    (click)="document.getElementById('avatar-upload')?.click()">
+              Choose File
+            </button>
+            <div class="selected-file" *ngIf="selectedAvatarFile">
+              Selected: {{ selectedAvatarFile.name }}
+            </div>
+            <div class="upload-error" *ngIf="avatarUploadError">
+              {{ avatarUploadError }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeSettingsModal()">Cancel</button>
+        <button class="save-btn" 
+                [disabled]="!selectedAvatarFile && !hasUnsavedChanges"
+                (click)="updateSettings()">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
 </div> 
