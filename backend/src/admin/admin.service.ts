@@ -15,6 +15,7 @@ import { CreateVectorKnowledgeBaseDto } from './admin.controller';
 import { CorpusFileService } from '../services/corpus-file.service';
 import { VectorChatHistoryService } from '../services/vector-chat-history.service';
 import { DocumentProcessingService } from '../services/document-processing.service';
+import { Logger } from '@nestjs/common';
 
 export interface AiAgentDetails {
   id: string;
@@ -46,6 +47,8 @@ export interface AiAgentDetails {
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -408,31 +411,14 @@ export class AdminService {
   }
 
   async processVectorKnowledgeBase(id: string): Promise<void> {
-    const knowledgeBase = await this.vectorKnowledgeBaseRepository.findOne({
-      where: { id },
-      relations: ['corpusFiles']
-    });
+    this.logger.log(`Processing vector knowledge base ${id}`);
 
-    if (!knowledgeBase) {
-      throw new NotFoundException('Vector knowledge base not found');
-    }
+    // Process unprocessed files
+    await this.corpusFileService.processUnprocessedFiles(id, this.documentProcessingService);
+    
+    // Process chat histories
+    await this.vectorChatHistoryService.processChatHistories(id);
 
-    // Process files
-    for (const file of knowledgeBase.corpusFiles) {
-      if (!file.processed) {
-        await this.corpusFileService.processUnprocessedFiles(id, this.documentProcessingService);
-      }
-    }
-
-    // Process chat histories if they haven't been processed yet
-    if (!knowledgeBase.chatHistoriesProcessed) {
-      await this.vectorChatHistoryService.processChatHistories(id);
-    }
-
-    // Mark knowledge base as not needing rebuild
-    await this.vectorKnowledgeBaseRepository.update(
-      { id },
-      { needsRebuild: false }
-    );
+    this.logger.log(`Finished processing vector knowledge base ${id}`);
   }
 } 
